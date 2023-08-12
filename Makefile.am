@@ -14,7 +14,11 @@ shv_bin_CCASFLAGS = -D__ASSEMBLY__ \
 	-Wall -Werror
 shv_bin_CFLAGS = \
 	-Wall -Werror -Wno-format -Wno-array-bounds \
-	-fno-stack-protector -fno-mudflap -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0
+	-fno-stack-protector -fno-mudflap -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
+	-mno-mmx -mno-sse -mno-sse2 -mno-sse3 -mno-ssse3 \
+	-mno-sse4.1 -mno-sse4.2 -mno-sse4 -mno-avx -mno-aes \
+	-mno-pclmul -mno-sse4a -mno-3dnow -mno-popcnt -mno-abm
+
 shv_bin_LDFLAGS = -T $(top_srcdir)/linker.ld -ffreestanding -nostdlib -no-pie
 shv_bin_LDADD = -lgcc
 
