@@ -41,11 +41,6 @@ __attribute__((aligned(16)));
 
 extern u64 x_gdt_start[MAX_VCPU_ENTRIES][GDT_NELEMS];
 
-VCPU *_svm_and_vmx_getvcpu(void)
-{
-	HALT_ON_ERRORCOND(0 && "LHV: not implemented yet");
-}
-
 static void lhv_vmx_vmcs_init(VCPU *vcpu)
 {
 	// From vmx_initunrestrictedguestVMCS
@@ -369,7 +364,7 @@ void vmexit_handler(VCPU *vcpu, struct regs *r)
 		vcpu->vmexit_handler_override(vcpu, r, &vmexit_info);
 	}
 
-	HALT_ON_ERRORCOND(vcpu == _svm_and_vmx_getvcpu());
+	HALT_ON_ERRORCOND(vcpu == get_vcpu());
 	switch (vmexit_reason) {
 	case VMX_VMEXIT_CPUID:
 		{
@@ -423,7 +418,7 @@ void vmexit_handler(VCPU *vcpu, struct regs *r)
 
 void vmentry_error(ulong_t is_resume, ulong_t valid)
 {
-	VCPU *vcpu = _svm_and_vmx_getvcpu();
+	VCPU *vcpu = get_vcpu();
 	/* 29.4 VM INSTRUCTION ERROR NUMBERS */
 	ulong_t vminstr_error = vmcs_vmread(vcpu, VMCS_info_vminstr_error);
 	printf("CPU(0x%02x): is_resume = %ld, valid = %ld, err = %ld\n",

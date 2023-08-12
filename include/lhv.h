@@ -49,9 +49,6 @@ typedef struct {
 #define LHV_USE_PS2_MOUSE			0x0000000000001000ULL
 /* End of bit definitions for SHV_OPT */
 
-/* xcph-x86.c */
-VCPU *_svm_and_vmx_getvcpu(void);
-
 /* lhv.c */
 void lhv_main(VCPU *vcpu);
 void handle_lhv_syscall(VCPU *vcpu, int vector, struct regs *r);
@@ -100,6 +97,7 @@ void lhv_ept_init(VCPU *vcpu);
 u64 lhv_build_ept(VCPU *vcpu, u8 ept_num);
 
 /* lhv-vmcs.c */
+// TODO: remove these, function, follow XMHF64 style
 void vmcs_vmwrite(VCPU *vcpu, ulong_t encoding, ulong_t value);
 void vmcs_vmwrite64(VCPU *vcpu, ulong_t encoding, u64 value);
 ulong_t vmcs_vmread(VCPU *vcpu, ulong_t encoding);

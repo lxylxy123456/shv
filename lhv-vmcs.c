@@ -135,8 +135,6 @@ u64 vmcs_vmread64(VCPU *vcpu, ulong_t encoding)
 
 void vmcs_dump(VCPU *vcpu, int verbose)
 {
-	HALT_ON_ERRORCOND(0 && "LHV: not implemented yet (need __vmx_vmread16)"); (void)vcpu; (void) verbose;
-#if 0
 	#define DECLARE_FIELD(encoding, name)								\
 		do {															\
 			if ((encoding & 0x6000) == 0x0000) {						\
@@ -167,13 +165,10 @@ void vmcs_dump(VCPU *vcpu, int verbose)
 		} while (0);
 	#include <lhv-vmcs-template.h>
 	#undef DECLARE_FIELD
-#endif
 }
 
 void vmcs_load(VCPU *vcpu)
 {
-	HALT_ON_ERRORCOND(0 && "LHV: not implemented yet (need __vmx_vmwrite16)"); (void)vcpu;
-#if 0
 	#define DECLARE_FIELD(encoding, name)								\
 		do {															\
 			if ((encoding & 0x6000) == 0x0000) {						\
@@ -189,5 +184,4 @@ void vmcs_load(VCPU *vcpu)
 		} while (0);
 	#include <lhv-vmcs-template.h>
 	#undef DECLARE_FIELD
-#endif
 }

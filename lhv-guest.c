@@ -873,7 +873,7 @@ void lhv_guest_main(ulong_t cpu_id)
 {
 	u64 iter = 0;
 	bool in_xmhf = false;
-	VCPU *vcpu = _svm_and_vmx_getvcpu();
+	VCPU *vcpu = get_vcpu();
 	HALT_ON_ERRORCOND(cpu_id == vcpu->idx);
 	{
 		u32 eax, ebx, ecx, edx;
@@ -956,22 +956,21 @@ void lhv_guest_xcphandler(VCPU * vcpu, struct regs *r, iret_info_t * info)
 
 	switch (vector) {
 	case 0x20:
-		handle_timer_interrupt(_svm_and_vmx_getvcpu(), vector, 1);
+		handle_timer_interrupt(get_vcpu(), vector, 1);
 		break;
 
 	case 0x21:
-		handle_keyboard_interrupt(_svm_and_vmx_getvcpu(), vector, 1);
+		handle_keyboard_interrupt(get_vcpu(), vector, 1);
 		break;
 
 	case 0x22:
-		handle_timer_interrupt(_svm_and_vmx_getvcpu(), vector, 1);
+		handle_timer_interrupt(get_vcpu(), vector, 1);
 		break;
 
 	case 0x23:
-		handle_lhv_syscall(_svm_and_vmx_getvcpu(), vector, r);
+		handle_lhv_syscall(get_vcpu(), vector, r);
 		break;
 
-#ifdef __DEBUG_QEMU__
 	case 0x27:
 		/*
 		 * We encountered the Mysterious IRQ 7. This has been observed on Bochs
@@ -987,11 +986,13 @@ void lhv_guest_xcphandler(VCPU * vcpu, struct regs *r, iret_info_t * info)
 		 * Note that calling printf() here will deadlock if the interrupted
 		 * code is already calling printf().
 		 */
+		if (pic_spurious(7) != 1) {
+			HALT_ON_ERRORCOND(0);
+		}
 		break;
-#endif /* __DEBUG_QEMU__ */
 
 	case 0x2c:
-		handle_mouse_interrupt(_svm_and_vmx_getvcpu(), vector, 1);
+		handle_mouse_interrupt(get_vcpu(), vector, 1);
 		break;
 
 	default:

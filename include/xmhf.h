@@ -24,6 +24,8 @@
 
 #include <cpu.h>
 
+#define __DEBUG_QEMU__
+
 // TODO: change its name
 #define HALT_ON_ERRORCOND(expr) \
 	do { \
@@ -199,7 +201,8 @@ typedef struct {
 extern uintptr_t g_idt_stubs[IDT_NELEMS];
 extern uintptr_t g_idt[IDT_NELEMS][2];
 extern void init_idt(void);
-void dump_exception(VCPU * vcpu, struct regs *r, iret_info_t * info);
+extern VCPU *get_vcpu(void);
+extern void dump_exception(VCPU * vcpu, struct regs *r, iret_info_t * info);
 extern void handle_idt(struct regs *r);
 
 /* gdt.c */

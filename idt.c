@@ -81,7 +81,7 @@ void init_idt(void)
 }
 
 /* From XMHF64 _svm_and_vmx_getvcpu(). */
-static VCPU *get_vcpu(void)
+VCPU *get_vcpu(void)
 {
 	u64 msr_val;
 	u32 lapic_id;
