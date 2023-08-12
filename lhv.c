@@ -26,6 +26,7 @@ void lhv_main(VCPU *vcpu)
 	console_clear(&vc);
 	if (vcpu->isbsp) {
 		console_cursor_clear();
+		pic_init();
 		// asm volatile ("int $0xf8");
 		if (0) {
 			int *a = (int *) 0xf0f0f0f0f0f0f0f0;

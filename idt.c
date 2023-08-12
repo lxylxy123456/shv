@@ -21,6 +21,17 @@
 #define IDT_NELEMS 256
 uintptr_t g_idt[256][2];
 
+typedef struct {
+	uintptr_t error_code;
+	uintptr_t ip;
+	uintptr_t cs;
+	uintptr_t flags;
+#ifdef __amd64__
+	uintptr_t sp;
+	uintptr_t ss;
+#endif /* __amd64__ */
+} __attribute__((packed)) iret_info_t;
+
 static void construct_idt(void)
 {
 	/* Sync to let only one CPU perform the construction. */
@@ -103,5 +114,7 @@ static VCPU *get_vcpu(void)
 void handle_idt(struct regs *r)
 {
 	VCPU * vcpu = get_vcpu();
+	// TODO: esp is for 32-bit only
+	printf("0x%08lx 0x%08lx\n", ((iret_info_t *)r->esp)->error_code, ((iret_info_t *)r->esp)->ip);
 	printf("CPU 0x%02x idt 0x%016llx\n", vcpu->id, rdtsc());
 }

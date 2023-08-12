@@ -25,6 +25,7 @@
 #define PUSHA	PUSHAQ
 #define POPA	POPAQ
 #define IRET	iretq
+#define SP		%rsp
 
 #elif defined(__i386__)
 
@@ -33,12 +34,15 @@
 #define PUSHA	pushal
 #define POPA	popal
 #define IRET	iretl
+#define SP		%esp
 
 #else /* !defined(__i386__) && !defined(__amd64__) */
 	#error "Unsupported Arch"
 #endif /* __amd64__ */
 
 idt_stub_common:
+
+	// TODO: save and restore seg regs
 
 	/* Push GPR. */
 	PUSHA
@@ -55,11 +59,16 @@ idt_stub_common:
 	/* Call C handler. */
 	call	handle_idt
 
+	/* Restore stack. */
+#ifdef __i386__
+	popl	%eax
+#endif /* __i386__ */
+
 	/* Pop GPR. */
 	POPA
 
 	/* Skip error code on the stack. */
-	leal	SIZE(%esp), %esp
+	leal	2*SIZE(SP), SP
 
 	IRET
 
