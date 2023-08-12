@@ -63,9 +63,6 @@ void lhv_main(VCPU *vcpu)
 		asm volatile ("sti");
 	}
 
-	printf("Stopping enabling interrupts\n");
-	HALT();
-
 	if (SHV_OPT & LHV_USE_PS2_MOUSE) {
 		if (vcpu->isbsp) {
 			mouse_init(vcpu);
