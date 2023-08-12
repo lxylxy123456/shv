@@ -26,6 +26,7 @@
 #define POPA	POPAQ
 #define IRET	iretq
 #define SP		%rsp
+#define AX		%rax
 
 #elif defined(__i386__)
 
@@ -35,6 +36,7 @@
 #define POPA	popal
 #define IRET	iretl
 #define SP		%esp
+#define AX		%eax
 
 #else /* !defined(__i386__) && !defined(__amd64__) */
 	#error "Unsupported Arch"
@@ -42,7 +44,22 @@
 
 idt_stub_common:
 
-	// TODO: save and restore seg regs
+	/* Save segment registers. */
+	movw	%gs, %ax
+	push	AX
+	movw	%fs, %ax
+	push	AX
+	movw	%es, %ax
+	push	AX
+	movw	%ds, %ax
+	push	AX
+
+	/* Save segment registers. */
+	movw	$(__DS), %ax
+	movw	%ax, %ds
+	movw	%ax, %es
+	movw	%ax, %fs
+	movw	%ax, %gs
 
 	/* Push GPR. */
 	PUSHA
@@ -66,6 +83,16 @@ idt_stub_common:
 
 	/* Pop GPR. */
 	POPA
+
+	/* Restore segment registers. */
+	pop		AX
+	movw	%ax, %ds
+	pop		AX
+	movw	%ax, %es
+	pop		AX
+	movw	%ax, %fs
+	pop		AX
+	movw	%ax, %gs
 
 	/* Skip error code on the stack. */
 	lea		2*SIZE(SP), SP

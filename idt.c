@@ -22,6 +22,10 @@
 uintptr_t g_idt[256][2];
 
 typedef struct {
+	uintptr_t ds;
+	uintptr_t es;
+	uintptr_t fs;
+	uintptr_t gs;
 	uintptr_t vector;
 	uintptr_t ip;
 	uintptr_t cs;
