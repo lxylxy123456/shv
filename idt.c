@@ -37,7 +37,7 @@ static void construct_idt(void)
 		spin_unlock(&lock);
 	}
 
-	/* From XMHF64 xmhf/src/xmhf-core/include/arch/x86/_processor.h . */
+	/* From XMHF64 xmhf_xcphandler_arch_initialize(). */
 	for (u32 i = 0; i < 256; i++) {
 		uintptr_t stub = g_idt_stubs[i];
 		idtentry_t *entry = (idtentry_t *)&(g_idt[i][0]);
@@ -77,7 +77,31 @@ void init_idt(void)
 	asm volatile("lidt %0" : : "m"(gdtr));
 }
 
+/* From XMHF64 _svm_and_vmx_getvcpu(). */
+static VCPU *get_vcpu(void)
+{
+	u64 msr_val;
+	u32 lapic_id;
+	msr_val = rdmsr64(MSR_APIC_BASE);
+	if (msr_val & (1ULL << 10)) {
+		/* x2APIC is enabled, use it */
+		lapic_id = (u32)(rdmsr64(IA32_X2APIC_APICID));
+	} else {
+		lapic_id = *(u32 *)((uintptr_t)(msr_val & ~0xFFFUL) + 0x20);
+		lapic_id = lapic_id >> 24;
+	}
+
+	for (u32 i = 0; i < g_midtable_numentries; i++) {
+		if (g_midtable[i].cpu_lapic_id == lapic_id) {
+			return (VCPU *)g_midtable[i].vcpu_vaddr_ptr;
+		}
+	}
+
+	HALT_ON_ERRORCOND(0 && ("Unable to retrieve vcpu"));
+}
+
 void handle_idt(struct regs *r)
 {
-	printf("idt 0x%016llx\n", rdtsc());
+	VCPU * vcpu = get_vcpu();
+	printf("CPU 0x%02x idt 0x%016llx\n", vcpu->id, rdtsc());
 }

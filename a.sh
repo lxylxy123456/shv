@@ -5,6 +5,7 @@ set -xe
 autoreconf --install && ./configure --host=i686-linux-gnu && make -j `nproc`
 autoreconf --install && ./configure --host=x86_64-linux-gnu && make -j `nproc`
 # --with-shv-opt=0x123
+# CFLAGS=-g
 
 set +x
 
