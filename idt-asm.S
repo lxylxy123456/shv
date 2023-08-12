@@ -68,7 +68,7 @@ idt_stub_common:
 	POPA
 
 	/* Skip error code on the stack. */
-	leal	2*SIZE(SP), SP
+	lea		2*SIZE(SP), SP
 
 	IRET
 

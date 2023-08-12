@@ -209,34 +209,71 @@
 struct regs
 {
 #ifdef __amd64__
-  u64 r15;
-  u64 r14;
-  u64 r13;
-  u64 r12;
-  u64 r11;
-  u64 r10;
-  u64 r9;
-  u64 r8;
-  union { u64 rdi; u32 edi; } __attribute__ ((packed));
-  union { u64 rsi; u32 esi; } __attribute__ ((packed));
-  union { u64 rbp; u32 ebp; } __attribute__ ((packed));
-  union { u64 rsp; u32 esp; } __attribute__ ((packed));
-  union { u64 rbx; u32 ebx; } __attribute__ ((packed));
-  union { u64 rdx; u32 edx; } __attribute__ ((packed));
-  union { u64 rcx; u32 ecx; } __attribute__ ((packed));
-  union { u64 rax; u32 eax; } __attribute__ ((packed));
-#elif defined(__i386__)
-  u32 edi;
-  u32 esi;
-  u32 ebp;
-  u32 esp;
-  u32 ebx;
-  u32 edx;
-  u32 ecx;
-  u32 eax;
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
+	u64 r15;
+	u64 r14;
+	u64 r13;
+	u64 r12;
+	u64 r11;
+	u64 r10;
+	u64 r9;
+	u64 r8;
+#endif /* __amd64__ */
+	union {
+#ifdef __amd64__
+		u64 rdi;
+#endif /* __amd64__ */
+		uintptr_t di;
+		u32 edi;
+	} __attribute__ ((packed));
+	union {
+#ifdef __amd64__
+		u64 rsi;
+#endif /* __amd64__ */
+		uintptr_t si;
+		u32 esi;
+	} __attribute__ ((packed));
+	union {
+#ifdef __amd64__
+		u64 rbp;
+#endif /* __amd64__ */
+		uintptr_t bp;
+		u32 ebp;
+	} __attribute__ ((packed));
+	union {
+#ifdef __amd64__
+		u64 rsp;
+#endif /* __amd64__ */
+		uintptr_t sp;
+		u32 esp;
+	} __attribute__ ((packed));
+	union {
+#ifdef __amd64__
+		u64 rbx;
+#endif /* __amd64__ */
+		uintptr_t bx;
+		u32 ebx;
+	} __attribute__ ((packed));
+	union {
+#ifdef __amd64__
+		u64 rdx;
+#endif /* __amd64__ */
+		uintptr_t dx;
+		u32 edx;
+	} __attribute__ ((packed));
+	union {
+#ifdef __amd64__
+		u64 rcx;
+#endif /* __amd64__ */
+		uintptr_t cx;
+		u32 ecx;
+	} __attribute__ ((packed));
+	union {
+#ifdef __amd64__
+		u64 rax;
+#endif /* __amd64__ */
+		uintptr_t ax;
+		u32 eax;
+	} __attribute__ ((packed));
 } __attribute__ ((packed));
 
 

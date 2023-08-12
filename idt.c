@@ -22,7 +22,7 @@
 uintptr_t g_idt[256][2];
 
 typedef struct {
-	uintptr_t error_code;
+	uintptr_t vector;
 	uintptr_t ip;
 	uintptr_t cs;
 	uintptr_t flags;
@@ -114,7 +114,6 @@ static VCPU *get_vcpu(void)
 void handle_idt(struct regs *r)
 {
 	VCPU * vcpu = get_vcpu();
-	// TODO: esp is for 32-bit only
-	printf("0x%08lx 0x%08lx\n", ((iret_info_t *)r->esp)->error_code, ((iret_info_t *)r->esp)->ip);
-	printf("CPU 0x%02x idt 0x%016llx\n", vcpu->id, rdtsc());
+	iret_info_t *iret_info = (iret_info_t *)r->sp;
+	printf("CPU 0x%02x idt 0x%lx\n", vcpu->id, iret_info->vector);
 }
