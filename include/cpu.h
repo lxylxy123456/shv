@@ -160,7 +160,7 @@ static inline u32 cpuid_ebx(u32 eax, u32 ecx)
 static inline u32 cpuid_ecx(u32 eax, u32 ecx)
 {
 	asm volatile("cpuid" : "+c"(ecx) : "a"(eax) : "ebx", "edx");
-	return eax;
+	return ecx;
 }
 
 static inline u32 cpuid_edx(u32 eax, u32 ecx)

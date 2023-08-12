@@ -67,6 +67,8 @@ void init_idt(void)
 {
 	construct_idt();
 
+	HALT_ON_ERRORCOND (cpuid_ecx(1, 0) & (1U << 5));
+
 	/* Load IDT */
 	struct {
 		u16 limit;
@@ -211,17 +213,10 @@ void handle_idt(struct regs *r)
 {
 	VCPU * vcpu = get_vcpu();
 	iret_info_t *iret_info = (iret_info_t *)r->sp;
-	printf("CPU 0x%02x idt 0x%lx\n", vcpu->id, iret_info->vector);
 
-#if 0
-	// TODO
 	if (cpuid_ecx(1, 0) & (1U << 5)) {
-		handle_idt_host(iret_info->vector, r);
+		handle_idt_host(vcpu, r, iret_info);
 	} else {
-		HALT_ON_ERRORCOND(0 && "TODO");
-		lhv_guest_xcphandler(iret_info->vector, r);
+		lhv_guest_xcphandler(vcpu, r, iret_info);
 	}
-#else
-	handle_idt_host(vcpu, r, iret_info);
-#endif
 }
