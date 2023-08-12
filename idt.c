@@ -17,24 +17,10 @@
  */
 
 #include <xmhf.h>
+#include <lhv.h>
 
 #define IDT_NELEMS 256
 uintptr_t g_idt[IDT_NELEMS][2];
-
-typedef struct {
-	uintptr_t ds;
-	uintptr_t es;
-	uintptr_t fs;
-	uintptr_t gs;
-	uintptr_t vector;
-	uintptr_t ip;
-	uintptr_t cs;
-	uintptr_t flags;
-#ifdef __amd64__
-	uintptr_t sp;
-	uintptr_t ss;
-#endif /* __amd64__ */
-} __attribute__((packed)) iret_info_t;
 
 static void construct_idt(void)
 {

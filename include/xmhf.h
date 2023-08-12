@@ -181,6 +181,20 @@ extern volatile u32 shv_pd[1024] ALIGNED_PAGE;
 
 /* idt.c */
 #define IDT_NELEMS 256
+typedef struct {
+	uintptr_t ds;
+	uintptr_t es;
+	uintptr_t fs;
+	uintptr_t gs;
+	uintptr_t vector;
+	uintptr_t ip;
+	uintptr_t cs;
+	uintptr_t flags;
+#ifdef __amd64__
+	uintptr_t sp;
+	uintptr_t ss;
+#endif /* __amd64__ */
+} __attribute__((packed)) iret_info_t;
 extern uintptr_t g_idt_stubs[IDT_NELEMS];
 extern uintptr_t g_idt[IDT_NELEMS][2];
 extern void init_idt(void);
