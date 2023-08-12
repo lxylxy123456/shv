@@ -101,12 +101,57 @@ static VCPU *get_vcpu(void)
 	HALT_ON_ERRORCOND(0 && ("Unable to retrieve vcpu"));
 }
 
-#if 0
-static void handle_idt_host(u8 vector, struct regs *r)
+static void handle_idt_host(VCPU * vcpu, struct regs *r, iret_info_t * info)
 {
-	HALT_ON_ERRORCOND(0);
+	u8 vector = info->vector;
+
+	switch (vector) {
+	case 0x20:
+		handle_timer_interrupt(vcpu, vector, 0);
+		break;
+
+	case 0x21:
+		handle_keyboard_interrupt(vcpu, vector, 0);
+		break;
+
+	case 0x22:
+		handle_timer_interrupt(vcpu, vector, 0);
+		break;
+
+	case 0x23:
+		handle_lhv_syscall(vcpu, vector, r);
+		break;
+
+	case 0x27:
+		/*
+		 * We encountered the Mysterious IRQ 7. This has been observed on Bochs
+		 * and Dell 7050. The correct way is likely to ignore this interrupt
+		 * (without sending EOI to PIC). References:
+		 * * https://en.wikipedia.org/wiki/Intel_8259#Spurious_interrupts
+		 * * https://wiki.osdev.org/8259_PIC#Spurious_IRQs
+		 * * Project 3: Writing a Kernel From Scratch (not publicly available)
+		 *    15-410 Operating Systems
+		 *    February 25, 2022
+		 *    4.1.8 The Mysterious Exception 0x27, aka IRQ 7
+		 *
+		 * Note that calling printf() here will deadlock if the interrupted
+		 * code is already calling printf().
+		 */
+		if (pic_spurious(7) != 1) {
+			HALT_ON_ERRORCOND(0);
+		}
+		break;
+
+	case 0x2c:
+		handle_mouse_interrupt(vcpu, vector, 0);
+		break;
+
+	default:
+		printf("Unknown exception or interrupt on CPU %d\n", vcpu->id);
+		HALT();
+		break;
+	}
 }
-#endif
 
 void handle_idt(struct regs *r)
 {
@@ -115,11 +160,14 @@ void handle_idt(struct regs *r)
 	printf("CPU 0x%02x idt 0x%lx\n", vcpu->id, iret_info->vector);
 
 #if 0
+	// TODO
 	if (cpuid_ecx(1, 0) & (1U << 5)) {
 		handle_idt_host(iret_info->vector, r);
 	} else {
 		HALT_ON_ERRORCOND(0 && "TODO");
 		lhv_guest_xcphandler(iret_info->vector, r);
 	}
+#else
+	handle_idt_host(vcpu, r, iret_info);
 #endif
 }
