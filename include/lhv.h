@@ -109,7 +109,7 @@ void vmcs_load(VCPU *vcpu);
 
 /* lhv-guest-asm.S */
 void lhv_guest_entry(void);
-void lhv_guest_xcphandler(uintptr_t vector, struct regs *r);
+void lhv_guest_xcphandler(u8 vector, struct regs *r);
 
 /* lhv-user.c */
 typedef struct ureg_t {

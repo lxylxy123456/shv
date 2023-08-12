@@ -950,7 +950,7 @@ void lhv_guest_main(ulong_t cpu_id)
 	}
 }
 
-void lhv_guest_xcphandler(uintptr_t vector, struct regs *r)
+void lhv_guest_xcphandler(u8 vector, struct regs *r)
 {
 	(void) r;
 	switch (vector) {
@@ -994,6 +994,9 @@ void lhv_guest_xcphandler(uintptr_t vector, struct regs *r)
             uintptr_t exception_rip;
             hva_t *found = NULL;
             hva_t *i = NULL;
+
+			// TODO: modify following handle_idt_host()
+			HALT_ON_ERRORCOND(0 && "TODO");
 
             // skip error code on stack if applicable
             if (vector == CPU_EXCEPTION_DF ||

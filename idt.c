@@ -101,9 +101,25 @@ static VCPU *get_vcpu(void)
 	HALT_ON_ERRORCOND(0 && ("Unable to retrieve vcpu"));
 }
 
+#if 0
+static void handle_idt_host(u8 vector, struct regs *r)
+{
+	HALT_ON_ERRORCOND(0);
+}
+#endif
+
 void handle_idt(struct regs *r)
 {
 	VCPU * vcpu = get_vcpu();
 	iret_info_t *iret_info = (iret_info_t *)r->sp;
 	printf("CPU 0x%02x idt 0x%lx\n", vcpu->id, iret_info->vector);
+
+#if 0
+	if (cpuid_ecx(1, 0) & (1U << 5)) {
+		handle_idt_host(iret_info->vector, r);
+	} else {
+		HALT_ON_ERRORCOND(0 && "TODO");
+		lhv_guest_xcphandler(iret_info->vector, r);
+	}
+#endif
 }
