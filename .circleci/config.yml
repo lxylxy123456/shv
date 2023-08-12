@@ -5,7 +5,8 @@ jobs:
     machine:
       # Need nested virtualization
       # https://discuss.circleci.com/t/new-android-machine-image-now-/39467
-      image: android-default
+      image: android:2022.03.1
+    resource_class: medium
     parameters:
       subarch:
         type: string
@@ -23,7 +24,7 @@ jobs:
           name: "Build"
           command: |
             autoreconf --install && \
-            ./configure --host=<< parameters.subarch >>-linux-gnu && \
+            ./configure --host=<< parameters.subarch >>-linux-gnu CFLAGS=-g && \
             make -j $(nproc)
       - run:
           name: "Versions"
