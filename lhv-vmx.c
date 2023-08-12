@@ -39,7 +39,7 @@ __attribute__((aligned(16)));
 static msr_entry_t vmentry_msrload_entries[MAX_VCPU_ENTRIES][MAX_GUESTS][MAX_MSR_LS]
 __attribute__((aligned(16)));
 
-extern u64 x_gdt_start[MAX_VCPU_ENTRIES][XMHF_GDT_NELEMS];
+extern u64 x_gdt_start[MAX_VCPU_ENTRIES][GDT_NELEMS];
 
 VCPU *_svm_and_vmx_getvcpu(void)
 {

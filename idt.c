@@ -19,7 +19,7 @@
 #include <xmhf.h>
 
 #define IDT_NELEMS 256
-uintptr_t g_idt[256][2];
+uintptr_t g_idt[IDT_NELEMS][2];
 
 typedef struct {
 	uintptr_t ds;
@@ -53,7 +53,7 @@ static void construct_idt(void)
 	}
 
 	/* From XMHF64 xmhf_xcphandler_arch_initialize(). */
-	for (u32 i = 0; i < 256; i++) {
+	for (u32 i = 0; i < IDT_NELEMS; i++) {
 		uintptr_t stub = g_idt_stubs[i];
 		idtentry_t *entry = (idtentry_t *)&(g_idt[i][0]);
 		entry->isrLow16 = (u16)stub;
@@ -86,7 +86,7 @@ void init_idt(void)
 		u16 limit;
 		uintptr_t base;
 	} __attribute__((packed)) gdtr = {
-		.limit=(uintptr_t)&g_idt[256][0] - (uintptr_t)&g_idt[0][0] - 1,
+		.limit=(uintptr_t)&g_idt[IDT_NELEMS][0] - (uintptr_t)&g_idt[0][0] - 1,
 		.base=(uintptr_t)&g_idt,
 	};
 	asm volatile("lidt %0" : : "m"(gdtr));
