@@ -162,7 +162,6 @@ extern PCPU g_cpumap[MAX_PCPU_ENTRIES];
 extern MIDTAB g_midtable[MAX_VCPU_ENTRIES];
 extern VCPU g_vcpus[MAX_VCPU_ENTRIES];
 extern u8 g_cpu_stack[MAX_VCPU_ENTRIES][SHV_STACK_SIZE];
-extern u8 g_runtime_TSS[MAX_VCPU_ENTRIES][PAGE_SIZE_4K];
 extern uintptr_t g_cr3;
 extern uintptr_t g_cr4;
 #ifdef __amd64__
@@ -208,6 +207,7 @@ extern void handle_idt(struct regs *r);
 /* gdt.c */
 #define GDT_NELEMS 10
 extern u64 g_gdt[MAX_VCPU_ENTRIES][GDT_NELEMS];
+extern u8 g_tss[MAX_VCPU_ENTRIES][PAGE_SIZE_4K] ALIGNED_PAGE;
 extern void init_gdt(VCPU * vcpu);
 
 #endif	/* !__ASSEMBLY__ */

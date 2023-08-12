@@ -24,7 +24,6 @@ PCPU g_cpumap[MAX_PCPU_ENTRIES];
 MIDTAB g_midtable[MAX_VCPU_ENTRIES];
 VCPU g_vcpus[MAX_VCPU_ENTRIES];
 u8 g_cpu_stack[MAX_VCPU_ENTRIES][SHV_STACK_SIZE];
-u8 g_runtime_TSS[MAX_VCPU_ENTRIES][PAGE_SIZE_4K];
 uintptr_t g_cr3;
 uintptr_t g_cr4;
 #ifdef __amd64__

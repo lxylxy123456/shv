@@ -119,14 +119,14 @@ void enter_user_mode(VCPU *vcpu, ulong_t arg)
 		ureg->r.rdi = (uintptr_t) vcpu;
 		stack[-3] = 0xdeadbeef;
 		/* Setup TSS */
-		*(u64 *)(g_runtime_TSS[vcpu->idx] + 4) = top;
+		*(u64 *)(g_tss[vcpu->idx] + 4) = top;
 #elif defined(__i386__)
 		stack[-1] = arg;
 		stack[-2] = (uintptr_t) vcpu;
 		stack[-3] = 0xdeadbeef;
 		/* Setup TSS */
-		*(u32 *)(g_runtime_TSS[vcpu->idx] + 4) = top;
-		*(u16 *)(g_runtime_TSS[vcpu->idx] + 8) = __DS;
+		*(u32 *)(g_tss[vcpu->idx] + 4) = top;
+		*(u16 *)(g_tss[vcpu->idx] + 8) = __DS;
 #else /* !defined(__i386__) && !defined(__amd64__) */
     #error "Unsupported Arch"
 #endif /* !defined(__i386__) && !defined(__amd64__) */

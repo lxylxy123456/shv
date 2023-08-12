@@ -19,9 +19,11 @@
 #include <xmhf.h>
 
 u64 g_gdt[MAX_VCPU_ENTRIES][GDT_NELEMS];
+u8 g_tss[MAX_VCPU_ENTRIES][PAGE_SIZE_4K] ALIGNED_PAGE;
 
 void init_gdt(VCPU * vcpu)
 {
+	/* Modify GDT entries. */
 	g_gdt[vcpu->idx][0] = 0x0000000000000000ULL;
 	g_gdt[vcpu->idx][1] = 0x00cf9a000000ffffULL;	// CS 32-bit
 	g_gdt[vcpu->idx][2] = 0x00cf92000000ffffULL;	// DS
@@ -33,12 +35,37 @@ void init_gdt(VCPU * vcpu)
 	g_gdt[vcpu->idx][8] = 0x0000000000000000ULL;
 	g_gdt[vcpu->idx][9] = 0x0000000000000000ULL;
 
-	struct {
-		u16 limit;
-		uintptr_t base;
-	} __attribute__((packed)) gdtr = {
-		.limit=GDT_NELEMS * 8 - 1,
-		.base=(uintptr_t)&(g_gdt[vcpu->idx][0]),
-	};
-	asm volatile("lgdt %0" : : "m"(gdtr));
+	/* Modify GDT entries for TSS. */
+	{
+		TSSENTRY * t = (void *)&g_gdt[vcpu->idx][4];
+		uintptr_t tss_addr = (uintptr_t)&g_tss[vcpu->idx][0];
+		t->attributes1 = 0x89;
+		t->limit16_19attributes2 = 0x00;
+		t->baseAddr0_15 = (u16)(tss_addr & 0x0000FFFF);
+		t->baseAddr16_23 = (u8)((tss_addr & 0x00FF0000) >> 16);
+		t->baseAddr24_31 = (u8)((tss_addr & 0xFF000000) >> 24);
+#ifdef __amd64__
+		t->baseAddr32_63 = (u32)((tss_addr & 0xFFFFFFFF00000000) >> 32);
+		t->reserved_zero = 0;
+#endif /* __amd64__ */
+		t->limit0_15=0x67;
+	}
+
+	/* Load GDT. */
+	{
+		struct {
+			u16 limit;
+			uintptr_t base;
+		} __attribute__((packed)) gdtr = {
+			.limit=GDT_NELEMS * 8 - 1,
+			.base=(uintptr_t)&(g_gdt[vcpu->idx][0]),
+		};
+		asm volatile("lgdt %0" : : "m"(gdtr));
+	}
+
+	/* Load TR. */
+	{
+		u16 trsel = __TRSEL;
+		asm volatile("ltr %0" : : "m"(trsel));
+	}
 }

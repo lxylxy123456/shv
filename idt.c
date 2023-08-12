@@ -70,14 +70,16 @@ void init_idt(void)
 	HALT_ON_ERRORCOND (cpuid_ecx(1, 0) & (1U << 5));
 
 	/* Load IDT */
-	struct {
-		u16 limit;
-		uintptr_t base;
-	} __attribute__((packed)) gdtr = {
-		.limit=(uintptr_t)&g_idt[IDT_NELEMS][0] - (uintptr_t)&g_idt[0][0] - 1,
-		.base=(uintptr_t)&g_idt,
-	};
-	asm volatile("lidt %0" : : "m"(gdtr));
+	{
+		struct {
+			u16 limit;
+			uintptr_t base;
+		} __attribute__((packed)) idtr = {
+			.limit=(uintptr_t)g_idt[IDT_NELEMS] - (uintptr_t)g_idt[0] - 1,
+			.base=(uintptr_t)&g_idt,
+		};
+		asm volatile("lidt %0" : : "m"(idtr));
+	}
 }
 
 /* From XMHF64 _svm_and_vmx_getvcpu(). */
