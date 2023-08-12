@@ -14,6 +14,11 @@ void kernel_main(void)
 	/* Print banner. */
 	{
 		printf("Small Hyper Visor (SHV)\n");
+#ifdef __amd64__
+		printf("Subarch: amd64\n");
+#elif __i386__
+		printf("Subarch: i386\n");
+#endif
 		printf("SHV Options: 0x%x\n", SHV_OPT);
 	}
 

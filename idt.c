@@ -101,6 +101,35 @@ static VCPU *get_vcpu(void)
 	HALT_ON_ERRORCOND(0 && ("Unable to retrieve vcpu"));
 }
 
+/* Dump information when handling exception. */
+void dump_exception(VCPU * vcpu, struct regs *r, iret_info_t * info)
+{
+#define _P(fmt, ...) printf("CPU(0x%02x): " fmt "\n", vcpu->id, __VA_ARGS__)
+#define _B (sizeof(uintptr_t) * 2)
+
+	_P("error code:     0x%04lx", info->error_code);
+	_P("FLAGS:          0x%08lx", info->flags);
+#ifdef __amd64__
+	_P("SS: 0x%04lx  SP: 0x%08lx", info->ss, info->sp);
+#endif /* __amd64__ */
+	_P("CS: 0x%04lx  IP: 0x%08lx", info->ss, info->ip);
+	_P("DS: 0x%04lx  ES: 0x%04lx", info->ds, info->es);
+	_P("FS: 0x%04lx  GS: 0x%04lx", info->fs, info->gs);
+	_P("AX: 0x%0*lx  CX: 0x%0*lx", _B, r->ax, _B, r->cx);
+	_P("DX: 0x%0*lx  BX: 0x%0*lx", _B, r->dx, _B, r->bx);
+	_P("SP: 0x%0*lx  BP: 0x%0*lx", _B, r->sp, _B, r->bp);
+	_P("SI: 0x%0*lx  DI: 0x%0*lx", _B, r->si, _B, r->di);
+#ifdef __amd64__
+	_P("R8: 0x%0*lx  R9: 0x%0*lx", _B, r->r8, _B, r->r9);
+	_P("R10:0x%0*lx  R11:0x%0*lx", _B, r->r10, _B, r->r11);
+	_P("R12:0x%0*lx  R13:0x%0*lx", _B, r->r12, _B, r->r13);
+	_P("R14:0x%0*lx  R15:0x%0*lx", _B, r->r14, _B, r->r15);
+#endif /* __amd64__ */
+
+#undef _P
+#undef _B
+}
+
 static void handle_idt_host(VCPU * vcpu, struct regs *r, iret_info_t * info)
 {
 	u8 vector = info->vector;
@@ -147,7 +176,31 @@ static void handle_idt_host(VCPU * vcpu, struct regs *r, iret_info_t * info)
 		break;
 
 	default:
-		printf("Unknown exception or interrupt on CPU %d\n", vcpu->id);
+		/* Try to recover using xcph_table. */
+		{
+			extern uint8_t _begin_xcph_table[];
+			extern uint8_t _end_xcph_table[];
+			uintptr_t exception_ip = info->ip;
+			bool found = false;
+
+			for (uintptr_t *i = (uintptr_t *)_begin_xcph_table;
+				 i < (uintptr_t *)_end_xcph_table; i += 3) {
+				if (i[0] == vector && i[1] == exception_ip) {
+					info->ip = i[2];
+					found = true;
+					break;
+				}
+			}
+
+			if (found) {
+				break;
+			}
+		}
+
+		/* Print registers for debugging. */
+		printf("CPU(0x%02x): V Unknown exception %hh02x\n", vcpu->id, vector);
+		dump_exception(vcpu, r, info);
+		printf("CPU(0x%02x): ^ Unknown exception %hh02x\n", vcpu->id, vector);
 		HALT();
 		break;
 	}
