@@ -1,4 +1,4 @@
-name: Build XMHF with TrustVisor
+name: Build SHV
 
 on: ["push", "pull_request"]
 
