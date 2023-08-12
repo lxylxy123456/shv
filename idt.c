@@ -107,6 +107,7 @@ void dump_exception(VCPU * vcpu, struct regs *r, iret_info_t * info)
 #define _P(fmt, ...) printf("CPU(0x%02x): " fmt "\n", vcpu->id, __VA_ARGS__)
 #define _B (sizeof(uintptr_t) * 2)
 
+	_P("vector:         0x%02lx", info->vector);
 	_P("error code:     0x%04lx", info->error_code);
 	_P("FLAGS:          0x%08lx", info->flags);
 #ifdef __amd64__
@@ -198,9 +199,9 @@ static void handle_idt_host(VCPU * vcpu, struct regs *r, iret_info_t * info)
 		}
 
 		/* Print registers for debugging. */
-		printf("CPU(0x%02x): V Unknown exception %hh02x\n", vcpu->id, vector);
+		printf("CPU(0x%02x): V Unknown host exception\n", vcpu->id);
 		dump_exception(vcpu, r, info);
-		printf("CPU(0x%02x): ^ Unknown exception %hh02x\n", vcpu->id, vector);
+		printf("CPU(0x%02x): ^ Unknown host exception\n", vcpu->id);
 		HALT();
 		break;
 	}

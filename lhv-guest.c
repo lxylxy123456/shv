@@ -950,22 +950,27 @@ void lhv_guest_main(ulong_t cpu_id)
 	}
 }
 
-void lhv_guest_xcphandler(u8 vector, struct regs *r)
+void lhv_guest_xcphandler(VCPU * vcpu, struct regs *r, iret_info_t * info)
 {
-	(void) r;
+	u8 vector = info->vector;
+
 	switch (vector) {
 	case 0x20:
 		handle_timer_interrupt(_svm_and_vmx_getvcpu(), vector, 1);
 		break;
+
 	case 0x21:
 		handle_keyboard_interrupt(_svm_and_vmx_getvcpu(), vector, 1);
 		break;
+
 	case 0x22:
 		handle_timer_interrupt(_svm_and_vmx_getvcpu(), vector, 1);
 		break;
+
 	case 0x23:
 		handle_lhv_syscall(_svm_and_vmx_getvcpu(), vector, r);
 		break;
+
 #ifdef __DEBUG_QEMU__
 	case 0x27:
 		/*
@@ -984,67 +989,38 @@ void lhv_guest_xcphandler(u8 vector, struct regs *r)
 		 */
 		break;
 #endif /* __DEBUG_QEMU__ */
+
 	case 0x2c:
 		handle_mouse_interrupt(_svm_and_vmx_getvcpu(), vector, 1);
 		break;
+
 	default:
+		/* Try to recover using xcph_table. */
 		{
 			extern uint8_t _begin_xcph_table[];
 			extern uint8_t _end_xcph_table[];
-            uintptr_t exception_rip;
-            hva_t *found = NULL;
-            hva_t *i = NULL;
+			uintptr_t exception_ip = info->ip;
+			bool found = false;
 
-			// TODO: modify following handle_idt_host()
-			HALT_ON_ERRORCOND(0 && "TODO");
+			for (uintptr_t *i = (uintptr_t *)_begin_xcph_table;
+				 i < (uintptr_t *)_end_xcph_table; i += 3) {
+				if (i[0] == vector && i[1] == exception_ip) {
+					info->ip = i[2];
+					found = true;
+					break;
+				}
+			}
 
-            // skip error code on stack if applicable
-            if (vector == CPU_EXCEPTION_DF ||
-                vector == CPU_EXCEPTION_TS ||
-                vector == CPU_EXCEPTION_NP ||
-                vector == CPU_EXCEPTION_SS ||
-                vector == CPU_EXCEPTION_GP ||
-                vector == CPU_EXCEPTION_PF ||
-                vector == CPU_EXCEPTION_AC) {
-#ifdef __amd64__
-                r->rsp += sizeof(uintptr_t);
-#elif defined(__i386__)
-                r->esp += sizeof(uintptr_t);
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
-            }
+			if (found) {
+				break;
+			}
+		}
 
-#ifdef __amd64__
-            exception_rip = ((uintptr_t *)(r->rsp))[0];
-#elif defined(__i386__)
-            exception_rip = ((uintptr_t *)(r->esp))[0];
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
-
-            for (i = (hva_t *)_begin_xcph_table;
-                 i < (hva_t *)_end_xcph_table; i += 3) {
-                if (i[0] == vector && i[1] == exception_rip) {
-                    found = i;
-                    break;
-                }
-            }
-
-            if (found) {
-                /* Found in xcph table; Modify EIP on stack and iret */
-#ifdef __amd64__
-                ((uintptr_t *)(r->rsp))[0] = found[2];
-#elif defined(__i386__)
-                ((uintptr_t *)(r->esp))[0] = found[2];
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
-                break;
-            }
-        }
-		printf("Guest: interrupt / exception vector %ld\n", vector);
-		HALT_ON_ERRORCOND(0 && "Guest: unknown interrupt / exception!\n");
+		/* Print registers for debugging. */
+		printf("CPU(0x%02x): V Unknown guest exception\n", vcpu->id);
+		dump_exception(vcpu, r, info);
+		printf("CPU(0x%02x): ^ Unknown guest exception\n", vcpu->id);
+		HALT();
 		break;
 	}
 }
