@@ -175,3 +175,9 @@ static inline void lock_incl(volatile u32 *num)
 	asm volatile("lock incl %0" : "+m"(*num));
 }
 
+static inline u64 rdtsc(void)
+{
+	u32 eax, edx;
+	asm volatile("rdtsc" : "=a"(eax), "=d"(edx));
+	return ((u64)edx << 32) | eax;
+}

@@ -79,5 +79,5 @@ void init_idt(void)
 
 void handle_idt(struct regs *r)
 {
-	HALT_ON_ERRORCOND(0 && "Cannot handle interrupt / exception yet");
+	printf("idt 0x%016llx\n", rdtsc());
 }
