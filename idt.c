@@ -112,7 +112,7 @@ void dump_exception(VCPU * vcpu, struct regs *r, iret_info_t * info)
 #ifdef __amd64__
 	_P("SS: 0x%04lx  SP: 0x%08lx", info->ss, info->sp);
 #endif /* __amd64__ */
-	_P("CS: 0x%04lx  IP: 0x%08lx", info->ss, info->ip);
+	_P("CS: 0x%04lx  IP: 0x%08lx", info->cs, info->ip);
 	_P("DS: 0x%04lx  ES: 0x%04lx", info->ds, info->es);
 	_P("FS: 0x%04lx  GS: 0x%04lx", info->fs, info->gs);
 	_P("AX: 0x%0*lx  CX: 0x%0*lx", _B, r->ax, _B, r->cx);
