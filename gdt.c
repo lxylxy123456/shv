@@ -18,7 +18,7 @@
 
 #include <xmhf.h>
 
-u64 g_gdt[MAX_VCPU_ENTRIES][XMHF_GDT_SIZE];
+u64 g_gdt[MAX_VCPU_ENTRIES][XMHF_GDT_NELEMS];
 
 void init_gdt(VCPU * vcpu)
 {
@@ -37,7 +37,7 @@ void init_gdt(VCPU * vcpu)
 		u16 limit;
 		uintptr_t base;
 	} __attribute__((packed)) gdtr = {
-		.limit=XMHF_GDT_SIZE * 8 - 1,
+		.limit=XMHF_GDT_NELEMS * 8 - 1,
 		.base=(uintptr_t)&(g_gdt[vcpu->idx][0]),
 	};
 	asm volatile("lgdt %0" : : "m"(gdtr));

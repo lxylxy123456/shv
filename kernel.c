@@ -61,7 +61,7 @@ void kernel_main_smp(VCPU *vcpu)
 	/* Initialize GDT, IDT, etc. */
 	{
 		init_gdt(vcpu);
-		// TODO: initialize idt
+		init_idt();
 		// TODO: initialize tss?
 	}
 

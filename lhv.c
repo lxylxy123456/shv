@@ -57,13 +57,13 @@ void lhv_main(VCPU *vcpu)
 #endif /* !defined(__i386__) && !defined(__amd64__) */
 	}
 
-	printf("Stopping enabling interrupts\n");
-	HALT();
-
 	if (!(SHV_OPT & LHV_NO_EFLAGS_IF)) {
 		/* Set EFLAGS.IF */
 		asm volatile ("sti");
 	}
+
+	printf("Stopping enabling interrupts\n");
+	HALT();
 
 	if (SHV_OPT & LHV_USE_PS2_MOUSE) {
 		if (vcpu->isbsp) {

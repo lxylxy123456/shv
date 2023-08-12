@@ -179,9 +179,16 @@ extern volatile u32 shv_pd[1024] ALIGNED_PAGE;
     #error "Unsupported Arch"
 #endif /* !defined(__i386__) && !defined(__amd64__) */
 
+/* idt.c */
+#define XMHF_IDT_NELEMS 256
+extern uintptr_t g_idt_stubs[256];
+extern uintptr_t g_idt[256][2];
+extern void init_idt(void);
+extern void handle_idt(struct regs *r);
+
 /* gdt.c */
-#define XMHF_GDT_SIZE 10
-extern u64 g_gdt[MAX_VCPU_ENTRIES][XMHF_GDT_SIZE];
+#define XMHF_GDT_NELEMS 10
+extern u64 g_gdt[MAX_VCPU_ENTRIES][XMHF_GDT_NELEMS];
 extern void init_gdt(VCPU * vcpu);
 
 #endif	/* !__ASSEMBLY__ */
