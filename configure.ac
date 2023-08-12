@@ -31,13 +31,34 @@ AM_CONDITIONAL([I386], [test x"$host_alias" = x"i686-linux-gnu"])
 
 # Define macros that will be passed to C and assembly files, following:
 # https://stackoverflow.com/questions/71709907/
+# https://stackoverflow.com/questions/32092644/
 
-shv_opt=0
+# SHV_OPT
 AC_ARG_WITH([shv_opt],
             [AS_HELP_STRING([--with-shv-opt=SHV_OPT],
                             [specify SHV options, see shv.h])],
-            [shv_opt="$withval"], [])
+            [shv_opt="$withval"], [shv_opt=0])
 AC_DEFINE_UNQUOTED([SHV_OPT],[${shv_opt}],[SHV options])
+
+# DEBUG_VGA
+AC_ARG_ENABLE([debug_vga],
+              [AS_HELP_STRING([--enable-debug-vga@<:@=yes|no@:>@],
+                              [enable VGA debugging])],
+              [AS_CASE(${enableval}, [yes], [debug_vga=1], [no], [debug_vga=0],
+                       [AC_MSG_ERROR([bad value ${enableval}])])],
+              [debug_vga=0])
+AC_DEFINE_UNQUOTED([DEBUG_VGA],[${debug_vga}],[Whether use VGA to debug])
+
+# DEBUG_SERIAL
+AC_ARG_ENABLE([debug_serial],
+              [AS_HELP_STRING([--enable-debug-serial@<:@=yes|no@:>@],
+                              [enable serial debugging])],
+              [AS_CASE(${enableval}, [yes], [debug_serial=1],
+                       [no], [debug_serial=0],
+                       [AC_MSG_ERROR([bad value ${enableval}])])],
+              [debug_serial=1])
+AC_DEFINE_UNQUOTED([DEBUG_SERIAL],[${debug_serial}],
+                   [Whether use Serial to debug])
 
 # Tells automake to create a Makefile
 # See https://www.gnu.org/software/automake/manual/html_node/Requirements.html

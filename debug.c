@@ -59,9 +59,13 @@ void emhfc_putchar(int c, void *arg)
 	char ch = (char)c;
 	(void)arg;
 
-	// TODO: allow configure to select which way to output
+#if DEBUG_SERIAL
 	dbg_x86_uart_putc(ch);
+#endif /* DEBUG_SERIAL */
+
+#if DEBUG_VGA
 	dbg_x86_vgamem_putc(ch);
+#endif /* DEBUG_VGA */
 }
 
 void emhfc_putchar_linelock(spin_lock_t *arg)
