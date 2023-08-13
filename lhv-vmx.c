@@ -174,7 +174,9 @@ static void lhv_vmx_vmcs_init(VCPU *vcpu)
 		ulong_t cr4 = vcpu->vmx_msrs[INDEX_IA32_VMX_CR4_FIXED0_MSR];
 #ifdef __amd64__
 		cr4 |= CR4_PAE;
-#endif
+#else /* __i386__ */
+		cr4 |= CR4_PSE;
+#endif /* __amd64__ */
 		vmcs_vmwrite(vcpu, VMCS_guest_CR4, cr4);
 	}
 	//CR3 set to 0, does not matter
