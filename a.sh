@@ -11,4 +11,5 @@ set +x
 
 echo qemu-system-i386 -cdrom grub.iso
 echo qemu-system-x86_64 -kernel shv.bin -serial stdio -display none -smp 4 -enable-kvm -cpu Haswell,vmx=yes
+echo gdb --ex 'target remote :::1234' --ex 'symbol-file shv.bin'
 
