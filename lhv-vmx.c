@@ -406,7 +406,7 @@ void vmexit_handler(VCPU *vcpu, struct regs *r)
 		/* fallthrough */
 	default:
 		{
-			printf("CPU(0x%02x): unknown vmexit %d\n", vcpu->id, vmexit_reason);
+			printf("CPU(0x%02x): unknown vmexit %u\n", vcpu->id, vmexit_reason);
 			printf("CPU(0x%02x): rip = 0x%x\n", vcpu->id, guest_rip);
 			vmcs_dump(vcpu, 0);
 			HALT_ON_ERRORCOND(0 && "Unknown VMEXIT");
