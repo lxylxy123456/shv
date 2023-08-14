@@ -30,8 +30,12 @@ void init_gdt(VCPU * vcpu)
 	g_gdt[vcpu->idx][3] = 0x00af9a000000ffffULL;	// CS 64-bit
 	g_gdt[vcpu->idx][4] = 0x0000000000000000ULL;	// TSS
 	g_gdt[vcpu->idx][5] = 0x0000000000000000ULL;	// TSS (only used in 64-bit)
-	g_gdt[vcpu->idx][6] = 0x0000000000000000ULL;	// CS Ring 3
-	g_gdt[vcpu->idx][7] = 0x0000000000000000ULL;	// DS Ring 3
+#ifdef __amd64__
+	g_gdt[vcpu->idx][6] = 0x00affa000000ffffULL;	// CS Ring 3, 64-bit
+#else /* !__amd64__ */
+	g_gdt[vcpu->idx][6] = 0x00cffa000000ffffULL;	// CS Ring 3, 32-bit
+#endif /* __amd64__ */
+	g_gdt[vcpu->idx][7] = 0x00cff2000000ffffULL;	// DS Ring 3
 	g_gdt[vcpu->idx][8] = 0x0000000000000000ULL;
 	g_gdt[vcpu->idx][9] = 0x0000000000000000ULL;
 

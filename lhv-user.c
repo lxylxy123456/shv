@@ -186,7 +186,7 @@ __attribute__((__noreturn__)) void leave_user_mode(void) {
 	HALT_ON_ERRORCOND(0 && "system call returned");
 }
 
-static u32 pal_lock = 1;
+static spin_lock_t pal_lock;
 static volatile u32 pal_available = 3;
 
 static void user_main_pal_demo(VCPU *vcpu, ulong_t arg)
