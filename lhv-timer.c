@@ -88,6 +88,11 @@ void timer_init(VCPU *vcpu)
 		}
 	}
 
+	/* Enable LAPIC for APs. */
+	if (!vcpu->isbsp) {
+		write_lapic(LAPIC_SVR, read_lapic(LAPIC_SVR) | LAPIC_ENABLE);
+	}
+
 	/* LAPIC Timer */
 	if (!(SHV_OPT & LHV_NO_INTERRUPT)) {
 		write_lapic(LAPIC_TIMER_DIV, 0x0000000b);
