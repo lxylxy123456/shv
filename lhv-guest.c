@@ -917,7 +917,7 @@ void lhv_guest_main(ulong_t cpu_id)
 				lhv_guest_test_msr_ls(vcpu);
 			} else if (iter == 3) {
 				/* Implement a barrier and make sure all CPUs arrive */
-				static u32 lock = 1;
+				static spin_lock_t lock;
 				static volatile u32 arrived = 0;
 				printf("CPU(0x%02x): enter LHV barrier\n", vcpu->id);
 				spin_lock(&lock);

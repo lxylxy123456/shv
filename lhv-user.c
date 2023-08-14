@@ -47,7 +47,7 @@ static u64 user_pt[4][512][512] ALIGNED_PAGE;
 static void set_user_mode_page_table(void)
 {
 	static uintptr_t initialized = 0;
-	static u32 lock = 1;
+	static spin_lock_t lock;
 	spin_lock(&lock);
 	if (!initialized) {
 #ifdef __amd64__
