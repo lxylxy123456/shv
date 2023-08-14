@@ -187,6 +187,7 @@ typedef struct {
 	uintptr_t es;
 	uintptr_t fs;
 	uintptr_t gs;
+	struct regs r;
 	uintptr_t vector;
 	uintptr_t error_code;
 	uintptr_t ip;
@@ -202,7 +203,7 @@ extern uintptr_t g_idt[IDT_NELEMS][2];
 extern void init_idt(void);
 extern VCPU *get_vcpu(void);
 extern void dump_exception(VCPU * vcpu, struct regs *r, iret_info_t * info);
-extern void handle_idt(struct regs *r);
+extern void handle_idt(iret_info_t * info);
 
 /* gdt.c */
 #define GDT_NELEMS 10

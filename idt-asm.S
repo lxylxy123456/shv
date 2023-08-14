@@ -44,6 +44,9 @@
 
 idt_stub_common:
 
+	/* Push GPR. */
+	PUSHA
+
 	/* Save segment registers. */
 	movw	%gs, %ax
 	push	AX
@@ -54,15 +57,12 @@ idt_stub_common:
 	movw	%ds, %ax
 	push	AX
 
-	/* Save segment registers. */
+	/* Load segment registers. */
 	movw	$(__DS), %ax
 	movw	%ax, %ds
 	movw	%ax, %es
 	movw	%ax, %fs
 	movw	%ax, %gs
-
-	/* Push GPR. */
-	PUSHA
 
 	/* Prepare argument. */
 #ifdef __amd64__
@@ -81,9 +81,6 @@ idt_stub_common:
 	popl	%eax
 #endif /* __i386__ */
 
-	/* Pop GPR. */
-	POPA
-
 	/* Restore segment registers. */
 	pop		AX
 	movw	%ax, %ds
@@ -93,6 +90,9 @@ idt_stub_common:
 	movw	%ax, %fs
 	pop		AX
 	movw	%ax, %gs
+
+	/* Pop GPR. */
+	POPA
 
 	/* Skip error code on the stack. */
 	lea		2*SIZE(SP), SP

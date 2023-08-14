@@ -211,14 +211,14 @@ static void handle_idt_host(VCPU * vcpu, struct regs *r, iret_info_t * info)
 	}
 }
 
-void handle_idt(struct regs *r)
+void handle_idt(iret_info_t * info)
 {
 	VCPU * vcpu = get_vcpu();
-	iret_info_t *iret_info = (iret_info_t *)r->sp;
+	struct regs *r = &info->r;
 
 	if (cpuid_ecx(1, 0) & (1U << 5)) {
-		handle_idt_host(vcpu, r, iret_info);
+		handle_idt_host(vcpu, r, info);
 	} else {
-		lhv_guest_xcphandler(vcpu, r, iret_info);
+		lhv_guest_xcphandler(vcpu, r, info);
 	}
 }
