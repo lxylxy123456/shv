@@ -29,10 +29,14 @@ vmexit_asm:
 	movq	128(%rsp), %rdi
 	movq	%rsp, %rsi
 
-	/* Optional code to check EFLAGS */
+	/*
+	 * Optional code to check EFLAGS.
+	 *
+	 * Note: PUSHAQ changes EFLAGS, so we do not check status flags.
+	 */
 	pushfq
 	popq	%rax
-9:	cmpq	$2, %rax
+9:	test	$~0x8d7, %rax
 	jne		9b
 #elif defined(__i386__)
 	pushal
@@ -41,7 +45,7 @@ vmexit_asm:
 	pushl	%eax
 	pushl	%esi
 
-	/* Optional code to check EFLAGS */
+	/* Optional code to check EFLAGS. */
 	pushfl
 	popl	%eax
 9:	cmpl	$2, %eax

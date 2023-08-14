@@ -157,6 +157,9 @@
  * Intel hardware supports PUSHAL in 32-bits, but not a similar instruction
  * in 64-bits. Here we define an assembly macro to do this. Both PUSHAL and
  * PUSHAQ follow struct regs.
+ *
+ * Note: this macro uses the ADD instruction, so it changes status flags in
+ * EFLAGS, such as EFLAGS.PF.
  */
 #define PUSHAQ \
         pushq   %rax; \
