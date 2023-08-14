@@ -21,6 +21,9 @@
 
 #define EPT_POOL_SIZE 128
 
+extern u8 _lhv_ept_low[];
+extern u8 _lhv_ept_high[];
+
 /* Whether the EPT is already built. If so, store EPTP */
 static u8 ept_valid[MAX_VCPU_ENTRIES][LHV_EPT_COUNT];
 
@@ -223,20 +226,11 @@ void lhv_ept_init(VCPU *vcpu)
 
 u64 lhv_build_ept(VCPU *vcpu, u8 ept_num)
 {
-#if 0
-	u64 low = rpb->XtVmmRuntimePhysBase;
-#ifdef __SKIP_RUNTIME_BSS__
-	u64 high = rpb->XtVmmRuntimeBssEnd;
-#else /* !__SKIP_RUNTIME_BSS__ */
-	u64 high = low + rpb->XtVmmRuntimeSize;
-#endif /* __SKIP_RUNTIME_BSS__ */
-#else
-	u64 low = 0;
-	u64 high = 0;
-#endif
+	u64 low = (uintptr_t)_lhv_ept_low;
+	u64 high = (uintptr_t)_lhv_ept_high;
 	lhv_ept_ctx_t ept_ctx;
 	hpt_pmeo_t pmeo;
-	HALT_ON_ERRORCOND(0 && "TODO: low and high not defined");
+
 	/* Assuming that ept_pool and ept_alloc are initialized to 0 by bss */
 	ept_ctx.ctx.gzp = lhv_ept_gzp;
 	ept_ctx.ctx.pa2ptr = lhv_ept_pa2ptr;
