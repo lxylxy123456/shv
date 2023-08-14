@@ -129,13 +129,15 @@ lhv_disable_enable_paging:
 	movl	%eax, %cr0
 
 	/* Get printf lock */
-	movl	(emhfc_putchar_linelock_arg), %eax
+	movl	(emhfc_putchar_linelock_arg), %ebx
+	movl	$1, %eax
 1:	pause
-	btl		$0, (%eax)
-	jnc		1b
+	cmpl	$0, (%ebx)
+	jne		1b
 	lock
-	btrl	$0, (%eax)
-	jnc		1b
+	xchg	%eax, (%ebx)
+	test	%eax, %eax
+	jne		1b
 
 	/* Print the string at %ecx */
 2:	cmpb	$0, (%ecx)
@@ -157,8 +159,9 @@ lhv_disable_enable_paging:
 3:
 
 	/* Release printf lock */
-	movl	(emhfc_putchar_linelock_arg), %eax
-	btsl	$0, (%eax)
+	movl	(emhfc_putchar_linelock_arg), %ebx
+	movl	$0, %eax
+	xchg	%eax, (%ebx)
 
 	/* Enable paging */
 	movl	%cr0, %eax

@@ -27,6 +27,7 @@ void spin_lock(spin_lock_t *lock)
 			if (val == 0) {
 				break;
 			}
+			cpu_relax();
 		}
 	}
 }
