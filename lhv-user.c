@@ -37,9 +37,15 @@ static u64 user_pdpt[P4L_NPDPT * 512] ALIGNED_PAGE;
 static u64 user_pdt[P4L_NPDT * 512] ALIGNED_PAGE;
 static u64 user_pt[P4L_NPT * 512] ALIGNED_PAGE;
 #elif defined(__i386__)
+#if 0
+/* Page table for PAE paging, currently not used */
 static u64 user_pdpt[4] __attribute__ ((aligned (32)));
 static u64 user_pd[4][512] ALIGNED_PAGE;
 static u64 user_pt[4][512][512] ALIGNED_PAGE;
+#else
+static u32 user_pd[1024] ALIGNED_PAGE;
+static u32 user_pt[1024][1024] ALIGNED_PAGE;
+#endif
 #else /* !defined(__i386__) && !defined(__amd64__) */
     #error "Unsupported Arch"
 #endif /* !defined(__i386__) && !defined(__amd64__) */
@@ -75,6 +81,8 @@ static void set_user_mode_page_table(void)
 		}
 		initialized = (uintptr_t) user_pml4t;
 #elif defined(__i386__)
+#if 0
+		/* Page table for PAE paging, currently not used */
 		u32 i, j, k;
 		u64 paddr = 0;
 		for (i = 0; i < 4; i++) {
@@ -88,6 +96,17 @@ static void set_user_mode_page_table(void)
 			}
 		}
 		initialized = (uintptr_t) user_pdpt;
+#else
+		u64 paddr = 0;
+		for (u32 i = 0; i < 1024; i++) {
+			user_pd[i] = 7 | (uintptr_t) user_pt[i];
+			for (u32 j = 0; j < 1024; j++) {
+				user_pt[i][j] = 7 | paddr;
+				paddr += PA_PAGE_SIZE_4K;
+			}
+		}
+		initialized = (uintptr_t) user_pd;
+#endif
 #else /* !defined(__i386__) && !defined(__amd64__) */
     #error "Unsupported Arch"
 #endif /* !defined(__i386__) && !defined(__amd64__) */
