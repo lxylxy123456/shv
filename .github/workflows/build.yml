@@ -29,7 +29,8 @@ jobs:
       run: |
         export CFLAGS="-g -${{ matrix.optimize_mode }}"
         autoreconf --install && \
-        ./configure --host=${{ matrix.target_arch }}-linux-gnu && \
+        ./configure --host=${{ matrix.target_arch }}-linux-gnu \
+                    --with-shv-opt=0xdfd && \
         make -j $(nproc)
     - name: Release
       uses: actions/upload-artifact@v3

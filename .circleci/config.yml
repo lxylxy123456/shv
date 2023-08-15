@@ -24,7 +24,8 @@ jobs:
           name: "Build"
           command: |
             autoreconf --install && \
-            ./configure --host=<< parameters.subarch >>-linux-gnu CFLAGS=-g && \
+            ./configure --host=<< parameters.subarch >>-linux-gnu \
+                        --with-shv-opt=0xdfd CFLAGS=-g && \
             make -j $(nproc)
       - run:
           name: "Versions"
@@ -52,16 +53,25 @@ jobs:
       - run:
           name: "Test"
           command: |
-            timeout 15 \
-              qemu-system-x86_64 -kernel shv.bin -smp 4 -enable-kvm \
-                -display none -serial file:qemu-output.txt || true
-            echo Begin qemu-output.txt
-            cat qemu-output.txt
-            echo End qemu-output.txt
-            grep 'Hello, smp World 0!' qemu-output.txt
-            grep 'Hello, smp World 1!' qemu-output.txt
-            grep 'Hello, smp World 2!' qemu-output.txt
-            grep 'Hello, smp World 3!' qemu-output.txt
+            rm -rf tmp
+            mkdir tmp
+            python3 -u ./tools/ci/test5.py \
+                --lhv-img ${PWD}/tmp/grub/c.img \
+                --work-dir ${PWD}/tmp/ \
+                --no-display \
+                --verbose \
+                --watch-serial
+#            timeout 15 \
+#              qemu-system-x86_64 -kernel shv.bin -smp 4 -enable-kvm \
+#                -display none -serial file:qemu-output.txt || true
+#            echo Begin qemu-output.txt
+#            cat qemu-output.txt
+#            echo End qemu-output.txt
+#            grep 'Hello, smp World 0!' qemu-output.txt
+#            grep 'Hello, smp World 1!' qemu-output.txt
+#            grep 'Hello, smp World 2!' qemu-output.txt
+#            grep 'Hello, smp World 3!' qemu-output.txt
+
 #            source ./tools/ci/circleci_env.sh << parameters.subarch >>
 #            rm -rf tmp qemu
 #            mkdir tmp qemu
