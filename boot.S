@@ -55,6 +55,9 @@ doesn't make sense to return from this function as the bootloader is gone.
 .type _start, @function
 _start:
 
+	/* Load GDT. */
+	lgdt	boot_gdt
+
 #ifdef __amd64__
 
 	/* Check support of CPUID.80000001H */
@@ -74,9 +77,6 @@ _start:
 1:	hlt
 	jmp		1b
 2:
-
-	/* Load GDT that contains 64-bit CS */
-	lgdt	boot_gdt
 
 	/* Set up PML4T for 64-bit paging. */
 	movl	$(shv_pdpt), %eax
@@ -118,24 +118,36 @@ _start:
 	btsl	$(EFER_LME), %eax
 	wrmsr
 
-	/* setup jump to 64-bit mode */
-	pushl	$(__CS64)
-	leal	_boot_start_64(%ebp), %eax
+#endif /* __amd64__ */
+
+	/* Setup lret */
+	pushl	$(__CS)
+	leal	_boot_start_lret(%ebp), %eax
 	pushl	%eax
 
-	/* enable paging */
+#ifdef __amd64__
+	/* Enable paging */
 	movl	%cr0, %eax
 	orl		$(CR0_PG), %eax
 	movl	%eax, %cr0
+#endif /* __amd64__ */
 
-	/* jump to 64-bit mode */
+	/* Perform lret to change CS / enter 64-bit mode */
 	lret
 
-_boot_start_64:
+_boot_start_lret:
 
+#ifdef __amd64__
 .code64
-
 #endif /* __amd64__ */
+
+	/* Refresh segment selectors. */
+	movw	$(__DS), %ax
+	movw	%ax, %ds
+	movw	%ax, %es
+	movw	%ax, %fs
+	movw	%ax, %gs
+	movw	%ax, %ss
 
 	/* Set up stack pointer. */
 	movl	$stack_top, %esp
