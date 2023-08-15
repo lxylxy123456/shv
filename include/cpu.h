@@ -130,7 +130,7 @@ static inline void wrmsr64(u32 msr, u64 val)
 		};
 		u64 eaxedx;
 	} ans = { .eaxedx=val };
-	asm volatile("rdmsr" : : "a"(ans.eax), "d"(ans.edx), "c"(msr));
+	asm volatile("wrmsr" : : "a"(ans.eax), "d"(ans.edx), "c"(msr));
 }
 
 static inline void cpuid(u32 func, u32 *eax, u32 *ebx, u32 *ecx, u32 *edx)
