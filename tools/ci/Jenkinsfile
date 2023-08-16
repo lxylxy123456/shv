@@ -17,13 +17,13 @@
  */
 
 /*
- * CI for testing LHV
+ * CI for testing SHV
  */
 
 properties([
     parameters([
-        string(name: 'XMHF_BRANCH', defaultValue: 'lhv'),
-        string(name: 'BUILD_OPTS', defaultValue: '--lhv-opt 0xdfd')
+        string(name: 'XMHF_BRANCH', defaultValue: 'shv'),
+        string(name: 'BUILD_OPTS', defaultValue: '--shv-opt 0xdfd')
     ])
 ])
 
@@ -33,7 +33,7 @@ void qemu_test(String subarch, String qemu_image, String qemu_image_back) {
     sh "mkdir tmp"
     sh """
         python3 -u ./tools/ci/test5.py \
-            --lhv-img ${PWD}/tmp/lhv.img \
+            --shv-img ${PWD}/tmp/shv.img \
             --work-dir ${PWD}/tmp/ \
             --no-display \
             --verbose \
@@ -62,26 +62,26 @@ pipeline {
                 }
             }
         }
-        stage('Build i386 LHV') {
+        stage('Build i386 SHV') {
             steps {
                 script {
                     helper.build_shv("i686", "${params.BUILD_OPTS}")
                 }
             }
         }
-        stage('Test i386 LHV') {
+        stage('Test i386 SHV') {
             steps {
                 qemu_test "i386", "debian11x86-j.qcow2", "debian11x86.qcow2"
             }
         }
-        stage('Build amd64 LHV') {
+        stage('Build amd64 SHV') {
             steps {
                 script {
                     helper.build_shv("x86_64", "${params.BUILD_OPTS}")
                 }
             }
         }
-        stage('Test amd64 LHV') {
+        stage('Test amd64 SHV') {
             steps {
                 qemu_test "amd64", "debian11x86-j.qcow2", "debian11x86.qcow2"
             }
