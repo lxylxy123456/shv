@@ -56,7 +56,7 @@ jobs:
             rm -rf tmp
             mkdir tmp
             python3 -u ./tools/ci/test5.py \
-                --lhv-img ${PWD}/shv.bin \
+                --shv-img ${PWD}/shv.bin \
                 --work-dir ${PWD}/tmp/ \
                 --no-display \
                 --verbose \
@@ -86,12 +86,6 @@ jobs:
 #                --work-dir ${PWD}/tmp/ \
 #                --verbose \
 #                --boot-dir ${PWD}/tools/ci/boot
-#            python3 -u ./tools/ci/test5.py \
-#                --lhv-img ${PWD}/tmp/grub/c.img \
-#                --work-dir ${PWD}/tmp/ \
-#                --no-display \
-#                --verbose \
-#                --watch-serial
 
 
 workflows:

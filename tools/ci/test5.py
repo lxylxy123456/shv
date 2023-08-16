@@ -1,5 +1,5 @@
 '''
-	Test running LHV in XMHF in QEMU
+	Test running LHV in QEMU
 '''
 
 from subprocess import Popen, check_call
@@ -14,8 +14,7 @@ SERIAL_FAIL = 2
 
 def parse_args():
 	parser = argparse.ArgumentParser()
-	# parser.add_argument('--xmhf-img', required=True)
-	parser.add_argument('--lhv-img', required=True)
+	parser.add_argument('--shv-img', required=True)
 	parser.add_argument('--smp', type=int, default=4)
 	parser.add_argument('--work-dir', required=True)
 	parser.add_argument('--no-display', action='store_true')
