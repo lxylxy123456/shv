@@ -1,5 +1,5 @@
 '''
-	Test running LHV in QEMU
+	Test running SHV in QEMU
 '''
 
 from subprocess import Popen, check_call
@@ -35,7 +35,7 @@ def println(*args):
 
 def spawn_qemu(args, serial_file):
 	qemu_args = [
-		'qemu-system-x86_64', '-m', args.memory, '-kernel', args.lhv_img,
+		'qemu-system-x86_64', '-m', args.memory, '-kernel', args.shv_img,
 		'-smp', str(args.smp), '-cpu', 'Haswell,vmx=yes', '--enable-kvm',
 		'-serial', 'file:%s' % serial_file,
 	]
@@ -80,8 +80,8 @@ def serial_thread(args, serial_file, serial_result):
 			with serial_result[0]:
 				serial_result[1] = SERIAL_PASS
 				break
-		# fmt = 'CPU\((0x[0-9a-f]+)\): LHV in XMHF test iter \d+'
-		fmt = 'CPU\((0x[0-9a-f]+)\): LHV test iter \d+'
+		# fmt = 'CPU\((0x[0-9a-f]+)\): SHV in XMHF test iter \d+'
+		fmt = 'CPU\((0x[0-9a-f]+)\): SHV test iter \d+'
 		matched = re.fullmatch(fmt, i)
 		if matched:
 			test_count[matched.groups()[0]] += 1

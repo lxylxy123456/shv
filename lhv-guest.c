@@ -900,9 +900,9 @@ void lhv_guest_main(ulong_t cpu_id)
 		/* Assume that iter never wraps around */
 		HALT_ON_ERRORCOND(++iter > 0);
 		if (in_xmhf) {
-			printf("CPU(0x%02x): LHV in XMHF test iter %lld\n", vcpu->id, iter);
+			printf("CPU(0x%02x): SHV in XMHF test iter %lld\n", vcpu->id, iter);
 		} else {
-			printf("CPU(0x%02x): LHV test iter %lld\n", vcpu->id, iter);
+			printf("CPU(0x%02x): SHV test iter %lld\n", vcpu->id, iter);
 		}
 		if (!(SHV_OPT & (LHV_NO_EFLAGS_IF | LHV_NO_INTERRUPT))) {
 			asm volatile ("hlt");
