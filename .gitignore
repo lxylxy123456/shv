@@ -19,3 +19,4 @@ include/config.h
 include/config.h.in
 
 build/
+tmp/
