@@ -22,7 +22,7 @@
 
 properties([
     parameters([
-        string(name: 'XMHF_BRANCH', defaultValue: 'shv'),
+        string(name: 'XMHF_BRANCH', defaultValue: 'master'),
         string(name: 'BUILD_OPTS', defaultValue: '--shv-opt 0xdfd')
     ])
 ])
