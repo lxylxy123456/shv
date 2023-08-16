@@ -17,7 +17,6 @@
  */
 
 void build_shv(String subarch, String build_opts) {
-    // PWD = sh(returnStdout: true, script: 'pwd').trim()
     sh "git clean -Xdf"
     // TODO: sh "./tools/ci/build.sh ${subarch} ${build_opts}"
     sh "autoreconf --install && \

@@ -33,7 +33,7 @@ void qemu_test(String subarch, String qemu_image, String qemu_image_back) {
     sh "mkdir tmp"
     sh """
         python3 -u ./tools/ci/test5.py \
-            --shv-img ${PWD}/tmp/shv.img \
+            --shv-img ${PWD}/shv.img \
             --work-dir ${PWD}/tmp/ \
             --no-display \
             --verbose \
