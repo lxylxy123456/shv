@@ -176,7 +176,8 @@ extern volatile u64 shv_pdpt[P4L_NPDPT * 512] ALIGNED_PAGE;
 extern volatile u64 shv_pdt[P4L_NPDT * 512] ALIGNED_PAGE;
 #elif defined(__i386__)
 #if I386_PAE
-TODO
+extern volatile u64 shv_pdpt[4] __attribute__ ((aligned (32)));
+extern volatile u64 shv_pdt[2048] ALIGNED_PAGE;
 #else /* !I386_PAE */
 extern volatile u32 shv_pdt[1024] ALIGNED_PAGE;
 #endif /* I386_PAE */

@@ -24,7 +24,8 @@ volatile u64 shv_pdpt[P4L_NPDPT * 512] ALIGNED_PAGE;
 volatile u64 shv_pdt[P4L_NPDT * 512] ALIGNED_PAGE;
 #elif defined(__i386__)
 #if I386_PAE
-TODO
+volatile u64 shv_pdpt[4] __attribute__ ((aligned (32)));
+volatile u64 shv_pdt[2048] ALIGNED_PAGE;
 #else /* !I386_PAE */
 volatile u32 shv_pdt[1024] ALIGNED_PAGE;
 #endif /* I386_PAE */
@@ -61,7 +62,14 @@ uintptr_t shv_page_table_init(void)
 	return (uintptr_t)shv_pml4t;
 #elif defined(__i386__)
 #if I386_PAE
-	TODO
+	for (u64 i = 0, paddr = (uintptr_t)shv_pdt; i < 4; i++) {
+		shv_pdpt[i] = 0x1U | paddr;
+		paddr += PAGE_SIZE_4K;
+	}
+	for (u64 i = 0, paddr = 0; i < 2048; i++, paddr += PA_PAGE_SIZE_2M) {
+		shv_pdt[i] = 0x83U | paddr;
+	}
+	return (uintptr_t)shv_pdpt;
 #else /* !I386_PAE */
 	for (u32 i = 0, paddr = 0; i < 1024; i++, paddr += PA_PAGE_SIZE_4M) {
 		shv_pdt[i] = 0x83U | paddr;
