@@ -23,7 +23,11 @@ volatile u64 shv_pml4t[P4L_NPLM4T * 512] ALIGNED_PAGE;
 volatile u64 shv_pdpt[P4L_NPDPT * 512] ALIGNED_PAGE;
 volatile u64 shv_pdt[P4L_NPDT * 512] ALIGNED_PAGE;
 #elif defined(__i386__)
-volatile u32 shv_pd[1024] ALIGNED_PAGE;
+#if I386_PAE
+TODO
+#else /* !I386_PAE */
+volatile u32 shv_pdt[1024] ALIGNED_PAGE;
+#endif /* I386_PAE */
 #else /* !defined(__i386__) && !defined(__amd64__) */
     #error "Unsupported Arch"
 #endif /* !defined(__i386__) && !defined(__amd64__) */
@@ -56,10 +60,14 @@ uintptr_t shv_page_table_init(void)
 	}
 	return (uintptr_t)shv_pml4t;
 #elif defined(__i386__)
+#if I386_PAE
+	TODO
+#else /* !I386_PAE */
 	for (u32 i = 0, paddr = 0; i < 1024; i++, paddr += PA_PAGE_SIZE_4M) {
-		shv_pd[i] = 0x83U | paddr;
+		shv_pdt[i] = 0x83U | paddr;
 	}
-	return (uintptr_t)shv_pd;
+	return (uintptr_t)shv_pdt;
+#endif /* I386_PAE */
 #else /* !defined(__i386__) && !defined(__amd64__) */
 	#error "Unsupported Arch"
 #endif /* !defined(__i386__) && !defined(__amd64__) */

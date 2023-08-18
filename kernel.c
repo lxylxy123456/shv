@@ -28,9 +28,15 @@ void kernel_main(void)
 		g_cr4 = read_cr4();
 
 #ifdef __i386__
+#if I386_PAE
+		/* Enable CR4.PAE. */
+		HALT_ON_ERRORCOND((cpuid_edx(1U, 0U) & (1U << 6)));
+		g_cr4 |= CR4_PAE;
+#else /* !I386_PAE */
 		/* Enable CR4.PSE, so we can use 4MB pages. */
 		HALT_ON_ERRORCOND((cpuid_edx(1U, 0U) & (1U << 3)));
 		g_cr4 |= CR4_PSE;
+#endif /* I386_PAE */
 #endif /* !__i386__ */
 	}
 

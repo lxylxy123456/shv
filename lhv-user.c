@@ -40,10 +40,10 @@ static u64 user_pt[P4L_NPT * 512] ALIGNED_PAGE;
 #if I386_PAE
 /* Page table for PAE paging, currently not used */
 static u64 user_pdpt[4] __attribute__ ((aligned (32)));
-static u64 user_pd[4][512] ALIGNED_PAGE;
+static u64 user_pdt[4][512] ALIGNED_PAGE;
 static u64 user_pt[4][512][512] ALIGNED_PAGE;
 #else /* !I386_PAE */
-static u32 user_pd[1024] ALIGNED_PAGE;
+static u32 user_pdt[1024] ALIGNED_PAGE;
 static u32 user_pt[1024][1024] ALIGNED_PAGE;
 #endif /* I386_PAE */
 #else /* !defined(__i386__) && !defined(__amd64__) */
@@ -86,9 +86,9 @@ static void set_user_mode_page_table(void)
 		u32 i, j, k;
 		u64 paddr = 0;
 		for (i = 0; i < 4; i++) {
-			user_pdpt[i] = 1 | (uintptr_t) user_pd[i];
+			user_pdpt[i] = 1 | (uintptr_t) user_pdt[i];
 			for (j = 0; j < 512; j++) {
-				user_pd[i][j] = 7 | (uintptr_t) user_pt[i][j];
+				user_pdt[i][j] = 7 | (uintptr_t) user_pt[i][j];
 				for (k = 0; k < 512; k++) {
 					user_pt[i][j][k] = 7 | paddr;
 					paddr += PA_PAGE_SIZE_4K;
@@ -100,13 +100,13 @@ static void set_user_mode_page_table(void)
 		/* Page table for 32-bit paging. */
 		u64 paddr = 0;
 		for (u32 i = 0; i < 1024; i++) {
-			user_pd[i] = 7 | (uintptr_t) user_pt[i];
+			user_pdt[i] = 7 | (uintptr_t) user_pt[i];
 			for (u32 j = 0; j < 1024; j++) {
 				user_pt[i][j] = 7 | paddr;
 				paddr += PA_PAGE_SIZE_4K;
 			}
 		}
-		initialized = (uintptr_t) user_pd;
+		initialized = (uintptr_t) user_pdt;
 #endif /* I386_PAE */
 #else /* !defined(__i386__) && !defined(__amd64__) */
     #error "Unsupported Arch"
