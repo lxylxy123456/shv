@@ -128,9 +128,9 @@ static void lhv_vmx_vmcs_init(VCPU *vcpu)
 		seccpu |= (1U << VMX_SECPROCBASED_ENABLE_EPT);
 		vmcs_vmwrite(vcpu, VMCS_control_VMX_seccpu_based, seccpu);
 		vmcs_vmwrite64(vcpu, VMCS_control_EPT_pointer, eptp | 0x1eULL);
-#if 0
-		/* For old LHV code, which uses PAE paging. SHV uses 32-bit paging. */
 #ifdef __i386__
+#if I386_PAE
+		/* For old LHV code, which uses PAE paging. SHV uses 32-bit paging. */
 		{
 			u64 *cr3 = (u64 *)read_cr3();
 			vmcs_vmwrite64(vcpu, VMCS_guest_PDPTE0, cr3[0]);
@@ -138,8 +138,8 @@ static void lhv_vmx_vmcs_init(VCPU *vcpu)
 			vmcs_vmwrite64(vcpu, VMCS_guest_PDPTE2, cr3[2]);
 			vmcs_vmwrite64(vcpu, VMCS_guest_PDPTE3, cr3[3]);
 		}
+#endif /* I386_PAE */
 #endif /* __i386__ */
-#endif
 	}
 
 	if (SHV_OPT & LHV_USE_VPID) {

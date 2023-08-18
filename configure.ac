@@ -40,6 +40,15 @@ AC_ARG_WITH([shv_opt],
             [shv_opt="$withval"], [shv_opt=0])
 AC_DEFINE_UNQUOTED([SHV_OPT],[${shv_opt}],[SHV options])
 
+# I386_PAE
+AC_ARG_ENABLE([i386_pae],
+              [AS_HELP_STRING([--enable-i386-pae@<:@=yes|no@:>@],
+                              [use PAE paging, ignored if not in 32-bit mode])],
+              [AS_CASE(${enableval}, [yes], [i386_pae=1], [no], [i386_pae=0],
+                       [AC_MSG_ERROR([bad value ${enableval}])])],
+              [i386_pae=0])
+AC_DEFINE_UNQUOTED([I386_PAE],[${i386_pae}],[Whether use PAE paging in 32-bit])
+
 # DEBUG_VGA
 AC_ARG_ENABLE([debug_vga],
               [AS_HELP_STRING([--enable-debug-vga@<:@=yes|no@:>@],
