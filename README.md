@@ -3,6 +3,7 @@
 TODO: write README.md
 TODO: rename all "LHV" and "XMHF"
 TODO: indent
+TODO: add copyright to every file
 
 ```sh
 sudo apt-get install -y xorriso mtools grub-pc-bin build-essential crossbuild-essential-i386
