@@ -175,7 +175,11 @@ static void lhv_vmx_vmcs_init(VCPU *vcpu)
 #ifdef __amd64__
 		cr4 |= CR4_PAE;
 #else /* __i386__ */
+#if I386_PAE
+		cr4 |= CR4_PAE;
+#else /* !I386_PAE */
 		cr4 |= CR4_PSE;
+#endif /* I386_PAE */
 #endif /* __amd64__ */
 		vmcs_vmwrite(vcpu, VMCS_guest_CR4, cr4);
 	}
