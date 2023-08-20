@@ -43,7 +43,8 @@ void qemu_test(String subarch, String shv_subarch) {
             --work-dir ${PWD}/tmp/ \
             --no-display \
             --verbose \
-            --watch-serial
+            --watch-serial \
+            --qemu-timeout 60
     """
 }
 
@@ -72,7 +73,7 @@ pipeline {
                 }
             }
         }
-        stage('Build i386 xmhf') {
+        stage('Build pae xmhf') {
             steps {
                 dir ("xmhf") {
                     script {
@@ -89,9 +90,21 @@ pipeline {
                 }
             }
         }
-        stage('Test i386 shv on i386 xmhf') {
+        stage('Test i386 shv on pae xmhf') {
             steps {
-                qemu_test "i386", "i386"
+                qemu_test "pae", "i386"
+            }
+        }
+        stage('Build pae shv') {
+            steps {
+                script {
+                    helper.build_shv("pae", "${params.BUILD_OPTS}")
+                }
+            }
+        }
+        stage('Test i386 shv on pae xmhf') {
+            steps {
+                qemu_test "pae", "pae"
             }
         }
         stage('Build amd64 xmhf') {
@@ -101,6 +114,18 @@ pipeline {
                         helper.build_xmhf("amd64", "tmp",
                                           "${params.XMHF_BUILD_OPTS}")
                     }
+                }
+            }
+        }
+        stage('Test pae shv on amd64 xmhf') {
+            steps {
+                qemu_test "amd64", "pae"
+            }
+        }
+        stage('Build i386 shv') {
+            steps {
+                script {
+                    helper.build_shv("i386", "${params.BUILD_OPTS}")
                 }
             }
         }
