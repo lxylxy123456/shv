@@ -37,8 +37,8 @@ void qemu_test(String subarch, String shv_subarch) {
     sh "cp ${PWD}/grub.iso ${PWD}/tmp/shv.img"
     sh """
         python3 -u ./tools/ci/test5.py \
-            --xmhf-img ${PWD}/xmhf/tmp/grub/c.img \
-            --shv-img ${PWD}/tmp/grub/c.img \
+            --xmhf-img ${PWD}/xmhf/tmp/xmhf.img \
+            --shv-img ${PWD}/tmp/shv.img \
             --work-dir ${PWD}/tmp/ \
             --no-display \
             --verbose \
