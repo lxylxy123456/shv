@@ -27,7 +27,7 @@ properties([
     ])
 ])
 
-void qemu_test(String subarch, String qemu_image, String qemu_image_back) {
+void qemu_test(String subarch) {
     PWD = sh(returnStdout: true, script: 'pwd').trim()
     sh "rm -rf tmp"
     sh "mkdir tmp"
@@ -62,28 +62,40 @@ pipeline {
                 }
             }
         }
-        stage('Build i386 SHV') {
+        stage('Build i386') {
             steps {
                 script {
                     helper.build_shv("i386", "${params.BUILD_OPTS}")
                 }
             }
         }
-        stage('Test i386 SHV') {
+        stage('Test i386') {
             steps {
-                qemu_test "i386", "debian11x86-j.qcow2", "debian11x86.qcow2"
+                qemu_test "i386"
             }
         }
-        stage('Build amd64 SHV') {
+        stage('Build pae') {
+            steps {
+                script {
+                    helper.build_shv("pae", "${params.BUILD_OPTS}")
+                }
+            }
+        }
+        stage('Test pae') {
+            steps {
+                qemu_test "pae"
+            }
+        }
+        stage('Build amd64') {
             steps {
                 script {
                     helper.build_shv("amd64", "${params.BUILD_OPTS}")
                 }
             }
         }
-        stage('Test amd64 SHV') {
+        stage('Test amd64') {
             steps {
-                qemu_test "amd64", "debian11x86-j.qcow2", "debian11x86.qcow2"
+                qemu_test "amd64"
             }
         }
     }

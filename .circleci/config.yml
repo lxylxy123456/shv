@@ -23,7 +23,7 @@ jobs:
       - run:
           name: "Build"
           command: |
-            tools/ci/build.sh --${{ matrix.target_arch }} -O0 --shv-opt 0xdfd
+            tools/ci/build.sh --<< parameters.subarch >> -O0 --shv-opt 0xdfd
       - run:
           name: "Versions"
           command: |
