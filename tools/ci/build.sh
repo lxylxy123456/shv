@@ -18,27 +18,35 @@
 #
 
 usage () {
+	if [ "$#" != "0" ]; then
+		echo "Error: $@"
+	fi
 	echo "$0: automatically configure and build SHV"
 	echo '	-h              Print this help message.'
+	echo '	-n              Only print configuration command, do not execute.'
 	echo '	-i, --i386      Use 32-bit paging.'
 	echo '	-p, --pae       Use 32-bit PAE paging.'
 	echo '	-a, --amd64     Use 64-bit 4-level paging.'
 	echo '	-O <level>      Set GCC optimization level.'
-	echo '	-n              Only print configuration command, do not execute.'
 	exit 1
 }
 
+# Initialize variables.
 conf=()
-
 DRY_RUN='n'
 
-opt=$(getopt -o 'hipaO:n' --long 'i386,pae,amd64' -- "$@")
-[ "$?" == "0" ] || usage
+# Parse arguments.
+opt=$(getopt -o 'hnipaO:s:' --long 'i386,pae,amd64,shv-opt:' -- "$@")
+[ "$?" == "0" ] || usage 'getopt failed'
 eval set -- "$opt"
 while true; do
+	#echo "$@"
 	case "$1" in
 	-h)
 		usage
+		;;
+	-n)
+		DRY_RUN='y'
 		;;
 	-i|--i386)
 		conf+=("--host=i686-linux-gnu" "--disable-i386-pae")
@@ -51,23 +59,31 @@ while true; do
 		;;
 	-O)
 		[ "$2" = "0" -o "$2" = "1" -o "$2" = "2" -o "$2" = "3" -o \
-		  "$2" = "s" -o "$2" = "fast" -o "$2" = "g" -o "$2" = "z" ] || usage
+		  "$2" = "s" -o "$2" = "fast" -o "$2" = "g" -o "$2" = "z" ] || \
+			usage "unknown argument to -O: $2"
 		conf+=("CFLAGS=-g -O$2")
 		shift
 		;;
-	-n)
-		DRY_RUN='y'
+	-s|--shv-opt)
+		conf+=("--with-shv-opt=$2")
+		shift
 		;;
 	--)
 		break
 		;;
 	*)
-		false
+		usage "unknown argument to case: $1"
 		;;
 	esac
 	shift
 done
 
+# Make sure there are no unparsed arguments.
+if [ "$#" != "1" ]; then
+	usage "unknown remaining arguments: $@"
+fi
+
+# Run configure / print the command.
 if [ "$DRY_RUN" = 'y' ]; then
 	echo $'\n'"./autogen.sh; ./configure ${conf[@]@Q}"$'\n'
 else

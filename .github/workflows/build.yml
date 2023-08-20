@@ -11,6 +11,7 @@ jobs:
       matrix:
         target_arch:
           - 'i686'
+          - 'pae'
           - 'x86_64'
         optimize_mode:
           - 'O0'
@@ -27,10 +28,9 @@ jobs:
                      autoconf libtool xorriso mtools grub-pc
     - name: Build
       run: |
-        export CFLAGS="-g -${{ matrix.optimize_mode }}"
-        autoreconf --install && \
-        ./configure --host=${{ matrix.target_arch }}-linux-gnu \
-                    --with-shv-opt=0xdfd && \
+        tools/ci/build.sh --${{ matrix.target_arch }} \
+                          -${{ matrix.optimize_mode }} \
+                          --shv-opt 0xdfd
         make -j $(nproc)
     - name: Release
       uses: actions/upload-artifact@v3
