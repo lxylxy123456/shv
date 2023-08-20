@@ -57,7 +57,6 @@
 #include <_vmx.h>
 #include <_vmx_ctls.h>
 #include <_acpi.h>
-// TODO: consider revert 53b0c1db07f68e30e1a01affef8a0169e7fff178
 #include <hptw.h>
 
 #include <smp.h>
