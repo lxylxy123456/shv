@@ -71,9 +71,6 @@ pipeline {
         }
         stage('Build i386 xmhf') {
             steps {
-                script {
-                    helper.build_shv("i386", "${params.BUILD_OPTS}")
-                }
                 dir ("xmhf") {
 		            script {
 		                helper.build_xmhf("i386", "tmp",
