@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         target_arch:
-          - 'i686'
+          - 'i386'
           - 'pae'
           - 'x86_64'
         optimize_mode:
