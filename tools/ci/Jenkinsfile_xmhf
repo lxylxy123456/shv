@@ -67,12 +67,13 @@ pipeline {
                     currentBuild.displayName += " ${cmt}"
                     helper = load "tools/ci/jenkins.groovy"
                 }
-                sh "echo hello 1"
             }
         }
         stage('Build i386 xmhf') {
             steps {
-                sh "echo hello 2"
+                script {
+                    helper.build_shv("i386", "${params.BUILD_OPTS}")
+                }
                 dir ("xmhf") {
 		            script {
 		                helper.build_xmhf("i386", "tmp",
