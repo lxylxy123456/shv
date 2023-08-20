@@ -102,7 +102,7 @@ pipeline {
                 }
             }
         }
-        stage('Test i386 shv on pae xmhf') {
+        stage('Test pae shv on pae xmhf') {
             steps {
                 qemu_test "pae", "pae"
             }
