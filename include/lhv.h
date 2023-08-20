@@ -21,8 +21,6 @@
 #ifndef _LHV_H_
 #define _LHV_H_
 
-#include <lhv-vmcs.h>
-
 #ifndef __ASSEMBLY__
 
 typedef struct {
