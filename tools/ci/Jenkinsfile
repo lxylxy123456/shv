@@ -22,7 +22,7 @@
 
 properties([
     parameters([
-        string(name: 'XMHF_BRANCH', defaultValue: 'master'),
+        string(name: 'SHV_BRANCH', defaultValue: 'master'),
         string(name: 'BUILD_OPTS', defaultValue: '--shv-opt=0xdfd')
     ])
 ])
@@ -49,14 +49,14 @@ pipeline {
     stages {
         stage('Logistics') {
             steps {
-                sh "git fetch origin ${params.XMHF_BRANCH}"
-                sh "git checkout ${params.XMHF_BRANCH}"
-                sh "git pull origin ${params.XMHF_BRANCH}"
+                sh "git fetch origin ${params.SHV_BRANCH}"
+                sh "git checkout ${params.SHV_BRANCH}"
+                sh "git pull origin ${params.SHV_BRANCH}"
                 script {
                     cmt = sh(
                         returnStdout: true,
                         script: 'git rev-parse HEAD | head -c 9').trim()
-                    currentBuild.displayName += " ${params.XMHF_BRANCH}"
+                    currentBuild.displayName += " ${params.SHV_BRANCH}"
                     currentBuild.displayName += " ${cmt}"
                     helper = load "tools/ci/jenkins.groovy"
                 }
