@@ -21,7 +21,7 @@ usage () {
 	if [ "$#" != "0" ]; then
 		echo "Error: $@"
 	fi
-	echo "$0: automatically configure and build SHV"
+	echo "$0: automatically configure and build SHV."
 	echo '	-h                  Print this help message.'
 	echo '	-n                  Dry run, only print configuration command.'
 	echo '	-s, --srcdir <DIR>  Configure source directory, instead of ".".'
