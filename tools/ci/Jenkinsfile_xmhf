@@ -25,7 +25,8 @@ properties([
         string(name: 'SHV_BRANCH', defaultValue: 'ci-xmhf'),
         string(name: 'XMHF_BRANCH', defaultValue: 'xmhf64'),
         string(name: 'BUILD_OPTS', defaultValue: '--shv-opt 0xdfd'),
-        string(name: 'XMHF_BUILD_OPTS', defaultValue: '--no-x2apic fast')
+        string(name: 'XMHF_BUILD_OPTS',
+               defaultValue: '--no-x2apic fast circleci O3')
     ])
 ])
 
@@ -74,10 +75,10 @@ pipeline {
         stage('Build i386 xmhf') {
             steps {
                 dir ("xmhf") {
-		            script {
-		                helper.build_xmhf("i386", "tmp",
-		                                  "${params.XMHF_BUILD_OPTS}")
-		            }
+                    script {
+                        helper.build_xmhf("i386", "tmp",
+                                          "${params.XMHF_BUILD_OPTS}")
+                    }
                 }
             }
         }
@@ -96,10 +97,10 @@ pipeline {
         stage('Build amd64 xmhf') {
             steps {
                 dir ("xmhf") {
-		            script {
-		                helper.build_xmhf("amd64", "tmp",
-		                                  "${params.XMHF_BUILD_OPTS}")
-		            }
+                    script {
+                        helper.build_xmhf("amd64", "tmp",
+                                          "${params.XMHF_BUILD_OPTS}")
+                    }
                 }
             }
         }
