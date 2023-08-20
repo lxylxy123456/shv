@@ -20,9 +20,12 @@
 	Test running SHV in QEMU
 '''
 
+import os
 from subprocess import Popen, check_call
 from collections import defaultdict
 import argparse, subprocess, time, os, re, random, socket, threading
+
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 println_lock = threading.Lock()
 
@@ -56,14 +59,10 @@ def spawn_qemu(args, serial_file):
 	if args.xmhf_img is None:
 		img = ['-kernel', args.shv_img]
 	else:
-		img = [
-			'--drive', 'media=disk,file=%s,format=raw,index=0' % args.xmhf_img,
-			'--drive', 'media=disk,file=%s,format=raw,index=1' % args.shv_img,
-		]
+		img = ['-d', args.xmhf_img, '+1', '-d', args.shv_img, '+2']
 	qemu_args = [
-		'qemu-system-x86_64', '-m', args.memory, *img,
-		'-smp', str(args.smp), '-cpu', 'Haswell,vmx=yes', '--enable-kvm',
-		'-serial', 'file:%s' % serial_file,
+		os.path.join(SCRIPT_DIR, 'qemu.sh'), '-m', args.memory, *img,
+		'-smp', str(args.smp), '-serial', 'file:%s' % serial_file,
 	]
 	if args.no_display:
 		qemu_args.append('-display')

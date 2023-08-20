@@ -32,6 +32,7 @@ usage () {
 	-smp 4: use 4 CPUs
 	-smp cpus=4,sockets=2: use 4 CPUs for Windows
 	-cpu Haswell,vmx=yes: set guest CPU model
+	-serial stdio: set serial port, can pass multiple times
 	--no-kvm: disable KVM
 	--win-bios: use bug_031/bios.bin for BIOS
 	--uefi: use /usr/share/OVMF/OVMF_CODE.fd for BIOS
@@ -79,6 +80,7 @@ HOSTFWD=""
 GDB_PORT=""
 SMP="4"
 CPU="Haswell,vmx=yes"
+SERIAL_FILES=()
 KVM="y"
 WIN_BIOS="n"
 UEFI="n"
@@ -103,6 +105,7 @@ while [ "$#" -gt 0 ]; do
 		--gdb) GDB_PORT="$2"; shift; ;;
 		-smp) SMP="$2"; shift; ;;
 		-cpu) CPU="$2"; shift; ;;
+		-serial) SERIAL_ARGS+=("-serial" "$2"); shift; ;;
 		--no-kvm) KVM="n"; ;;
 		--win-bios) WIN_BIOS="y"; ;;
 		--uefi) UEFI="y"; ;;
@@ -159,7 +162,11 @@ if [ "$UEFI" == "y" ]; then
 fi
 if [ "$Q35" == "y" ]; then ARGS+=("-machine" "q35"); fi
 if [ "$IOMMU" == "y" ]; then ARGS+=("-device" "intel-iommu"); fi
-ARGS+=("-serial" "stdio")
+if [ "${#SERIAL_ARGS[@]}" = "0" ]; then
+	ARGS+=("-serial" "stdio")
+else
+	ARGS+=("${SERIAL_ARGS[@]}")
+fi
 ARGS+=("${DRIVE_ARGS[@]}")
 ARGS+=("${EXTRA_ARGS[@]}")
 
