@@ -1,0 +1,151 @@
+/*
+ * SHV - Small HyperVisor for testing nested virtualization in hypervisors
+ * Copyright (C) 2023  Eric Li
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+/*
+ * CI for SHV running in XMHF.
+ */
+
+properties([
+    parameters([
+        string(name: 'SHV_BRANCH', defaultValue: 'master'),
+        string(name: 'XMHF_BRANCH', defaultValue: 'xmhf64'),
+        string(name: 'BUILD_OPTS', defaultValue: '--shv-opt 0xdfd'),
+        string(name: 'XMHF_BUILD_OPTS',
+               defaultValue: '--no-x2apic fast circleci O3')
+    ])
+])
+
+void qemu_test(String subarch, String shv_subarch) {
+    PWD = sh(returnStdout: true, script: 'pwd').trim()
+    sh "cp ${PWD}/xmhf/tmp/grub/c.img ${PWD}/xmhf/tmp/xmhf.img"
+    sh "rm -rf ${PWD}/tmp/"
+    sh "mkdir ${PWD}/tmp/"
+    sh "cp ${PWD}/grub.iso ${PWD}/tmp/shv.img"
+    sh """
+        python3 -u ./tools/ci/test5.py \
+            --xmhf-img ${PWD}/xmhf/tmp/xmhf.img \
+            --shv-img ${PWD}/tmp/shv.img \
+            --work-dir ${PWD}/tmp/ \
+            --no-display \
+            --verbose \
+            --watch-serial \
+            --qemu-timeout 60
+    """
+}
+
+def helper
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Logistics') {
+            steps {
+                sh "git fetch origin ${params.SHV_BRANCH}"
+                sh "git checkout ${params.SHV_BRANCH}"
+                sh "git pull origin ${params.SHV_BRANCH}"
+                dir ("xmhf") {
+                    git url: "https://github.com/lxylxy123456/uberxmhf.git",
+                        branch: "${params.XMHF_BRANCH}"
+                }
+                script {
+                    cmt = sh(
+                        returnStdout: true,
+                        script: 'git rev-parse HEAD | head -c 9').trim()
+                    currentBuild.displayName += " ${params.SHV_BRANCH}"
+                    currentBuild.displayName += " ${cmt}"
+                    helper = load "tools/ci/jenkins.groovy"
+                }
+            }
+        }
+        stage('Build pae xmhf') {
+            steps {
+                dir ("xmhf") {
+                    script {
+                        helper.build_xmhf("i386", "tmp",
+                                          "${params.XMHF_BUILD_OPTS}")
+                    }
+                }
+            }
+        }
+        stage('Build i386 shv') {
+            steps {
+                script {
+                    helper.build_shv("i386", "${params.BUILD_OPTS}")
+                }
+            }
+        }
+        stage('Test i386 shv on pae xmhf') {
+            steps {
+                qemu_test "pae", "i386"
+            }
+        }
+        stage('Build pae shv') {
+            steps {
+                script {
+                    helper.build_shv("pae", "${params.BUILD_OPTS}")
+                }
+            }
+        }
+        stage('Test pae shv on pae xmhf') {
+            steps {
+                qemu_test "pae", "pae"
+            }
+        }
+        stage('Build amd64 xmhf') {
+            steps {
+                dir ("xmhf") {
+                    script {
+                        helper.build_xmhf("amd64", "tmp",
+                                          "${params.XMHF_BUILD_OPTS}")
+                    }
+                }
+            }
+        }
+        stage('Test pae shv on amd64 xmhf') {
+            steps {
+                qemu_test "amd64", "pae"
+            }
+        }
+        stage('Build i386 shv again') {
+            steps {
+                script {
+                    helper.build_shv("i386", "${params.BUILD_OPTS}")
+                }
+            }
+        }
+        stage('Test i386 shv on amd64 xmhf') {
+            steps {
+                qemu_test "amd64", "i386"
+            }
+        }
+        stage('Build amd64 shv') {
+            steps {
+                script {
+                    helper.build_shv("amd64", "${params.BUILD_OPTS}")
+                }
+            }
+        }
+        stage('Test amd64 shv on amd64 xmhf') {
+            steps {
+                qemu_test "amd64", "amd64"
+            }
+        }
+    }
+}
+

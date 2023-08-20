@@ -32,6 +32,7 @@ SERIAL_FAIL = 2
 
 def parse_args():
 	parser = argparse.ArgumentParser()
+	parser.add_argument('--xmhf-img')
 	parser.add_argument('--shv-img', required=True)
 	parser.add_argument('--smp', type=int, default=4)
 	parser.add_argument('--work-dir', required=True)
@@ -52,8 +53,15 @@ def println(*args):
 		print('{', *args, '}')
 
 def spawn_qemu(args, serial_file):
+	if args.xmhf_img is None:
+		img = ['-kernel', args.shv_img]
+	else:
+		img = [
+			'--drive', 'media=disk,file=%s,format=raw,index=0' % args.xmhf_img,
+			'--drive', 'media=disk,file=%s,format=raw,index=1' % args.shv_img,
+		]
 	qemu_args = [
-		'qemu-system-x86_64', '-m', args.memory, '-kernel', args.shv_img,
+		'qemu-system-x86_64', '-m', args.memory, *img,
 		'-smp', str(args.smp), '-cpu', 'Haswell,vmx=yes', '--enable-kvm',
 		'-serial', 'file:%s' % serial_file,
 	]
@@ -98,8 +106,10 @@ def serial_thread(args, serial_file, serial_result):
 			with serial_result[0]:
 				serial_result[1] = SERIAL_PASS
 				break
-		# fmt = 'CPU\((0x[0-9a-f]+)\): SHV in XMHF test iter \d+'
-		fmt = 'CPU\((0x[0-9a-f]+)\): SHV test iter \d+'
+		if args.xmhf_img is None:
+			fmt = 'CPU\((0x[0-9a-f]+)\): SHV test iter \d+'
+		else:
+			fmt = 'CPU\((0x[0-9a-f]+)\): SHV in XMHF test iter \d+'
 		matched = re.fullmatch(fmt, i)
 		if matched:
 			test_count[matched.groups()[0]] += 1
