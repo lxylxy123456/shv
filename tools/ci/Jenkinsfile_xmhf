@@ -32,6 +32,8 @@ properties([
 
 void qemu_test(String subarch, String shv_subarch) {
     PWD = sh(returnStdout: true, script: 'pwd').trim()
+    sh "rm -rf ${PWD}/${shv_subarch}/tmp/"
+    sh "mkdir ${PWD}/${shv_subarch}/tmp/"
     sh """
         python3 -u ./tools/ci/test5.py \
             --xmhf-img ${PWD}/xmhf/tmp/grub/c.img \
