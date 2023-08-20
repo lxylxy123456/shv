@@ -37,6 +37,7 @@ def parse_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--xmhf-img')
 	parser.add_argument('--shv-img', required=True)
+	parser.add_argument('--qcow2-suffix')
 	parser.add_argument('--smp', type=int, default=4)
 	parser.add_argument('--work-dir', required=True)
 	parser.add_argument('--no-display', action='store_true')
@@ -59,7 +60,8 @@ def spawn_qemu(args, serial_file):
 	if args.xmhf_img is None:
 		img = ['-kernel', args.shv_img]
 	else:
-		img = ['-d', args.xmhf_img, '+1', '-d', args.shv_img, '+2']
+		img = ['-d', args.xmhf_img, args.qcow2_suffix,
+			   '-d', args.shv_img, args.qcow2_suffix]
 	qemu_args = [
 		os.path.join(SCRIPT_DIR, 'qemu.sh'), '-m', args.memory, *img,
 		'-smp', str(args.smp), '-serial', 'file:%s' % serial_file,

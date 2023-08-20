@@ -32,14 +32,11 @@ properties([
 
 void qemu_test(String subarch, String shv_subarch) {
     PWD = sh(returnStdout: true, script: 'pwd').trim()
-    sh "cp ${PWD}/xmhf/tmp/grub/c.img ${PWD}/xmhf/tmp/xmhf.img"
-    sh "rm -rf ${PWD}/${shv_subarch}/tmp/"
-    sh "mkdir ${PWD}/${shv_subarch}/tmp/"
-    sh "cp ${PWD}/${shv_subarch}/grub.iso ${PWD}/${shv_subarch}/tmp/shv.img"
     sh """
         python3 -u ./tools/ci/test5.py \
-            --xmhf-img ${PWD}/xmhf/tmp/xmhf.img \
-            --shv-img ${PWD}/${shv_subarch}/tmp/shv.img \
+            --xmhf-img ${PWD}/xmhf/tmp/grub/c.img \
+            --shv-img ${PWD}/${shv_subarch}/grub.iso \
+            --qcow2-suffix +${subarch}_${shv_subarch} \
             --work-dir ${PWD}/${shv_subarch}/tmp/ \
             --no-display \
             --verbose \
