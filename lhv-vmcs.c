@@ -163,7 +163,7 @@ void vmcs_dump(VCPU *vcpu, int verbose)
 				ASSERT(0);									\
 			}															\
 		} while (0);
-	#include <lhv-vmcs-template.h>
+	#include <_vmx_vmcs_fields.h>
 	#undef DECLARE_FIELD
 }
 
@@ -182,6 +182,6 @@ void vmcs_load(VCPU *vcpu)
 				__vmx_vmwriteNW(encoding, vcpu->vmcs.name);				\
 			}															\
 		} while (0);
-	#include <lhv-vmcs-template.h>
+	#include <_vmx_vmcs_fields.h>
 	#undef DECLARE_FIELD
 }

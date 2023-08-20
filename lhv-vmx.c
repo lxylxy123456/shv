@@ -340,7 +340,7 @@ void lhv_vmx_main(VCPU *vcpu)
 				printf("vmread(0x%04x) = %08lx\n", encoding,	\
 						vmcs_vmread(vcpu, encoding));			\
 			}
-#include <lhv-vmcs-template.h>
+#include <_vmx_vmcs_fields.h>
 #undef DECLARE_FIELD
 		}
 	}
