@@ -22,21 +22,27 @@ usage () {
 		echo "Error: $@"
 	fi
 	echo "$0: automatically configure and build SHV"
-	echo '	-h              Print this help message.'
-	echo '	-n              Only print configuration command, do not execute.'
-	echo '	-i, --i386      Use 32-bit paging.'
-	echo '	-p, --pae       Use 32-bit PAE paging.'
-	echo '	-a, --amd64     Use 64-bit 4-level paging.'
-	echo '	-O <level>      Set GCC optimization level.'
+	echo '	-h                  Print this help message.'
+	echo '	-n                  Dry run, only print configuration command.'
+	echo '	-s, --srcdir <DIR>  Configure source directory, instead of ".".'
+	echo '	-A, --ac            Force performing autoreconf --install.'
+	echo '	-i, --i386          Use 32-bit paging.'
+	echo '	-p, --pae           Use 32-bit PAE paging.'
+	echo '	-a, --amd64         Use 64-bit 4-level paging.'
+	echo '	-O <level>          Set GCC optimization level.'
+	echo '	-S, --shv-opt <OPT> Set SHV_OPT.'
 	exit 1
 }
 
 # Initialize variables.
 conf=()
 DRY_RUN='n'
+SRCDIR='.'
+AC='n'
 
 # Parse arguments.
-opt=$(getopt -o 'hnipaO:s:' --long 'i386,pae,amd64,shv-opt:' -- "$@")
+opt=$(getopt -o 'hns:AipaO:S:' --long 'srcdir:,ac,i386,pae,amd64,shv-opt:' \
+	-- "$@")
 [ "$?" == "0" ] || usage 'getopt failed'
 eval set -- "$opt"
 while true; do
@@ -47,6 +53,13 @@ while true; do
 		;;
 	-n)
 		DRY_RUN='y'
+		;;
+	-s|--srcdir)
+		SRCDIR="$2"
+		shift
+		;;
+	-A|--ac)
+		AC='y'
 		;;
 	-i|--i386)
 		conf+=("--host=i686-linux-gnu" "--disable-i386-pae")
@@ -64,7 +77,7 @@ while true; do
 		conf+=("CFLAGS=-g -O$2")
 		shift
 		;;
-	-s|--shv-opt)
+	-S|--shv-opt)
 		conf+=("--with-shv-opt=$2")
 		shift
 		;;
@@ -83,13 +96,19 @@ if [ "$#" != "1" ]; then
 	usage "unknown remaining arguments: $@"
 fi
 
+CONFIGURE="$SRCDIR/configure"
+
 # Run configure / print the command.
 if [ "$DRY_RUN" = 'y' ]; then
-	echo $'\n'"./autogen.sh; ./configure ${conf[@]@Q}"$'\n'
+	echo $'\n'"autoreconf --install"$'\n'"./configure ${conf[@]@Q}"$'\n'
 else
 	set -xe
-	autoreconf --install
-	./configure "${conf[@]}"
+	if [ "$AC" = "y" -o ! -f "$CONFIGURE" ]; then
+		pushd "$SRCDIR"
+		autoreconf --install
+		popd
+	fi
+	"$CONFIGURE" "${conf[@]}"
 	make -j "$(nproc)"
 fi
 
