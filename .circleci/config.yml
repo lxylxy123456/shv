@@ -23,13 +23,7 @@ jobs:
       - run:
           name: "Build"
           command: |
-            tools/ci/build.sh --${{ matrix.target_arch }} \
-                          -${{ matrix.optimize_mode }} \
-                          --shv-opt 0xdfd
-            autoreconf --install && \
-            ./configure --host=<< parameters.subarch >>-linux-gnu \
-                        --with-shv-opt=0xdfd CFLAGS=-g && \
-            make -j $(nproc)
+            tools/ci/build.sh --${{ matrix.target_arch }} -O0 --shv-opt 0xdfd
       - run:
           name: "Versions"
           command: |
@@ -97,4 +91,4 @@ workflows:
       - test-xmhf:
           matrix:
             parameters:
-              subarch: ["i686", "x86_64"]
+              subarch: ["i386", "pae", "amd64"]
