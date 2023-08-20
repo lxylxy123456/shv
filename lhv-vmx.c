@@ -151,7 +151,7 @@ static void lhv_vmx_vmcs_init(VCPU *vcpu)
 
 	if (SHV_OPT & LHV_USE_UNRESTRICTED_GUEST) {
 		u32 seccpu;
-		HALT_ON_ERRORCOND(SHV_OPT & LHV_USE_EPT);
+		ASSERT(SHV_OPT & LHV_USE_EPT);
 		seccpu = vmcs_vmread(vcpu, VMCS_control_VMX_seccpu_based);
 		seccpu |= (1U << VMX_SECPROCBASED_UNRESTRICTED_GUEST);
 		vmcs_vmwrite(vcpu, VMCS_control_VMX_seccpu_based, seccpu);
@@ -273,9 +273,9 @@ void lhv_vmx_main(VCPU *vcpu)
 	{
 		u32 eax, ebx, ecx, edx;
 		cpuid(0, &eax, &ebx, &ecx, &edx);
-		HALT_ON_ERRORCOND(ebx == INTEL_STRING_DWORD1);
-		HALT_ON_ERRORCOND(ecx == INTEL_STRING_DWORD3);
-		HALT_ON_ERRORCOND(edx == INTEL_STRING_DWORD2);
+		ASSERT(ebx == INTEL_STRING_DWORD1);
+		ASSERT(ecx == INTEL_STRING_DWORD3);
+		ASSERT(edx == INTEL_STRING_DWORD2);
 	}
 
 	/* Save contents of MSRs (from _vmx_initVT) */
@@ -287,7 +287,7 @@ void lhv_vmx_main(VCPU *vcpu)
 	{
 		u32 eax, ebx, ecx, edx;
 		cpuid(1, &eax, &ebx, &ecx, &edx);
-		HALT_ON_ERRORCOND(ecx & (1U << 5));
+		ASSERT(ecx & (1U << 5));
 	}
 
 	/* Allocate VM (23.11.5 VMXON Region) */
@@ -303,7 +303,7 @@ void lhv_vmx_main(VCPU *vcpu)
 	/* Set CR4.VMXE (22.7 ENABLING AND ENTERING VMX OPERATION) */
 	{
 		ulong_t cr4 = read_cr4();
-		HALT_ON_ERRORCOND((cr4 & CR4_VMXE) == 0);
+		ASSERT((cr4 & CR4_VMXE) == 0);
 		write_cr4(cr4 | CR4_VMXE);
 	}
 
@@ -311,13 +311,13 @@ void lhv_vmx_main(VCPU *vcpu)
 	{
 		u64 vmx_msr_efcr = rdmsr64(MSR_EFCR);
 		// printf("rdmsr64(MSR_EFCR) = 0x%016x\n", vmx_msr_efcr);
-		HALT_ON_ERRORCOND(vmx_msr_efcr & 1);
-		HALT_ON_ERRORCOND(vmx_msr_efcr & 4);
+		ASSERT(vmx_msr_efcr & 1);
+		ASSERT(vmx_msr_efcr & 4);
 	}
 
 	/* VMXON */
 	{
-		HALT_ON_ERRORCOND(__vmx_vmxon(hva2spa(vcpu->vmxon_region)));
+		ASSERT(__vmx_vmxon(hva2spa(vcpu->vmxon_region)));
 	}
 
 	/* VMCLEAR, VMPTRLD */
@@ -328,9 +328,9 @@ void lhv_vmx_main(VCPU *vcpu)
 				((u32 *) vcpu->my_vmcs)[i] = (i << 20) | i;
 			}
 		}
-		HALT_ON_ERRORCOND(__vmx_vmclear(hva2spa(vcpu->my_vmcs)));
+		ASSERT(__vmx_vmclear(hva2spa(vcpu->my_vmcs)));
 		*((u32 *) vcpu->my_vmcs) = vmcs_revision_identifier;
-		HALT_ON_ERRORCOND(__vmx_vmptrld(hva2spa(vcpu->my_vmcs)));
+		ASSERT(__vmx_vmptrld(hva2spa(vcpu->my_vmcs)));
 		if (!"test_vmclear" && vcpu->isbsp) {
 			for (u32 i = 0; i < 0x1000 / sizeof(u32); i++) {
 				printf("vmcs[0x%03x] = 0x%08x\n", i, ((u32 *)vcpu->my_vmcs)[i]);
@@ -357,7 +357,7 @@ void lhv_vmx_main(VCPU *vcpu)
 		vmlaunch_asm(&r);
 	}
 
-	HALT_ON_ERRORCOND(0 && "vmlaunch_asm() should never return");
+	ASSERT(0 && "vmlaunch_asm() should never return");
 }
 
 void vmexit_handler(VCPU *vcpu, struct regs *r)
@@ -375,7 +375,7 @@ void vmexit_handler(VCPU *vcpu, struct regs *r)
 		vcpu->vmexit_handler_override(vcpu, r, &vmexit_info);
 	}
 
-	HALT_ON_ERRORCOND(vcpu == get_vcpu());
+	ASSERT(vcpu == get_vcpu());
 	switch (vmexit_reason) {
 	case VMX_VMEXIT_CPUID:
 		{
@@ -399,7 +399,7 @@ void vmexit_handler(VCPU *vcpu, struct regs *r)
 			break;
 		}
 	case VMX_VMEXIT_EPT_VIOLATION:
-		HALT_ON_ERRORCOND(SHV_OPT & LHV_USE_EPT);
+		ASSERT(SHV_OPT & LHV_USE_EPT);
 		{
 			ulong_t q = vmcs_vmread(vcpu, VMCS_info_exit_qualification);
 			u64 paddr = vmcs_vmread64(vcpu, VMCS_guest_paddr);
@@ -409,7 +409,7 @@ void vmexit_handler(VCPU *vcpu, struct regs *r)
 			printf("CPU(0x%02x): paddr: 0x%016llx\n", vcpu->id, paddr);
 			printf("CPU(0x%02x): vaddr: 0x%08lx\n", vcpu->id, vaddr);
 			vmcs_dump(vcpu, 0);
-			HALT_ON_ERRORCOND(0 && "Unknown EPT violation");
+			ASSERT(0 && "Unknown EPT violation");
 			break;
 		}
 	case VMX_VMEXIT_VMCALL:
@@ -420,7 +420,7 @@ void vmexit_handler(VCPU *vcpu, struct regs *r)
 			printf("CPU(0x%02x): unknown vmexit %u\n", vcpu->id, vmexit_reason);
 			printf("CPU(0x%02x): rip = 0x%x\n", vcpu->id, guest_rip);
 			vmcs_dump(vcpu, 0);
-			HALT_ON_ERRORCOND(0 && "Unknown VMEXIT");
+			ASSERT(0 && "Unknown VMEXIT");
 			break;
 		}
 	}
@@ -434,6 +434,6 @@ void vmentry_error(ulong_t is_resume, ulong_t valid)
 	ulong_t vminstr_error = vmcs_vmread(vcpu, VMCS_info_vminstr_error);
 	printf("CPU(0x%02x): is_resume = %ld, valid = %ld, err = %ld\n",
 			vcpu->id, is_resume, valid, vminstr_error);
-	HALT_ON_ERRORCOND(is_resume && valid && 0);
-	HALT_ON_ERRORCOND(0);
+	ASSERT(is_resume && valid && 0);
+	ASSERT(0);
 }

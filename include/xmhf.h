@@ -45,10 +45,10 @@
 #define __DEBUG_QEMU__
 
 // TODO: change its name
-#define HALT_ON_ERRORCOND(expr) \
+#define ASSERT(expr) \
 	do { \
 		if (!(expr)) { \
-			printf("Error: HALT_ON_ERRORCOND(%s) @ %s:%d failed\n", #expr, \
+			printf("Error: ASSERT(%s) @ %s:%d failed\n", #expr, \
 				   __FILE__, __LINE__); \
 			cpu_halt(); \
 		} \

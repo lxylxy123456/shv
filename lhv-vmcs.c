@@ -23,19 +23,19 @@
 
 /* Write 16-bit VMCS field, never fails */
 void __vmx_vmwrite16(u16 encoding, u16 value) {
-	HALT_ON_ERRORCOND((encoding >> 12) == 0UL);
-	HALT_ON_ERRORCOND(__vmx_vmwrite(encoding, value));
+	ASSERT((encoding >> 12) == 0UL);
+	ASSERT(__vmx_vmwrite(encoding, value));
 }
 
 /* Write 64-bit VMCS field, never fails */
 void __vmx_vmwrite64(u16 encoding, u64 value) {
-	HALT_ON_ERRORCOND((encoding >> 12) == 2UL);
-	HALT_ON_ERRORCOND((encoding & 0x1) == 0x0);
+	ASSERT((encoding >> 12) == 2UL);
+	ASSERT((encoding & 0x1) == 0x0);
 #ifdef __amd64__
-	HALT_ON_ERRORCOND(__vmx_vmwrite(encoding, value));
+	ASSERT(__vmx_vmwrite(encoding, value));
 #elif defined(__i386__)
-	HALT_ON_ERRORCOND(__vmx_vmwrite(encoding, value));
-	HALT_ON_ERRORCOND(__vmx_vmwrite(encoding + 1, value >> 32));
+	ASSERT(__vmx_vmwrite(encoding, value));
+	ASSERT(__vmx_vmwrite(encoding + 1, value >> 32));
 #else /* !defined(__i386__) && !defined(__amd64__) */
     #error "Unsupported Arch"
 #endif /* !defined(__i386__) && !defined(__amd64__) */
@@ -43,22 +43,22 @@ void __vmx_vmwrite64(u16 encoding, u64 value) {
 
 /* Write 32-bit VMCS field, never fails */
 void __vmx_vmwrite32(u16 encoding, u32 value) {
-	HALT_ON_ERRORCOND((encoding >> 12) == 4UL);
-	HALT_ON_ERRORCOND(__vmx_vmwrite(encoding, value));
+	ASSERT((encoding >> 12) == 4UL);
+	ASSERT(__vmx_vmwrite(encoding, value));
 }
 
 /* Write natural width (NW) VMCS field, never fails */
 void __vmx_vmwriteNW(u16 encoding, ulong_t value) {
-	HALT_ON_ERRORCOND((encoding >> 12) == 6UL);
-	HALT_ON_ERRORCOND(__vmx_vmwrite(encoding, value));
+	ASSERT((encoding >> 12) == 6UL);
+	ASSERT(__vmx_vmwrite(encoding, value));
 }
 
 /* Read 16-bit VMCS field, never fails */
 u16 __vmx_vmread16(u16 encoding) {
 	unsigned long value;
-	HALT_ON_ERRORCOND((encoding >> 12) == 0UL);
-	HALT_ON_ERRORCOND(__vmx_vmread(encoding, &value));
-	HALT_ON_ERRORCOND(value == (unsigned long)(u16)value);
+	ASSERT((encoding >> 12) == 0UL);
+	ASSERT(__vmx_vmread(encoding, &value));
+	ASSERT(value == (unsigned long)(u16)value);
 	return value;
 }
 
@@ -66,8 +66,8 @@ u16 __vmx_vmread16(u16 encoding) {
 u64 __vmx_vmread64(u16 encoding) {
 #ifdef __amd64__
 	unsigned long value;
-	HALT_ON_ERRORCOND((encoding >> 12) == 2UL);
-	HALT_ON_ERRORCOND(__vmx_vmread(encoding, &value));
+	ASSERT((encoding >> 12) == 2UL);
+	ASSERT(__vmx_vmread(encoding, &value));
 	return value;
 #elif defined(__i386__)
 	union {
@@ -77,10 +77,10 @@ u64 __vmx_vmread64(u16 encoding) {
 		u64 full;
 	} ans;
 	_Static_assert(sizeof(u32) == sizeof(unsigned long), "incorrect size");
-	HALT_ON_ERRORCOND((encoding >> 12) == 2UL);
-	HALT_ON_ERRORCOND((encoding & 0x1) == 0x0);
-	HALT_ON_ERRORCOND(__vmx_vmread(encoding, &ans.low));
-	HALT_ON_ERRORCOND(__vmx_vmread(encoding + 1, &ans.high));
+	ASSERT((encoding >> 12) == 2UL);
+	ASSERT((encoding & 0x1) == 0x0);
+	ASSERT(__vmx_vmread(encoding, &ans.low));
+	ASSERT(__vmx_vmread(encoding + 1, &ans.high));
 	return ans.full;
 #else /* !defined(__i386__) && !defined(__amd64__) */
     #error "Unsupported Arch"
@@ -90,18 +90,18 @@ u64 __vmx_vmread64(u16 encoding) {
 /* Read 32-bit VMCS field, never fails */
 u32 __vmx_vmread32(u16 encoding) {
 	unsigned long value;
-	HALT_ON_ERRORCOND((encoding >> 12) == 4UL);
-	HALT_ON_ERRORCOND(__vmx_vmread(encoding, &value));
-	HALT_ON_ERRORCOND(value == (unsigned long)(u32)value);
+	ASSERT((encoding >> 12) == 4UL);
+	ASSERT(__vmx_vmread(encoding, &value));
+	ASSERT(value == (unsigned long)(u32)value);
 	return value;
 }
 
 /* Read natural width (NW) VMCS field, never fails */
 ulong_t __vmx_vmreadNW(u16 encoding) {
 	unsigned long value;
-	HALT_ON_ERRORCOND((encoding >> 12) == 6UL);
-	HALT_ON_ERRORCOND(__vmx_vmread(encoding, &value));
-	HALT_ON_ERRORCOND(value == (unsigned long)(ulong_t)value);
+	ASSERT((encoding >> 12) == 6UL);
+	ASSERT(__vmx_vmread(encoding, &value));
+	ASSERT(value == (unsigned long)(ulong_t)value);
 	return value;
 }
 
@@ -109,7 +109,7 @@ void vmcs_vmwrite(VCPU *vcpu, ulong_t encoding, ulong_t value)
 {
 	(void) vcpu;
 	// printf("CPU(0x%02x): vmwrite(0x%04lx, 0x%08lx)\n", vcpu->id, encoding, value);
-	HALT_ON_ERRORCOND(__vmx_vmwrite(encoding, value));
+	ASSERT(__vmx_vmwrite(encoding, value));
 }
 
 void vmcs_vmwrite64(VCPU *vcpu, ulong_t encoding, u64 value)
@@ -122,7 +122,7 @@ ulong_t vmcs_vmread(VCPU *vcpu, ulong_t encoding)
 {
 	unsigned long value;
 	(void) vcpu;
-	HALT_ON_ERRORCOND(__vmx_vmread(encoding, &value));
+	ASSERT(__vmx_vmread(encoding, &value));
 	// printf("CPU(0x%02x): 0x%08lx = vmread(0x%04lx)\n", vcpu->id, value, encoding);
 	return value;
 }
@@ -144,7 +144,7 @@ void vmcs_dump(VCPU *vcpu, int verbose)
 			} else if ((encoding & 0x6000) == 0x4000) {					\
 				vcpu->vmcs.name = __vmx_vmread32(encoding);				\
 			} else {													\
-				HALT_ON_ERRORCOND((encoding & 0x6000) == 0x6000);		\
+				ASSERT((encoding & 0x6000) == 0x6000);		\
 				vcpu->vmcs.name = __vmx_vmreadNW(encoding);				\
 			}															\
 			if (!verbose) {												\
@@ -160,7 +160,7 @@ void vmcs_dump(VCPU *vcpu, int verbose)
 				printf("CPU(0x%02x): vcpu->vmcs." #name "=0x%04x\n",	\
 						vcpu->id, (u32) vcpu->vmcs.name);				\
 			} else {													\
-				HALT_ON_ERRORCOND(0);									\
+				ASSERT(0);									\
 			}															\
 		} while (0);
 	#include <lhv-vmcs-template.h>
@@ -178,7 +178,7 @@ void vmcs_load(VCPU *vcpu)
 			} else if ((encoding & 0x6000) == 0x4000) {					\
 				__vmx_vmwrite32(encoding, vcpu->vmcs.name);				\
 			} else {													\
-				HALT_ON_ERRORCOND((encoding & 0x6000) == 0x6000);		\
+				ASSERT((encoding & 0x6000) == 0x6000);		\
 				__vmx_vmwriteNW(encoding, vcpu->vmcs.name);				\
 			}															\
 		} while (0);

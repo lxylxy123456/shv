@@ -93,7 +93,7 @@ static void udelay(u32 usecs){
   //compute appropriate latch register value depending on usecs
   latchregval = ((u64)1193182 * usecs) / 1000000;
 
-  HALT_ON_ERRORCOND(latchregval < (1 << 16));
+  ASSERT(latchregval < (1 << 16));
 
   //write latch register to ch-2
   val = (u8)latchregval;
@@ -118,7 +118,7 @@ void wakeupAPs(void){
 
     //read LAPIC base address from MSR
     apic_base = rdmsr64(MSR_APIC_BASE);
-    HALT_ON_ERRORCOND( apic_base < ADDR_4GB ); //APIC is below 4G
+    ASSERT( apic_base < ADDR_4GB ); //APIC is below 4G
 
     icr = (u32 *) (uintptr_t)((apic_base & ~0xFFFULL) | 0x300);
 
@@ -191,7 +191,7 @@ u32 smp_getinfo(PCPU *pcpus, u32 *num_pcpus, void *uefi_rsdp){
     rsdp=(ACPI_RSDP *)ACPIGetRSDP();
   } else {
     rsdp = (ACPI_RSDP *)uefi_rsdp;
-    HALT_ON_ERRORCOND(_ACPIGetRSDPComputeChecksum((uintptr_t)rsdp, 20) == 0);
+    ASSERT(_ACPIGetRSDPComputeChecksum((uintptr_t)rsdp, 20) == 0);
   }
   if(!rsdp){
     printf("System is not ACPI Compliant, falling through...\n");
@@ -263,7 +263,7 @@ u32 smp_getinfo(PCPU *pcpus, u32 *num_pcpus, void *uefi_rsdp){
       if(apicrecord->type == 0x0 && (apicrecord->flags & 0x1)){ //processor record
 
         foundcores=1;
-        HALT_ON_ERRORCOND( *num_pcpus < MAX_PCPU_ENTRIES);
+        ASSERT( *num_pcpus < MAX_PCPU_ENTRIES);
         i = *num_pcpus;
         pcpus[i].lapic_id = apicrecord->lapicid;
         pcpus[i].lapic_ver = 0;
@@ -284,7 +284,7 @@ u32 smp_getinfo(PCPU *pcpus, u32 *num_pcpus, void *uefi_rsdp){
 
 
 fallthrough:
-  HALT_ON_ERRORCOND(0 && "ACPI detection failed");
+  ASSERT(0 && "ACPI detection failed");
 
 
   return 1;
@@ -321,7 +321,7 @@ ACPI_RSDP * ACPIGetRSDP(void){
     rsdp=(ACPI_RSDP *)(uintptr_t)(ebdaphys+i);
     if(rsdp->signature == ACPI_RSDP_SIGNATURE){
       /* Check for truncation */
-      HALT_ON_ERRORCOND((uintptr_t)rsdp == (uintptr_t)(u32)(uintptr_t)rsdp);
+      ASSERT((uintptr_t)rsdp == (uintptr_t)(u32)(uintptr_t)rsdp);
       if(!_ACPIGetRSDPComputeChecksum((uintptr_t)rsdp, 20)){
         found=1;
         break;
@@ -336,7 +336,7 @@ ACPI_RSDP * ACPIGetRSDP(void){
   for(i=0xE0000; i < (0xFFFFF-8); i+=16){
     rsdp=(ACPI_RSDP *)(uintptr_t)i;
     if(rsdp->signature == ACPI_RSDP_SIGNATURE){
-      HALT_ON_ERRORCOND((uintptr_t)rsdp == (uintptr_t)(u32)(uintptr_t)rsdp);
+      ASSERT((uintptr_t)rsdp == (uintptr_t)(u32)(uintptr_t)rsdp);
       if(!_ACPIGetRSDPComputeChecksum((uintptr_t)rsdp, 20)){
         found=1;
         break;
@@ -353,7 +353,7 @@ ACPI_RSDP * ACPIGetRSDP(void){
 void smp_init(void)
 {
 	/* Get list of CPUs information. */
-	HALT_ON_ERRORCOND(smp_getinfo(g_cpumap, &g_midtable_numentries, NULL));
+	ASSERT(smp_getinfo(g_cpumap, &g_midtable_numentries, NULL));
 	for (u32 i = 0; i < g_midtable_numentries; i++) {
 		g_midtable[i].cpu_lapic_id = g_cpumap[i].lapic_id;
 		g_midtable[i].vcpu_vaddr_ptr = (uintptr_t)&g_vcpus[i];
@@ -377,5 +377,5 @@ void smp_init(void)
 	/* Switch stack and call kernel_main_smp(). */
 	init_core_lowlevel_setup();
 
-	HALT_ON_ERRORCOND(0 && "Should not return from init_core_lowlevel_setup()");
+	ASSERT(0 && "Should not return from init_core_lowlevel_setup()");
 }

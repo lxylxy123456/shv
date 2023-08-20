@@ -160,8 +160,8 @@ void enter_user_mode(VCPU *vcpu, ulong_t arg)
 void handle_lhv_syscall(VCPU *vcpu, int vector, struct regs *r)
 {
 	/* Currently the only syscall is to exit guest mode */
-	HALT_ON_ERRORCOND(vector == 0x23);
-	HALT_ON_ERRORCOND(r->eax == 0xdeaddead);
+	ASSERT(vector == 0x23);
+	ASSERT(r->eax == 0xdeaddead);
 	exit_user_mode_asm(esp0[vcpu->idx]);
 }
 
@@ -203,7 +203,7 @@ static inline uintptr_t vmcall(uintptr_t eax, uintptr_t ecx, uintptr_t edx,
 
 __attribute__((__noreturn__)) void leave_user_mode(void) {
 	asm volatile ("movl $0xdeaddead, %eax; int $0x23;");
-	HALT_ON_ERRORCOND(0 && "system call returned");
+	ASSERT(0 && "system call returned");
 }
 
 static spin_lock_t pal_lock;
@@ -249,7 +249,7 @@ static void user_main_pal_demo(VCPU *vcpu, ulong_t arg)
 
 	/* Register PAL */
 	printf("CPU(0x%02x): starting PAL 0x%x\n", vcpu->id, arg);
-	HALT_ON_ERRORCOND(!vmcall(TV_HC_REG + arg, (uintptr_t)&sections, 0,
+	ASSERT(!vmcall(TV_HC_REG + arg, (uintptr_t)&sections, 0,
 							  (uintptr_t)&params, pal_entry));
 
 	/* Call PAL function */
@@ -272,7 +272,7 @@ static void user_main_pal_demo(VCPU *vcpu, ulong_t arg)
 	}
 
 	/* Unregister PAL */
-	HALT_ON_ERRORCOND(!vmcall(TV_HC_UNREG + arg, pal_entry, 0, 0, 0));
+	ASSERT(!vmcall(TV_HC_UNREG + arg, pal_entry, 0, 0, 0));
 
 	if ("valid access") {
 		printf("", *(u32*)pal_entry);
@@ -308,8 +308,8 @@ void user_main(VCPU *vcpu, ulong_t arg)
 			/* Test TrustVisor presence using CPUID */
 			u32 eax=0x7a567254U, ebx, ecx=arg, edx;
 			cpuid_raw(&eax, &ebx, &ecx, &edx);
-			HALT_ON_ERRORCOND(eax == 0x7a767274U && "TrustVisor not present 1");
-			HALT_ON_ERRORCOND(ebx == 0xffffffffU && "TrustVisor not present 2");
+			ASSERT(eax == 0x7a767274U && "TrustVisor not present 1");
+			ASSERT(ebx == 0xffffffffU && "TrustVisor not present 2");
 			user_main_pal_demo(vcpu, arg);
 		} else {
 			printf("CPU(0x%02x): can enter user mode 0x%x\n", vcpu->id, arg);

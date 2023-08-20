@@ -34,11 +34,11 @@ void lhv_main(VCPU *vcpu)
 		}
 	}
 	timer_init(vcpu);
-	HALT_ON_ERRORCOND(vc.height >= 2);
+	ASSERT(vc.height >= 2);
 	for (int i = 0; i < vc.width; i++) {
 		for (int j = 0; j < 2; j++) {
 #ifndef __DEBUG_VGA__
-			HALT_ON_ERRORCOND(console_get_char(&vc, i, j) == ' ');
+			ASSERT(console_get_char(&vc, i, j) == ' ');
 #endif /* !__DEBUG_VGA__ */
 			console_put_char(&vc, i, j, '0' + vcpu->id);
 		}
@@ -72,6 +72,6 @@ void lhv_main(VCPU *vcpu)
 	/* Start VT related things */
 	lhv_vmx_main(vcpu);
 
-	HALT_ON_ERRORCOND(0 && "Should not reach here");
+	ASSERT(0 && "Should not reach here");
 }
 

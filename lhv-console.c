@@ -40,12 +40,12 @@ void console_cursor_clear(void)
 static volatile char *console_get_mmio(console_vc_t *vc, int x, int y)
 {
 	if (!vc) {
-		HALT_ON_ERRORCOND(0 <= x && x < CONSOLE_WIDTH);
-		HALT_ON_ERRORCOND(0 <= y && y < CONSOLE_HEIGHT);
+		ASSERT(0 <= x && x < CONSOLE_WIDTH);
+		ASSERT(0 <= y && y < CONSOLE_HEIGHT);
 		return CONSOLE_MEM_BASE + 2 * (x + CONSOLE_WIDTH * y);
 	}
-	HALT_ON_ERRORCOND(0 <= x && x < vc->width);
-	HALT_ON_ERRORCOND(0 <= y && y < vc->height);
+	ASSERT(0 <= x && x < vc->width);
+	ASSERT(0 <= y && y < vc->height);
 	return console_get_mmio(NULL, x + vc->left, y + vc->top);
 }
 
@@ -74,8 +74,8 @@ void console_put_char(console_vc_t *vc, int x, int y, char c)
 
 void console_get_vc(console_vc_t *vc, int num, int guest)
 {
-	HALT_ON_ERRORCOND(0 <= num && num < CONSOLE_MAX_CPU);
-	HALT_ON_ERRORCOND(0 <= guest && guest < 2);
+	ASSERT(0 <= num && num < CONSOLE_MAX_CPU);
+	ASSERT(0 <= guest && guest < 2);
 	vc->left = (CONSOLE_WIDTH / 2) * guest;
 	vc->top = (CONSOLE_HEIGHT / CONSOLE_MAX_CPU) * num;
 	vc->width = (CONSOLE_WIDTH / 2);

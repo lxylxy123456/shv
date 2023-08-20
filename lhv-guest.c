@@ -101,7 +101,7 @@ static bool msr_writable(u32 index) {
 	if (_wrmsr_safe(index, new_val)) {
 		return false;
 	}
-	HALT_ON_ERRORCOND(_wrmsr_safe(index, old_val) == 0);
+	ASSERT(_wrmsr_safe(index, old_val) == 0);
 	return true;
 }
 
@@ -135,8 +135,8 @@ static void lhv_guest_test_msr_ls_vmexit_handler(VCPU *vcpu, struct regs *r,
 		 */
 		if ((rdmsr64(0x179U) & 0xff) > 1 && msr_writable(0x402)) {
 			data->skip_mc_msrs = false;
-			HALT_ON_ERRORCOND(msr_writable(0x403));
-			HALT_ON_ERRORCOND(msr_writable(0x406));
+			ASSERT(msr_writable(0x403));
+			ASSERT(msr_writable(0x406));
 			data->mc_msrs[0] = 0x402U;
 			data->mc_msrs[1] = 0x403U;
 			data->mc_msrs[2] = 0x406U;
@@ -165,7 +165,7 @@ static void lhv_guest_test_msr_ls_vmexit_handler(VCPU *vcpu, struct regs *r,
 			vmcs_vmwrite(vcpu, VMCS_control_VM_exit_MSR_load_count, 2);
 			vmcs_vmwrite(vcpu, VMCS_control_VM_entry_MSR_load_count, 2);
 		}
-		HALT_ON_ERRORCOND((rdmsr64(0xfeU) & 0xff) > 6);
+		ASSERT((rdmsr64(0xfeU) & 0xff) > 6);
 		wrmsr64(0x20aU, 0x00000000aaaaa000ULL);
 		wrmsr64(0x20bU, 0x00000000deadb000ULL);
 		wrmsr64(0x20cU, 0x00000000deadc000ULL);
@@ -174,7 +174,7 @@ static void lhv_guest_test_msr_ls_vmexit_handler(VCPU *vcpu, struct regs *r,
 			wrmsr64(data->mc_msrs[1], 0xdeaddeadbeefbeefULL);
 			wrmsr64(data->mc_msrs[2], 0xdeaddeadbeefbeefULL);
 		}
-		HALT_ON_ERRORCOND(rdmsr64(MSR_IA32_PAT) == 0x0007040600070406ULL);
+		ASSERT(rdmsr64(MSR_IA32_PAT) == 0x0007040600070406ULL);
 		vcpu->my_vmexit_msrstore[0].index = 0x20aU;
 		vcpu->my_vmexit_msrstore[0].data = 0x00000000deada000ULL;
 		vcpu->my_vmexit_msrstore[1].index = MSR_EFER;
@@ -202,20 +202,20 @@ static void lhv_guest_test_msr_ls_vmexit_handler(VCPU *vcpu, struct regs *r,
 		break;
 	case 16:
 		/* Check effects */
-		HALT_ON_ERRORCOND(vcpu->my_vmexit_msrstore[0].data ==
+		ASSERT(vcpu->my_vmexit_msrstore[0].data ==
 						  0x00000000aaaaa000ULL);
-		HALT_ON_ERRORCOND(rdmsr64(0x20bU) == 0x00000000bbbbb000ULL);
-		HALT_ON_ERRORCOND(rdmsr64(0x20cU) == 0x00000000ccccc000ULL);
-		HALT_ON_ERRORCOND(vcpu->my_vmexit_msrstore[1].data ==
+		ASSERT(rdmsr64(0x20bU) == 0x00000000bbbbb000ULL);
+		ASSERT(rdmsr64(0x20cU) == 0x00000000ccccc000ULL);
+		ASSERT(vcpu->my_vmexit_msrstore[1].data ==
 						  rdmsr64(MSR_EFER));
-		HALT_ON_ERRORCOND(rdmsr64(MSR_IA32_PAT) == 0x0007060400070604ULL);
-		HALT_ON_ERRORCOND(rdmsr64(0xc0000081U) == 0x0000000011111000ULL);
+		ASSERT(rdmsr64(MSR_IA32_PAT) == 0x0007060400070604ULL);
+		ASSERT(rdmsr64(0xc0000081U) == 0x0000000011111000ULL);
 		if (!data->skip_mc_msrs) {
-			HALT_ON_ERRORCOND(vcpu->my_vmexit_msrstore[2].data ==
+			ASSERT(vcpu->my_vmexit_msrstore[2].data ==
 							  0x2222222222222222ULL);
-			HALT_ON_ERRORCOND(rdmsr64(data->mc_msrs[1]) ==
+			ASSERT(rdmsr64(data->mc_msrs[1]) ==
 							  0x3333333333333333ULL);
-			HALT_ON_ERRORCOND(rdmsr64(data->mc_msrs[2]) ==
+			ASSERT(rdmsr64(data->mc_msrs[2]) ==
 							  0x6666666666666666ULL);
 		}
 		/* Reset state */
@@ -236,7 +236,7 @@ static void lhv_guest_test_msr_ls_vmexit_handler(VCPU *vcpu, struct regs *r,
 		}
 		break;
 	default:
-		HALT_ON_ERRORCOND(0 && "Unknown argument");
+		ASSERT(0 && "Unknown argument");
 		break;
 	}
 	vmcs_vmwrite(vcpu, VMCS_guest_RIP, info->guest_rip + info->inst_len);
@@ -270,9 +270,9 @@ static void lhv_guest_test_ept_vmexit_handler(VCPU *vcpu, struct regs *r,
 			return;
 		}
 		/* On older machines: q = 0x181; on Dell 7050: q = 0x581 */
-		HALT_ON_ERRORCOND((q & ~0xe00UL) == 0x181UL);
-		HALT_ON_ERRORCOND(r->eax == 0xdeadbeefU);
-		HALT_ON_ERRORCOND(r->ebx == 0x12340000U);
+		ASSERT((q & ~0xe00UL) == 0x181UL);
+		ASSERT(r->eax == 0xdeadbeefU);
+		ASSERT(r->ebx == 0x12340000U);
 		r->eax = 0xfee1c0de;
 		vcpu->ept_exit_count++;
 	}
@@ -284,7 +284,7 @@ static void lhv_guest_test_ept(VCPU *vcpu)
 {
 	if (SHV_OPT & LHV_USE_EPT) {
 		u32 expected_ept_count;
-		HALT_ON_ERRORCOND(vcpu->ept_exit_count == 0);
+		ASSERT(vcpu->ept_exit_count == 0);
 		vcpu->vmexit_handler_override = lhv_guest_test_ept_vmexit_handler;
 		{
 			u32 a = 0xdeadbeef;
@@ -298,18 +298,18 @@ static void lhv_guest_test_ept(VCPU *vcpu)
 					   vcpu->ept_num);
 			}
 			if (vcpu->ept_num == 0) {
-				HALT_ON_ERRORCOND(a == 0xfee1c0de);
+				ASSERT(a == 0xfee1c0de);
 				expected_ept_count = 1;
 			} else {
-				HALT_ON_ERRORCOND((u8) a == vcpu->ept_num);
-				HALT_ON_ERRORCOND((u8) (a >> 8) == vcpu->ept_num);
-				HALT_ON_ERRORCOND((u8) (a >> 16) == vcpu->ept_num);
-				HALT_ON_ERRORCOND((u8) (a >> 24) == vcpu->ept_num);
+				ASSERT((u8) a == vcpu->ept_num);
+				ASSERT((u8) (a >> 8) == vcpu->ept_num);
+				ASSERT((u8) (a >> 16) == vcpu->ept_num);
+				ASSERT((u8) (a >> 24) == vcpu->ept_num);
 				expected_ept_count = 0;
 			}
 		}
 		vcpu->vmexit_handler_override = NULL;
-		HALT_ON_ERRORCOND(vcpu->ept_exit_count == expected_ept_count);
+		ASSERT(vcpu->ept_exit_count == expected_ept_count);
 		vcpu->ept_exit_count = 0;
 	}
 }
@@ -321,11 +321,11 @@ static void lhv_guest_switch_ept_vmexit_handler(VCPU *vcpu, struct regs *r,
 	if (info->vmexit_reason != VMX_VMEXIT_VMCALL) {
 		return;
 	}
-	HALT_ON_ERRORCOND(r->eax == 17);
+	ASSERT(r->eax == 17);
 	{
 		u64 eptp;
 		/* Check prerequisite */
-		HALT_ON_ERRORCOND(SHV_OPT & LHV_USE_EPT);
+		ASSERT(SHV_OPT & LHV_USE_EPT);
 		/* Swap EPT */
 		vcpu->ept_num++;
 		vcpu->ept_num %= (LHV_EPT_COUNT << 4);
@@ -339,7 +339,7 @@ static void lhv_guest_switch_ept_vmexit_handler(VCPU *vcpu, struct regs *r,
 static void lhv_guest_switch_ept(VCPU *vcpu)
 {
 	if (SHV_OPT & LHV_USE_SWITCH_EPT) {
-		HALT_ON_ERRORCOND(SHV_OPT & LHV_USE_EPT);
+		ASSERT(SHV_OPT & LHV_USE_EPT);
 		vcpu->vmexit_handler_override = lhv_guest_switch_ept_vmexit_handler;
 		asm volatile ("vmcall" : : "a"(17));
 		vcpu->vmexit_handler_override = NULL;
@@ -353,7 +353,7 @@ static void lhv_guest_test_vmxoff_vmexit_handler(VCPU *vcpu, struct regs *r,
 	if (info->vmexit_reason != VMX_VMEXIT_VMCALL) {
 		return;
 	}
-	HALT_ON_ERRORCOND(r->eax == 22);
+	ASSERT(r->eax == 22);
 	{
 		bool test_vmxoff = r->ebx;
 		const bool test_modify_vmcs = true;
@@ -368,18 +368,18 @@ static void lhv_guest_test_vmxoff_vmexit_handler(VCPU *vcpu, struct regs *r,
 			vmcs_vmwrite(vcpu, VMCS_guest_ES_limit, new_es_limit);
 		}
 		/* Test VMPTRST */
-		HALT_ON_ERRORCOND(__vmx_vmptrst(&vmptr));
-		HALT_ON_ERRORCOND(vmptr == hva2spa(vcpu->my_vmcs));
+		ASSERT(__vmx_vmptrst(&vmptr));
+		ASSERT(vmptr == hva2spa(vcpu->my_vmcs));
 
 		/* VMCLEAR current VMCS */
-		HALT_ON_ERRORCOND(__vmx_vmclear(hva2spa(vcpu->my_vmcs)));
+		ASSERT(__vmx_vmclear(hva2spa(vcpu->my_vmcs)));
 		/* Make sure that VMWRITE fails */
-		HALT_ON_ERRORCOND(!__vmx_vmwrite(0x0000, 0x0000));
+		ASSERT(!__vmx_vmwrite(0x0000, 0x0000));
 
 		/* Run VMXOFF and VMXON */
 		if (test_vmxoff) {
 			u32 result;
-			HALT_ON_ERRORCOND(__vmx_vmxoff());
+			ASSERT(__vmx_vmxoff());
 			asm volatile ("1:\r\n"
 						  "vmwrite %2, %1\r\n"
 						  "xor %%ebx, %%ebx\r\n"
@@ -405,9 +405,9 @@ static void lhv_guest_test_vmxoff_vmexit_handler(VCPU *vcpu, struct regs *r,
 						  : "r"(0UL), "rm"(0UL));
 
 			/* Make sure that VMWRITE raises #UD exception */
-			HALT_ON_ERRORCOND(result == 1);
+			ASSERT(result == 1);
 
-			HALT_ON_ERRORCOND(__vmx_vmxon(hva2spa(vcpu->vmxon_region)));
+			ASSERT(__vmx_vmxon(hva2spa(vcpu->vmxon_region)));
 		}
 
 		/*
@@ -424,27 +424,27 @@ static void lhv_guest_test_vmxoff_vmexit_handler(VCPU *vcpu, struct regs *r,
 					found++;
 				}
 			}
-			HALT_ON_ERRORCOND(found == 1);
+			ASSERT(found == 1);
 		}
 
 		/* Make sure that VMWRITE still fails */
-		HALT_ON_ERRORCOND(!__vmx_vmwrite(0x0000, 0x0000));
+		ASSERT(!__vmx_vmwrite(0x0000, 0x0000));
 
 		/* Restore VMCS using VMCLEAR and VMPTRLD */
-		HALT_ON_ERRORCOND(__vmx_vmclear(hva2spa(vcpu->my_vmcs)));
+		ASSERT(__vmx_vmclear(hva2spa(vcpu->my_vmcs)));
 		{
 			u64 basic_msr = vcpu->vmx_msrs[INDEX_IA32_VMX_BASIC_MSR];
 			u32 vmcs_revision_identifier = basic_msr & 0x7fffffffU;
-			HALT_ON_ERRORCOND(*((u32 *) vcpu->my_vmcs) ==
+			ASSERT(*((u32 *) vcpu->my_vmcs) ==
 							  vmcs_revision_identifier);
 		}
-		HALT_ON_ERRORCOND(__vmx_vmptrld(hva2spa(vcpu->my_vmcs)));
+		ASSERT(__vmx_vmptrld(hva2spa(vcpu->my_vmcs)));
 		/* Make sure all VMCS fields stay the same */
 		{
 			struct _vmx_vmcsfields a;
 			memcpy(&a, &vcpu->vmcs, sizeof(a));
 			vmcs_dump(vcpu, 0);
-			HALT_ON_ERRORCOND(memcmp(&a, &vcpu->vmcs, sizeof(a)) == 0);
+			ASSERT(memcmp(&a, &vcpu->vmcs, sizeof(a)) == 0);
 		}
 	}
 	vmcs_vmwrite(vcpu, VMCS_guest_RIP, info->guest_rip + info->inst_len);
@@ -468,31 +468,31 @@ static void lhv_guest_test_vpid_vmexit_handler(VCPU *vcpu, struct regs *r,
 	if (info->vmexit_reason != VMX_VMEXIT_VMCALL) {
 		return;
 	}
-	HALT_ON_ERRORCOND(r->eax == 19);
+	ASSERT(r->eax == 19);
 	{
 		/* VPID will always be odd */
 		u16 vpid = vmcs_vmread(vcpu, VMCS_control_vpid);
-		HALT_ON_ERRORCOND(vpid % 2 == 1);
+		ASSERT(vpid % 2 == 1);
 		/*
 		 * Currently we cannot easily test the effect of INVVPID. So
 		 * just make sure that the return value is correct.
 		 */
-		HALT_ON_ERRORCOND(__vmx_invvpid(VMX_INVVPID_INDIVIDUALADDRESS, vpid,
+		ASSERT(__vmx_invvpid(VMX_INVVPID_INDIVIDUALADDRESS, vpid,
 										0x12345678U));
 #ifdef __amd64__
-		HALT_ON_ERRORCOND(!__vmx_invvpid(VMX_INVVPID_INDIVIDUALADDRESS, vpid,
+		ASSERT(!__vmx_invvpid(VMX_INVVPID_INDIVIDUALADDRESS, vpid,
 										 0xf0f0f0f0f0f0f0f0ULL));
 #elif !defined(__i386__)
     #error "Unsupported Arch"
 #endif /* !defined(__i386__) */
-		HALT_ON_ERRORCOND(!__vmx_invvpid(VMX_INVVPID_INDIVIDUALADDRESS, 0,
+		ASSERT(!__vmx_invvpid(VMX_INVVPID_INDIVIDUALADDRESS, 0,
 										 0x12345678U));
-		HALT_ON_ERRORCOND(__vmx_invvpid(VMX_INVVPID_SINGLECONTEXT, vpid, 0));
-		HALT_ON_ERRORCOND(!__vmx_invvpid(VMX_INVVPID_SINGLECONTEXT, 0, 0));
-		HALT_ON_ERRORCOND(__vmx_invvpid(VMX_INVVPID_ALLCONTEXTS, vpid, 0));
-		HALT_ON_ERRORCOND(__vmx_invvpid(VMX_INVVPID_SINGLECONTEXTGLOBAL, vpid,
+		ASSERT(__vmx_invvpid(VMX_INVVPID_SINGLECONTEXT, vpid, 0));
+		ASSERT(!__vmx_invvpid(VMX_INVVPID_SINGLECONTEXT, 0, 0));
+		ASSERT(__vmx_invvpid(VMX_INVVPID_ALLCONTEXTS, vpid, 0));
+		ASSERT(__vmx_invvpid(VMX_INVVPID_SINGLECONTEXTGLOBAL, vpid,
 										0));
-		HALT_ON_ERRORCOND(!__vmx_invvpid(VMX_INVVPID_SINGLECONTEXTGLOBAL, 0,
+		ASSERT(!__vmx_invvpid(VMX_INVVPID_SINGLECONTEXTGLOBAL, 0,
 										 0));
 		/* Update VPID */
 		vpid += 2;
@@ -521,7 +521,7 @@ static void lhv_guest_wait_int_vmexit_handler(VCPU *vcpu, struct regs *r,
 	if (info->vmexit_reason != VMX_VMEXIT_VMCALL) {
 		return;
 	}
-	HALT_ON_ERRORCOND(r->eax == 25);
+	ASSERT(r->eax == 25);
 	if (!(SHV_OPT & (LHV_NO_EFLAGS_IF | LHV_NO_INTERRUPT))) {
 		asm volatile ("sti; hlt; cli;");
 	}
@@ -570,9 +570,9 @@ static void lhv_guest_test_large_page(VCPU *vcpu)
 {
 	(void)vcpu;
 	if (SHV_OPT & LHV_USE_LARGE_PAGE) {
-		HALT_ON_ERRORCOND(SHV_OPT & LHV_USE_EPT);
-		HALT_ON_ERRORCOND(large_pages[0][0] == 'B');
-		HALT_ON_ERRORCOND(large_pages[1][0] == 'A');
+		ASSERT(SHV_OPT & LHV_USE_EPT);
+		ASSERT(large_pages[0][0] == 'B');
+		ASSERT(large_pages[1][0] == 'A');
 	}
 }
 
@@ -583,7 +583,7 @@ static void lhv_guest_test_user_vmexit_handler(VCPU *vcpu, struct regs *r,
 	if (info->vmexit_reason != VMX_VMEXIT_VMCALL) {
 		return;
 	}
-	HALT_ON_ERRORCOND(r->eax == 33);
+	ASSERT(r->eax == 33);
 	vmcs_vmwrite(vcpu, VMCS_guest_RIP, info->guest_rip + info->inst_len);
 	enter_user_mode(vcpu, 0);
 	vmresume_asm(r);
@@ -592,7 +592,7 @@ static void lhv_guest_test_user_vmexit_handler(VCPU *vcpu, struct regs *r,
 static void lhv_guest_test_user(VCPU *vcpu)
 {
 	if (SHV_OPT & LHV_USER_MODE) {
-		HALT_ON_ERRORCOND(!(SHV_OPT & LHV_NO_EFLAGS_IF));
+		ASSERT(!(SHV_OPT & LHV_NO_EFLAGS_IF));
 		vcpu->vmexit_handler_override = lhv_guest_test_user_vmexit_handler;
 		asm volatile ("vmcall" : : "a"(33));
 		vcpu->vmexit_handler_override = NULL;
@@ -609,13 +609,13 @@ static void lhv_guest_test_nested_user_vmexit_handler(VCPU *vcpu,
 	}
 	(void)vcpu;
 	(void)r;
-	HALT_ON_ERRORCOND(0 && "VMEXIT not allowed");
+	ASSERT(0 && "VMEXIT not allowed");
 }
 
 static void lhv_guest_test_nested_user(VCPU *vcpu)
 {
 	if (SHV_OPT & LHV_NESTED_USER_MODE) {
-		HALT_ON_ERRORCOND(!(SHV_OPT & LHV_NO_EFLAGS_IF));
+		ASSERT(!(SHV_OPT & LHV_NO_EFLAGS_IF));
 		vcpu->vmexit_handler_override =
 			lhv_guest_test_nested_user_vmexit_handler;
 		// asm volatile ("vmcall" : : "a"(0x4c4150ffU));
@@ -643,24 +643,24 @@ static void lhv_guest_msr_bitmap_vmexit_handler(VCPU *vcpu, struct regs *r,
 			/* Enable MSR bitmap */
 			{
 				u32 val = vmcs_vmread(vcpu, VMCS_control_VMX_cpu_based);
-				HALT_ON_ERRORCOND((val & mask) == 0);
+				ASSERT((val & mask) == 0);
 				val |= mask;
 				vmcs_vmwrite(vcpu, VMCS_control_VMX_cpu_based, val);
 			}
 			for (u32 i = 0; i < PAGE_SIZE_4K; i++) {
-				HALT_ON_ERRORCOND(msr_bitmap[i] == 0);
+				ASSERT(msr_bitmap[i] == 0);
 			}
 			{
 				u64 addr = (u64) (ulong_t) msr_bitmap;
 				vmcs_vmwrite(vcpu, VMCS_control_MSR_Bitmaps_address, addr);
 			}
-			HALT_ON_ERRORCOND(rdmsr64(0x3b) == 0ULL);
+			ASSERT(rdmsr64(0x3b) == 0ULL);
 			break;
 		case 37:
 			/* Disable MSR bitmap */
 			{
 				u32 val = vmcs_vmread(vcpu, VMCS_control_VMX_cpu_based);
-				HALT_ON_ERRORCOND((val & mask) == mask);
+				ASSERT((val & mask) == mask);
 				val &= ~mask;
 				vmcs_vmwrite(vcpu, VMCS_control_VMX_cpu_based, val);
 			}
@@ -668,33 +668,33 @@ static void lhv_guest_msr_bitmap_vmexit_handler(VCPU *vcpu, struct regs *r,
 			break;
 		case 38:
 			/* Set bit, argument in EBX */
-			HALT_ON_ERRORCOND(r->ebx < 0x8000);
-			HALT_ON_ERRORCOND(!(msr_bitmap[r->ebx / 8] & (1 << (r->ebx % 8))));
+			ASSERT(r->ebx < 0x8000);
+			ASSERT(!(msr_bitmap[r->ebx / 8] & (1 << (r->ebx % 8))));
 			msr_bitmap[r->ebx / 8] |= (1 << (r->ebx % 8));
 			break;
 		case 39:
 			/* Clear bit, argument in EBX */
-			HALT_ON_ERRORCOND(r->ebx < 0x8000);
-			HALT_ON_ERRORCOND((msr_bitmap[r->ebx / 8] & (1 << (r->ebx % 8))));
+			ASSERT(r->ebx < 0x8000);
+			ASSERT((msr_bitmap[r->ebx / 8] & (1 << (r->ebx % 8))));
 			msr_bitmap[r->ebx / 8] &= ~(1 << (r->ebx % 8));
 			break;
 		case 41:
 			/* Prepare for FS / GS check */
-			HALT_ON_ERRORCOND(rdmsr64(IA32_MSR_FS_BASE) == 0ULL);
-			HALT_ON_ERRORCOND(rdmsr64(IA32_MSR_GS_BASE) == 0ULL);
-			HALT_ON_ERRORCOND(vmcs_vmread(vcpu, VMCS_guest_FS_base) == 0UL);
-			HALT_ON_ERRORCOND(vmcs_vmread(vcpu, VMCS_guest_GS_base) == 0UL);
+			ASSERT(rdmsr64(IA32_MSR_FS_BASE) == 0ULL);
+			ASSERT(rdmsr64(IA32_MSR_GS_BASE) == 0ULL);
+			ASSERT(vmcs_vmread(vcpu, VMCS_guest_FS_base) == 0UL);
+			ASSERT(vmcs_vmread(vcpu, VMCS_guest_GS_base) == 0UL);
 			vmcs_vmwrite(vcpu, VMCS_guest_FS_base, 0x680effffUL);
 			vmcs_vmwrite(vcpu, VMCS_guest_GS_base, 0x6810ffffUL);
 			break;
 		case 42:
 			/* Check FS / GS */
-			HALT_ON_ERRORCOND(vmcs_vmread(vcpu, VMCS_guest_FS_base) ==
+			ASSERT(vmcs_vmread(vcpu, VMCS_guest_FS_base) ==
 							  0xffff680eUL);
-			HALT_ON_ERRORCOND(vmcs_vmread(vcpu, VMCS_guest_GS_base) ==
+			ASSERT(vmcs_vmread(vcpu, VMCS_guest_GS_base) ==
 							  0xffff6810UL);
-			HALT_ON_ERRORCOND(rdmsr64(IA32_MSR_FS_BASE) == 0ULL);
-			HALT_ON_ERRORCOND(rdmsr64(IA32_MSR_GS_BASE) == 0ULL);
+			ASSERT(rdmsr64(IA32_MSR_FS_BASE) == 0ULL);
+			ASSERT(rdmsr64(IA32_MSR_GS_BASE) == 0ULL);
 			vmcs_vmwrite(vcpu, VMCS_guest_FS_base, 0UL);
 			vmcs_vmwrite(vcpu, VMCS_guest_GS_base, 0UL);
 			break;
@@ -709,7 +709,7 @@ static void lhv_guest_msr_bitmap_vmexit_handler(VCPU *vcpu, struct regs *r,
 		case IA32_X2APIC_APICID:
 			return;
 		default:
-			HALT_ON_ERRORCOND(r->ebx == MSR_TEST_NORMAL);
+			ASSERT(r->ebx == MSR_TEST_NORMAL);
 			r->ebx = MSR_TEST_VMEXIT;
 			break;
 		}
@@ -717,7 +717,7 @@ static void lhv_guest_msr_bitmap_vmexit_handler(VCPU *vcpu, struct regs *r,
 	case VMX_VMEXIT_CPUID:
 		return;
 	default:
-		HALT_ON_ERRORCOND(0 && "Unknown exit reason");
+		ASSERT(0 && "Unknown exit reason");
 	}
 	vmcs_vmwrite(vcpu, VMCS_guest_RIP, info->guest_rip + info->inst_len);
 	vmresume_asm(r);
@@ -748,7 +748,7 @@ static void _test_rdmsr(u32 ecx, u32 expected_ebx)
 				  "3:\r\n"
 				  : "+b"(ebx), "=a"(eax), "=d"(edx)
 				  : "c" (ecx), [e]"g"(MSR_TEST_EXCEPT));
-	HALT_ON_ERRORCOND(ebx == expected_ebx);
+	ASSERT(ebx == expected_ebx);
 }
 
 static void _test_wrmsr(u32 ecx, u32 expected_ebx, u64 val)
@@ -776,7 +776,7 @@ static void _test_wrmsr(u32 ecx, u32 expected_ebx, u64 val)
 				  "3:\r\n"
 				  : "+b"(ebx)
 				  : "c" (ecx), "a"(eax), "d"(edx), [e]"g"(MSR_TEST_EXCEPT));
-	HALT_ON_ERRORCOND(ebx == expected_ebx);
+	ASSERT(ebx == expected_ebx);
 }
 
 static void lhv_guest_msr_bitmap(VCPU *vcpu)
@@ -846,8 +846,8 @@ static void lhv_guest_msr_bitmap(VCPU *vcpu)
 		asm volatile ("cli");
 		asm volatile ("vmcall" : : "a"(41));
 		_test_rdmsr(IA32_MSR_FS_BASE, MSR_TEST_NORMAL);
-		HALT_ON_ERRORCOND(rdmsr64(IA32_MSR_FS_BASE) == 0x680effffULL);
-		HALT_ON_ERRORCOND(rdmsr64(IA32_MSR_GS_BASE) == 0x6810ffffULL);
+		ASSERT(rdmsr64(IA32_MSR_FS_BASE) == 0x680effffULL);
+		ASSERT(rdmsr64(IA32_MSR_GS_BASE) == 0x6810ffffULL);
 		_test_wrmsr(IA32_MSR_FS_BASE, MSR_TEST_NORMAL, 0xffff680eULL);
 		_test_wrmsr(IA32_MSR_GS_BASE, MSR_TEST_NORMAL, 0xffff6810ULL);
 		asm volatile ("vmcall" : : "a"(42));
@@ -874,7 +874,7 @@ void lhv_guest_main(ulong_t cpu_id)
 	u64 iter = 0;
 	bool in_xmhf = false;
 	VCPU *vcpu = get_vcpu();
-	HALT_ON_ERRORCOND(cpu_id == vcpu->idx);
+	ASSERT(cpu_id == vcpu->idx);
 	{
 		u32 eax, ebx, ecx, edx;
 		cpuid(0x46484d58U, &eax, &ebx, &ecx, &edx);
@@ -887,7 +887,7 @@ void lhv_guest_main(ulong_t cpu_id)
 		for (int i = 0; i < vc.width; i++) {
 			for (int j = 0; j < 2; j++) {
 #ifndef __DEBUG_VGA__
-				HALT_ON_ERRORCOND(console_get_char(&vc, i, j) == ' ');
+				ASSERT(console_get_char(&vc, i, j) == ' ');
 #endif /* !__DEBUG_VGA__ */
 				console_put_char(&vc, i, j, '0' + vcpu->id);
 			}
@@ -898,7 +898,7 @@ void lhv_guest_main(ulong_t cpu_id)
 	}
 	while (1) {
 		/* Assume that iter never wraps around */
-		HALT_ON_ERRORCOND(++iter > 0);
+		ASSERT(++iter > 0);
 		if (in_xmhf) {
 			printf("CPU(0x%02x): SHV in XMHF test iter %lld\n", vcpu->id, iter);
 		} else {
@@ -987,7 +987,7 @@ void lhv_guest_xcphandler(VCPU * vcpu, struct regs *r, iret_info_t * info)
 		 * code is already calling printf().
 		 */
 		if (pic_spurious(7) != 1) {
-			HALT_ON_ERRORCOND(0);
+			ASSERT(0);
 		}
 		break;
 

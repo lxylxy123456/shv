@@ -67,7 +67,7 @@ void init_idt(void)
 {
 	construct_idt();
 
-	HALT_ON_ERRORCOND (cpuid_ecx(1, 0) & (1U << 5));
+	ASSERT (cpuid_ecx(1, 0) & (1U << 5));
 
 	/* Load IDT */
 	{
@@ -102,7 +102,7 @@ VCPU *get_vcpu(void)
 		}
 	}
 
-	HALT_ON_ERRORCOND(0 && ("Unable to retrieve vcpu"));
+	ASSERT(0 && ("Unable to retrieve vcpu"));
 }
 
 /* Dump information when handling exception. */
@@ -172,7 +172,7 @@ static void handle_idt_host(VCPU * vcpu, struct regs *r, iret_info_t * info)
 		 * code is already calling printf().
 		 */
 		if (pic_spurious(7) != 1) {
-			HALT_ON_ERRORCOND(0);
+			ASSERT(0);
 		}
 		break;
 

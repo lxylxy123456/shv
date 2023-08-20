@@ -75,8 +75,8 @@ static void* lhv_ept_gzp(void *vctx, size_t alignment, size_t sz)
 {
 	lhv_ept_ctx_t *ept_ctx = (lhv_ept_ctx_t *)vctx;
 	u32 i;
-	HALT_ON_ERRORCOND(alignment == PAGE_SIZE_4K);
-	HALT_ON_ERRORCOND(sz == PAGE_SIZE_4K);
+	ASSERT(alignment == PAGE_SIZE_4K);
+	ASSERT(sz == PAGE_SIZE_4K);
 	for (i = 0; i < EPT_POOL_SIZE; i++) {
 		if (!ept_ctx->page_alloc[i]) {
 			ept_ctx->page_alloc[i] = 1;
@@ -124,7 +124,7 @@ static u8 ept_get_mem_type(VCPU *vcpu, u64 pagebaseaddr)
 		/*
 		 * Should be impossible because the last entry in fixed_mtrr_prop is 1M.
 		 */
-		HALT_ON_ERRORCOND(0 && "Unknown fixed MTRR");
+		ASSERT(0 && "Unknown fixed MTRR");
 	}
 	/* Compute variable MTRRs */
 	for (i = 0; i < vcpu->vmx_guestmtrrmsrs.var_count; i++) {
@@ -171,7 +171,7 @@ static void ept_map_continuous_addr(VCPU *vcpu, lhv_ept_ctx_t *ept_ctx,
 	for (paddr = low; paddr < high; paddr += PA_PAGE_SIZE_4K) {
 		hpt_pmeo_setcache(pmeo, ept_get_mem_type(vcpu, paddr));
 		hpt_pmeo_set_address(pmeo, paddr);
-		HALT_ON_ERRORCOND(hptw_insert_pmeo_alloc(&ept_ctx->ctx, pmeo,
+		ASSERT(hptw_insert_pmeo_alloc(&ept_ctx->ctx, pmeo,
 												 paddr) == 0);
 	}
 }
@@ -183,20 +183,20 @@ void lhv_ept_init(VCPU *vcpu)
 		u32 eax, ebx, ecx, edx;
 		/* Check whether CPUID 0x80000008 is supported */
 		cpuid(0x80000000U, &eax, &ebx, &ecx, &edx);
-		HALT_ON_ERRORCOND(eax >= 0x80000008U);
+		ASSERT(eax >= 0x80000008U);
 		/* Compute paddrmask from CPUID.80000008H:EAX[7:0] (max phy addr) */
 		cpuid(0x80000008U, &eax, &ebx, &ecx, &edx);
 		eax &= 0xFFU;
-		HALT_ON_ERRORCOND(eax >= 32 && eax < 64);
+		ASSERT(eax >= 32 && eax < 64);
 		vcpu->vmx_ept_paddrmask = (1ULL << eax) - 0x1000ULL;
 	}
 	{
 		u64 msrval = rdmsr64(IA32_MTRRCAP);
 		vcpu->vmx_guestmtrrmsrs.var_count = (u8) msrval;
 		//sanity check that fixed MTRRs are supported
-		HALT_ON_ERRORCOND(msrval & (1U << 8));
+		ASSERT(msrval & (1U << 8));
 		//ensure number of variable MTRRs are within the maximum supported
-		HALT_ON_ERRORCOND( (vcpu->vmx_guestmtrrmsrs.var_count <=
+		ASSERT( (vcpu->vmx_guestmtrrmsrs.var_count <=
 							MAX_VARIABLE_MTRR_PAIRS) );
 	}
 	{
@@ -257,9 +257,9 @@ u64 lhv_build_ept(VCPU *vcpu, u8 ept_num)
 		/* Real mode */
 		ept_map_continuous_addr(vcpu, &ept_ctx, &pmeo, 0x00000000, 0x00100000);
 	} else {
-		HALT_ON_ERRORCOND(__vmx_invept(VMX_INVEPT_SINGLECONTEXT,
+		ASSERT(__vmx_invept(VMX_INVEPT_SINGLECONTEXT,
 									   ept_ctx.ctx.root_pa | 0x1eULL));
-		// HALT_ON_ERRORCOND(__vmx_invept(VMX_INVEPT_GLOBAL, 0));
+		// ASSERT(__vmx_invept(VMX_INVEPT_GLOBAL, 0));
 	}
 
 	/* Map 0x12340000 to ept_target */
@@ -271,7 +271,7 @@ u64 lhv_build_ept(VCPU *vcpu, u8 ept_num)
 		} else {
 			pmeo.pme = 0;
 		}
-		HALT_ON_ERRORCOND(hptw_insert_pmeo_alloc(&ept_ctx.ctx, &pmeo,
+		ASSERT(hptw_insert_pmeo_alloc(&ept_ctx.ctx, &pmeo,
 												 0x12340000ULL) == 0);
 	}
 
@@ -279,8 +279,8 @@ u64 lhv_build_ept(VCPU *vcpu, u8 ept_num)
 	if (SHV_OPT & LHV_USE_LARGE_PAGE) {
 		spa_t addr0 = hva2spa(large_pages[0]);
 		spa_t addr1 = hva2spa(large_pages[1]);
-		HALT_ON_ERRORCOND(PA_PAGE_ALIGNED_2M(addr0));
-		HALT_ON_ERRORCOND(PA_PAGE_ALIGNED_2M(addr1));
+		ASSERT(PA_PAGE_ALIGNED_2M(addr0));
+		ASSERT(PA_PAGE_ALIGNED_2M(addr1));
 		pmeo.lvl = 2;
 		pmeo.pme = 0;
 		hpt_pmeo_set_page(&pmeo, true);
@@ -289,11 +289,11 @@ u64 lhv_build_ept(VCPU *vcpu, u8 ept_num)
 		hpt_pmeo_setcache(&pmeo, HPT_PMT_WB);
 		/* lage_pages[1] -> lage_pages[0] */
 		hpt_pmeo_set_address(&pmeo, addr0);
-		HALT_ON_ERRORCOND(hptw_insert_pmeo_alloc(&ept_ctx.ctx, &pmeo,
+		ASSERT(hptw_insert_pmeo_alloc(&ept_ctx.ctx, &pmeo,
 												 addr1) == 0);
 		/* lage_pages[1] -> lage_pages[1] */
 		hpt_pmeo_set_address(&pmeo, addr1);
-		HALT_ON_ERRORCOND(hptw_insert_pmeo_alloc(&ept_ctx.ctx, &pmeo,
+		ASSERT(hptw_insert_pmeo_alloc(&ept_ctx.ctx, &pmeo,
 												 addr0) == 0);
 		memset(large_pages[0], 'A', 16);
 		memset(large_pages[1], 'B', 16);

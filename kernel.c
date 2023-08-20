@@ -48,11 +48,11 @@ void kernel_main(void)
 #ifdef __i386__
 #if I386_PAE
 		/* Enable CR4.PAE. */
-		HALT_ON_ERRORCOND((cpuid_edx(1U, 0U) & (1U << 6)));
+		ASSERT((cpuid_edx(1U, 0U) & (1U << 6)));
 		g_cr4 |= CR4_PAE;
 #else /* !I386_PAE */
 		/* Enable CR4.PSE, so we can use 4MB pages. */
-		HALT_ON_ERRORCOND((cpuid_edx(1U, 0U) & (1U << 3)));
+		ASSERT((cpuid_edx(1U, 0U) & (1U << 3)));
 		g_cr4 |= CR4_PSE;
 #endif /* I386_PAE */
 #endif /* !__i386__ */
@@ -63,7 +63,7 @@ void kernel_main(void)
 		smp_init();
 	}
 
-	HALT_ON_ERRORCOND(0 && "Should not reach here");
+	ASSERT(0 && "Should not reach here");
 }
 
 /* This function is called from smp-asm.S, both BSP and AP. */
@@ -101,5 +101,5 @@ void kernel_main_smp(VCPU *vcpu)
 		lhv_main(vcpu);
 	}
 
-	HALT_ON_ERRORCOND(0 && "Should not reach here");
+	ASSERT(0 && "Should not reach here");
 }

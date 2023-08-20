@@ -74,7 +74,7 @@ static void ps2_write_conf(u8 data)
 
 void mouse_init(VCPU *vcpu)
 {
-	HALT_ON_ERRORCOND(vcpu->isbsp);
+	ASSERT(vcpu->isbsp);
 	printf("Initializing mouse\n");
 
 	/*
@@ -95,32 +95,32 @@ void mouse_init(VCPU *vcpu)
 	{
 		u8 conf = ps2_read_conf();
 		/* If fail, not dual channel PS/2 controller */
-		HALT_ON_ERRORCOND((conf & 0x20));
+		ASSERT((conf & 0x20));
 		ps2_write_conf(conf & ~0x43);
 	}
 
 	/* Step 6: Perform Controller Self Test */
 	ps2_send_ctrl(0xaa);
-	HALT_ON_ERRORCOND(ps2_recv_data() == 0x55);
+	ASSERT(ps2_recv_data() == 0x55);
 
 	/* Step 7: Determine If There Are 2 Channels */
 	ps2_send_ctrl(0xa8);
-	HALT_ON_ERRORCOND(!(ps2_read_conf() & (1U << 5)));
+	ASSERT(!(ps2_read_conf() & (1U << 5)));
 	ps2_send_ctrl(0xa7);
-	HALT_ON_ERRORCOND(ps2_read_conf() & (1U << 5));
+	ASSERT(ps2_read_conf() & (1U << 5));
 
 	/* Step 8: Perform Interface Tests */
 	ps2_send_ctrl(0xab);
-	HALT_ON_ERRORCOND(ps2_recv_data() == 0x00);
+	ASSERT(ps2_recv_data() == 0x00);
 	ps2_send_ctrl(0xa9);
-	HALT_ON_ERRORCOND(ps2_recv_data() == 0x00);
+	ASSERT(ps2_recv_data() == 0x00);
 
 	/* Step 9: Enable Devices */
 	ps2_send_ctrl(0xae);
 	ps2_send_ctrl(0xa8);
 	{
 		u8 conf = ps2_read_conf();
-		HALT_ON_ERRORCOND(!(conf & 0x30));
+		ASSERT(!(conf & 0x30));
 		ps2_write_conf(conf | 0x03);
 	}
 
@@ -129,30 +129,30 @@ void mouse_init(VCPU *vcpu)
 	drop_mouse_interrupts = ???;
 	drop_keyboard_interrupts = ???;
 	ps2_send_data(0xff);
-	HALT_ON_ERRORCOND(ps2_recv_data() == 0xfa);
-	HALT_ON_ERRORCOND(ps2_recv_data() == 0xaa);
+	ASSERT(ps2_recv_data() == 0xfa);
+	ASSERT(ps2_recv_data() == 0xaa);
 	ps2_send_ctrl(0xd4);
 	ps2_send_data(0xff);
-	HALT_ON_ERRORCOND(ps2_recv_data() == 0xfa);
-	HALT_ON_ERRORCOND(ps2_recv_data() == 0xaa);
-	HALT_ON_ERRORCOND(drop_mouse_interrupts == 0);
-	HALT_ON_ERRORCOND(drop_keyboard_interrupts == 0);
+	ASSERT(ps2_recv_data() == 0xfa);
+	ASSERT(ps2_recv_data() == 0xaa);
+	ASSERT(drop_mouse_interrupts == 0);
+	ASSERT(drop_keyboard_interrupts == 0);
 #endif
 
 	/* Enable mouse */
 	drop_mouse_interrupts = 1;
 	ps2_send_ctrl(0xd4);
 	ps2_send_data(0xf4);
-	HALT_ON_ERRORCOND(ps2_recv_data() == 0xfa);
-	HALT_ON_ERRORCOND(drop_mouse_interrupts == 0);
+	ASSERT(ps2_recv_data() == 0xfa);
+	ASSERT(drop_mouse_interrupts == 0);
 
 	printf("Initialized mouse\n");
 }
 
 void handle_mouse_interrupt(VCPU *vcpu, int vector, int guest)
 {
-	HALT_ON_ERRORCOND(vcpu->isbsp);
-	HALT_ON_ERRORCOND(vector == 0x2c);
+	ASSERT(vcpu->isbsp);
+	ASSERT(vector == 0x2c);
 	if (drop_mouse_interrupts) {
 		drop_mouse_interrupts--;
 		printf("Dropped a mouse interrupt\n");

@@ -26,8 +26,8 @@ volatile u32 drop_keyboard_interrupts = 0;
 
 void handle_keyboard_interrupt(VCPU *vcpu, int vector, int guest)
 {
-	HALT_ON_ERRORCOND(vcpu->isbsp);
-	HALT_ON_ERRORCOND(vector == 0x21);
+	ASSERT(vcpu->isbsp);
+	ASSERT(vector == 0x21);
 	if (drop_keyboard_interrupts) {
 		drop_keyboard_interrupts--;
 		printf("Dropped a keyborad interrupt\n");
