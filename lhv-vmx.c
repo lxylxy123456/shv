@@ -335,23 +335,7 @@ void lhv_vmx_main(VCPU *vcpu)
 			for (u32 i = 0; i < 0x1000 / sizeof(u32); i++) {
 				printf("vmcs[0x%03x] = 0x%08x\n", i, ((u32 *)vcpu->my_vmcs)[i]);
 			}
-#define DECLARE_FIELD_16(encoding, name, ...)	\
-			printf("vmread(0x%04x) = %08hx\n", encoding, \
-				   __vmx_vmread16(encoding));
-#define DECLARE_FIELD_64(encoding, name, ...)	\
-			printf("vmread(0x%04x) = %08llx\n", encoding, \
-				   __vmx_vmread64(encoding));
-#define DECLARE_FIELD_32(encoding, name, ...)	\
-			printf("vmread(0x%04x) = %08x\n", encoding, \
-				   __vmx_vmread32(encoding));
-#define DECLARE_FIELD_NW(encoding, name, ...)	\
-			printf("vmread(0x%04x) = %08lx\n", encoding, \
-				   __vmx_vmreadNW(encoding));
-#include <_vmx_vmcs_fields.h>
-#undef DECLARE_FIELD_16
-#undef DECLARE_FIELD_64
-#undef DECLARE_FIELD_32
-#undef DECLARE_FIELD_NW
+			vmcs_print(vcpu);
 		}
 	}
 

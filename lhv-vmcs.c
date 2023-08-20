@@ -53,22 +53,37 @@ void __vmx_vmwriteNW(u16 encoding, ulong_t value) {
 	ASSERT(__vmx_vmwrite(encoding, value));
 }
 
-/* Read 16-bit VMCS field, never fails */
-u16 __vmx_vmread16(u16 encoding) {
+/* Read 16-bit VMCS field, return whether succeed */
+bool __vmx_vmread16_safe(u16 encoding, u16 *result)
+{
 	unsigned long value;
 	ASSERT((encoding >> 12) == 0UL);
-	ASSERT(__vmx_vmread(encoding, &value));
+	if (!__vmx_vmread(encoding, &value)) {
+		return false;
+	}
 	ASSERT(value == (unsigned long)(u16)value);
+	*result = value;
+	return true;
+}
+
+/* Read 16-bit VMCS field, never fails */
+u16 __vmx_vmread16(u16 encoding) {
+	u16 value;
+	ASSERT(__vmx_vmread16_safe(encoding, &value));
 	return value;
 }
 
-/* Read 64-bit VMCS field, never fails */
-u64 __vmx_vmread64(u16 encoding) {
+/* Read 64-bit VMCS field, return whether succeed */
+bool __vmx_vmread64_safe(u16 encoding, u64 *result)
+{
 #ifdef __amd64__
 	unsigned long value;
 	ASSERT((encoding >> 12) == 2UL);
-	ASSERT(__vmx_vmread(encoding, &value));
-	return value;
+	if (!__vmx_vmread(encoding, &value)) {
+		return false;
+	}
+	*result = value;
+	return true;
 #elif defined(__i386__)
 	union {
 		struct {
@@ -79,29 +94,65 @@ u64 __vmx_vmread64(u16 encoding) {
 	_Static_assert(sizeof(u32) == sizeof(unsigned long), "incorrect size");
 	ASSERT((encoding >> 12) == 2UL);
 	ASSERT((encoding & 0x1) == 0x0);
-	ASSERT(__vmx_vmread(encoding, &ans.low));
+	if (!__vmx_vmread(encoding, &ans.low)) {
+		return false;
+	}
+	/* Since reading low succeeds, assume reading high will succeed. */
 	ASSERT(__vmx_vmread(encoding + 1, &ans.high));
-	return ans.full;
+	*result = ans.full;
+	return true;
 #else /* !defined(__i386__) && !defined(__amd64__) */
     #error "Unsupported Arch"
 #endif /* !defined(__i386__) && !defined(__amd64__) */
 }
 
-/* Read 32-bit VMCS field, never fails */
-u32 __vmx_vmread32(u16 encoding) {
-	unsigned long value;
-	ASSERT((encoding >> 12) == 4UL);
-	ASSERT(__vmx_vmread(encoding, &value));
-	ASSERT(value == (unsigned long)(u32)value);
+/* Read 64-bit VMCS field, never fails */
+u64 __vmx_vmread64(u16 encoding)
+{
+	u64 value;
+	ASSERT(__vmx_vmread64_safe(encoding, &value));
 	return value;
 }
 
-/* Read natural width (NW) VMCS field, never fails */
-ulong_t __vmx_vmreadNW(u16 encoding) {
+/* Read 32-bit VMCS field, return whether succeed */
+bool __vmx_vmread32_safe(u16 encoding, u32 *result)
+{
+	unsigned long value;
+	ASSERT((encoding >> 12) == 4UL);
+	if (!__vmx_vmread(encoding, &value)) {
+		return false;
+	}
+	ASSERT(value == (unsigned long)(u32)value);
+	*result = value;
+	return true;
+}
+
+/* Read 32-bit VMCS field, never fails */
+u32 __vmx_vmread32(u16 encoding)
+{
+	u32 value;
+	ASSERT(__vmx_vmread32_safe(encoding, &value));
+	return value;
+}
+
+/* Read natural width (NW) VMCS field, return whether succeed */
+bool __vmx_vmreadNW_safe(u16 encoding, ulong_t *result)
+{
 	unsigned long value;
 	ASSERT((encoding >> 12) == 6UL);
-	ASSERT(__vmx_vmread(encoding, &value));
+	if (!__vmx_vmread(encoding, &value)) {
+		return false;
+	}
 	ASSERT(value == (unsigned long)(ulong_t)value);
+	*result = value;
+	return true;
+}
+
+/* Read natural width (NW) VMCS field, never fails */
+ulong_t __vmx_vmreadNW(u16 encoding)
+{
+	ulong_t value;
+	ASSERT(__vmx_vmreadNW_safe(encoding, &value));
 	return value;
 }
 
@@ -131,6 +182,59 @@ u64 vmcs_vmread64(VCPU *vcpu, ulong_t encoding)
 {
 	(void) vcpu;
 	return __vmx_vmread64(encoding);
+}
+
+void vmcs_print(VCPU *vcpu)
+{
+#define DECLARE_FIELD_16(encoding, name, ...) \
+	{ \
+		u16 value; \
+		if (__vmx_vmread16_safe(encoding, &value)) { \
+			printf("CPU(0x%02x): vmread(0x%04x) = %04hx\n", vcpu->id, \
+				   encoding, value); \
+		} else { \
+			printf("CPU(0x%02x): vmread(0x%04x) = unavailable\n", vcpu->id, \
+				   encoding); \
+		} \
+	}
+#define DECLARE_FIELD_64(encoding, name, ...) \
+	{ \
+		u64 value; \
+		if (__vmx_vmread64_safe(encoding, &value)) { \
+			printf("CPU(0x%02x): vmread(0x%04x) = %016llx\n", vcpu->id, \
+				   encoding, value); \
+		} else { \
+			printf("CPU(0x%02x): vmread(0x%04x) = unavailable\n", vcpu->id, \
+				   encoding); \
+		} \
+	}
+#define DECLARE_FIELD_32(encoding, name, ...) \
+	{ \
+		u32 value; \
+		if (__vmx_vmread32_safe(encoding, &value)) { \
+			printf("CPU(0x%02x): vmread(0x%04x) = %08x\n", vcpu->id, \
+				   encoding, value); \
+		} else { \
+			printf("CPU(0x%02x): vmread(0x%04x) = unavailable\n", vcpu->id, \
+				   encoding); \
+		} \
+	}
+#define DECLARE_FIELD_NW(encoding, name, ...) \
+	{ \
+		ulong_t value; \
+		if (__vmx_vmreadNW_safe(encoding, &value)) { \
+			printf("CPU(0x%02x): vmread(0x%04x) = %08lx\n", vcpu->id, \
+				   encoding, value); \
+		} else { \
+			printf("CPU(0x%02x): vmread(0x%04x) = unavailable\n", vcpu->id, \
+				   encoding); \
+		} \
+	}
+#include <_vmx_vmcs_fields.h>
+#undef DECLARE_FIELD_16
+#undef DECLARE_FIELD_64
+#undef DECLARE_FIELD_32
+#undef DECLARE_FIELD_NW
 }
 
 void vmcs_dump(VCPU *vcpu, int verbose)

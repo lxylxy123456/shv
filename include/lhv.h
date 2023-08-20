@@ -100,6 +100,8 @@ void vmcs_vmwrite(VCPU *vcpu, ulong_t encoding, ulong_t value);
 void vmcs_vmwrite64(VCPU *vcpu, ulong_t encoding, u64 value);
 ulong_t vmcs_vmread(VCPU *vcpu, ulong_t encoding);
 u64 vmcs_vmread64(VCPU *vcpu, ulong_t encoding);
+
+void vmcs_print(VCPU *vcpu);
 void vmcs_dump(VCPU *vcpu, int verbose);
 void vmcs_load(VCPU *vcpu);
 
@@ -107,9 +109,13 @@ void __vmx_vmwrite16(u16 encoding, u16 value);
 void __vmx_vmwrite64(u16 encoding, u64 value);
 void __vmx_vmwrite32(u16 encoding, u32 value);
 void __vmx_vmwriteNW(u16 encoding, ulong_t value);
+bool __vmx_vmread16_safe(u16 encoding, u16 *result);
 u16 __vmx_vmread16(u16 encoding);
+bool __vmx_vmread64_safe(u16 encoding, u64 *result);
 u64 __vmx_vmread64(u16 encoding);
+bool __vmx_vmread32_safe(u16 encoding, u32 *result);
 u32 __vmx_vmread32(u16 encoding);
+bool __vmx_vmreadNW_safe(u16 encoding, ulong_t *result);
 ulong_t __vmx_vmreadNW(u16 encoding);
 
 /* lhv-guest-asm.S */
