@@ -29,14 +29,14 @@ properties([
     ])
 ])
 
-void qemu_test(String subarch, String lhv_subarch) {
+void qemu_test(String subarch, String shv_subarch) {
     PWD = sh(returnStdout: true, script: 'pwd').trim()
-    sh "cp ${PWD}/tmp/grub/c.img ${PWD}/tmp/xmhf.img"
-    sh "cp ${PWD}/lhv/tmp/grub/c.img ${PWD}/lhv/tmp/xmhf.img"
+    sh "cp ${PWD}/xmhf/tmp/grub/c.img ${PWD}/xmhf/tmp/xmhf.img"
+    sh "cp ${PWD}/grub.iso ${PWD}/tmp/shv.img"
     sh """
         python3 -u ./tools/ci/test5.py \
-            --xmhf-img ${PWD}/tmp/grub/c.img \
-            --lhv-img ${PWD}/lhv/tmp/grub/c.img \
+            --xmhf-img ${PWD}/xmhf/tmp/grub/c.img \
+            --shv-img ${PWD}/tmp/grub/c.img \
             --work-dir ${PWD}/tmp/ \
             --no-display \
             --verbose \
