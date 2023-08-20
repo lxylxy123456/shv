@@ -179,5 +179,5 @@ if [ -n "$GDB_PORT" ]; then
 fi
 set -x
 
-"$QEMU_BIN" "${ARGS[@]}" < /dev/null
+exec "$QEMU_BIN" "${ARGS[@]}" < /dev/null
 
