@@ -44,12 +44,11 @@
 
 #define __DEBUG_QEMU__
 
-// TODO: change its name
 #define ASSERT(expr) \
 	do { \
 		if (!(expr)) { \
-			printf("Error: ASSERT(%s) @ %s:%d failed\n", #expr, \
-				   __FILE__, __LINE__); \
+			printf("Error: ASSERT(%s) @ %s:%d failed\n", #expr, __FILE__, \
+				   __LINE__); \
 			cpu_halt(); \
 		} \
 	} while (0)

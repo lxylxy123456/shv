@@ -19,7 +19,7 @@
 version: 2.1
 
 jobs:
-  test-xmhf:
+  test-shv:
     machine:
       # Need nested virtualization
       # https://discuss.circleci.com/t/new-android-machine-image-now-/39467
@@ -53,18 +53,6 @@ jobs:
           path: shv.bin
       - store_artifacts:
           path: grub.iso
-#      - restore_cache:
-#          keys:
-#            - debian11x86x64-20220407-<< parameters.subarch >>
-#      - run:
-#          name: "Download Debian"
-#          command: |
-#            source ./tools/ci/circleci_env.sh << parameters.subarch >>
-#            tools/ci/download.sh cache ${qemu_image_back}
-#      - save_cache:
-#          key: debian11x86x64-20220407-<< parameters.subarch >>
-#          paths:
-#            - cache/
       - run:
           name: "Test"
           command: |
@@ -76,37 +64,11 @@ jobs:
                 --no-display \
                 --verbose \
                 --watch-serial
-#            timeout 15 \
-#              qemu-system-x86_64 -kernel shv.bin -smp 4 -enable-kvm \
-#                -display none -serial file:qemu-output.txt || true
-#            echo Begin qemu-output.txt
-#            cat qemu-output.txt
-#            echo End qemu-output.txt
-#            grep 'Hello, smp World 0!' qemu-output.txt
-#            grep 'Hello, smp World 1!' qemu-output.txt
-#            grep 'Hello, smp World 2!' qemu-output.txt
-#            grep 'Hello, smp World 3!' qemu-output.txt
-
-#            source ./tools/ci/circleci_env.sh << parameters.subarch >>
-#            rm -rf tmp qemu
-#            mkdir tmp qemu
-#            ln -s ${PWD}/cache/${qemu_image_back} qemu
-#            # qemu-img create -f qcow2 -b ${PWD}/qemu/${qemu_image_back} \
-#            #                 -F qcow2 ${PWD}/qemu/${qemu_image}
-#            # sha512sum ${PWD}/qemu/${qemu_image_back}
-#            python3 -m pip install jinja2
-#            python3 -u ./tools/ci/grub.py \
-#                --subarch ${SUBARCH} \
-#                --xmhf-bin ${PWD}/ \
-#                --work-dir ${PWD}/tmp/ \
-#                --verbose \
-#                --boot-dir ${PWD}/tools/ci/boot
-
 
 workflows:
-  test-xmhf-workflow:
+  test-shv-workflow:
     jobs:
-      - test-xmhf:
+      - test-shv:
           matrix:
             parameters:
               subarch: ["i386", "pae", "amd64"]
