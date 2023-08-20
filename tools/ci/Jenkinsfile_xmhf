@@ -122,7 +122,7 @@ pipeline {
                 qemu_test "amd64", "pae"
             }
         }
-        stage('Build i386 shv') {
+        stage('Build i386 shv again') {
             steps {
                 script {
                     helper.build_shv("i386", "${params.BUILD_OPTS}")
