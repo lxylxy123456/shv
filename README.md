@@ -1,7 +1,7 @@
 # SHV
 
 TODO: write README.md
-TODO: rename all "LHV" and "XMHF"
+TODO: rename all "LHV"
 TODO: indent
 
 ```sh

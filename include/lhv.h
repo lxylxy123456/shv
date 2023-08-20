@@ -103,6 +103,15 @@ u64 vmcs_vmread64(VCPU *vcpu, ulong_t encoding);
 void vmcs_dump(VCPU *vcpu, int verbose);
 void vmcs_load(VCPU *vcpu);
 
+void __vmx_vmwrite16(u16 encoding, u16 value);
+void __vmx_vmwrite64(u16 encoding, u64 value);
+void __vmx_vmwrite32(u16 encoding, u32 value);
+void __vmx_vmwriteNW(u16 encoding, ulong_t value);
+u16 __vmx_vmread16(u16 encoding);
+u64 __vmx_vmread64(u16 encoding);
+u32 __vmx_vmread32(u16 encoding);
+ulong_t __vmx_vmreadNW(u16 encoding);
+
 /* lhv-guest-asm.S */
 void lhv_guest_entry(void);
 void lhv_guest_xcphandler(VCPU * vcpu, struct regs *r, iret_info_t * info);

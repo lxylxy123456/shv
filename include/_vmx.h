@@ -516,7 +516,7 @@ typedef struct msr_entry {
 //VMX VMCS fields
 enum _vmcs_encodings {
 #define DECLARE_FIELD_16(encoding, name, ...) \
-  VMCS_##name = encoding,
+	VMCS_##name = encoding,
 #define DECLARE_FIELD_64(...) DECLARE_FIELD_16(__VA_ARGS__)
 #define DECLARE_FIELD_32(...) DECLARE_FIELD_16(__VA_ARGS__)
 #define DECLARE_FIELD_NW(...) DECLARE_FIELD_16(__VA_ARGS__)
@@ -525,13 +525,13 @@ enum _vmcs_encodings {
 
 struct _vmx_vmcsfields {
 #define DECLARE_FIELD_16(encoding, name, ...) \
-  u16 name;
+	u16 name;
 #define DECLARE_FIELD_64(encoding, name, ...) \
-  u64 name;
+	u64 name;
 #define DECLARE_FIELD_32(encoding, name, ...) \
-  u32 name;
+	u32 name;
 #define DECLARE_FIELD_NW(encoding, name, ...) \
-  ulong_t name;
+	ulong_t name;
 #include "_vmx_vmcs_fields.h"
 };
 
