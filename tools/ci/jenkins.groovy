@@ -18,10 +18,7 @@
 
 void build_shv(String subarch, String build_opts) {
     sh "git clean -Xdf"
-    // TODO: sh "./tools/ci/build.sh ${subarch} ${build_opts}"
-    sh "autoreconf --install && \
-        ./configure --host=${subarch}-linux-gnu ${build_opts} && \
-        make -j \$(nproc)"
+    sh "./tools/ci/build.sh --${subarch} ${build_opts}"
 }
 
 return this

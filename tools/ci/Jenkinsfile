@@ -23,7 +23,7 @@
 properties([
     parameters([
         string(name: 'XMHF_BRANCH', defaultValue: 'master'),
-        string(name: 'BUILD_OPTS', defaultValue: '--with-shv-opt=0xdfd')
+        string(name: 'BUILD_OPTS', defaultValue: '--shv-opt=0xdfd')
     ])
 ])
 
@@ -65,7 +65,7 @@ pipeline {
         stage('Build i386 SHV') {
             steps {
                 script {
-                    helper.build_shv("i686", "${params.BUILD_OPTS}")
+                    helper.build_shv("i386", "${params.BUILD_OPTS}")
                 }
             }
         }
@@ -77,7 +77,7 @@ pipeline {
         stage('Build amd64 SHV') {
             steps {
                 script {
-                    helper.build_shv("x86_64", "${params.BUILD_OPTS}")
+                    helper.build_shv("amd64", "${params.BUILD_OPTS}")
                 }
             }
         }
