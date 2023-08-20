@@ -12,7 +12,7 @@ jobs:
         target_arch:
           - 'i386'
           - 'pae'
-          - 'x86_64'
+          - 'amd64'
         optimize_mode:
           - 'O0'
           - 'O2'

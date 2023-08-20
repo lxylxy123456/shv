@@ -23,6 +23,9 @@ jobs:
       - run:
           name: "Build"
           command: |
+            tools/ci/build.sh --${{ matrix.target_arch }} \
+                          -${{ matrix.optimize_mode }} \
+                          --shv-opt 0xdfd
             autoreconf --install && \
             ./configure --host=<< parameters.subarch >>-linux-gnu \
                         --with-shv-opt=0xdfd CFLAGS=-g && \
