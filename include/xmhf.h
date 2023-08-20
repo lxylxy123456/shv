@@ -72,7 +72,6 @@ extern void emhfc_putchar(int c, void *arg);
 extern void emhfc_putchar_linelock(spin_lock_t *arg);
 extern void emhfc_putchar_lineunlock(spin_lock_t *arg);
 
-#define xmhf_cpu_relax cpu_relax
 #define HALT cpu_halt
 
 typedef u64 spa_t;

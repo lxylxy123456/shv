@@ -262,7 +262,7 @@ static void user_main_pal_demo(VCPU *vcpu, ulong_t arg)
 			spin_lock(&pal_lock);
 			printf("CPU(0x%02x): Locked pal_lock\n", vcpu->id);
 			while (1) {
-				xmhf_cpu_relax();
+				cpu_relax();
 			}
 		}
 	}

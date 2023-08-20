@@ -75,7 +75,7 @@
 static void dbg_x86_uart_putc_bare(char ch){
 	//wait for xmit hold register to be empty
 	while ( ! (inb(UART_PORT+0x5) & 0x20) ) {
-		xmhf_cpu_relax();
+		cpu_relax();
 	}
 
 	//write the character

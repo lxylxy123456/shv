@@ -103,7 +103,7 @@ static void udelay(u32 usecs){
 
   //wait for countdown
   while(!(inb(0x61) & 0x20)) {
-    xmhf_cpu_relax();
+    cpu_relax();
   }
 
   //disable ch-2 counter
@@ -148,7 +148,7 @@ void wakeupAPs(void){
             udelay(200);
             //wait for command completion
             while ((*icr) & 0x1000U) {
-                xmhf_cpu_relax();
+                cpu_relax();
             }
             printf("Sent SIPI-%u\n", i);
         }

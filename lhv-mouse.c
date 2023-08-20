@@ -35,7 +35,7 @@ static u8 ps2_recv_stat(void)
 static void ps2_send_ctrl(u8 ctrl)
 {
 	while (ps2_recv_stat() & 2) {
-		xmhf_cpu_relax();
+		cpu_relax();
 	}
 	outb(PS2_CTRL_PORT, ctrl);
 }
@@ -44,7 +44,7 @@ static void ps2_send_ctrl(u8 ctrl)
 static u8 ps2_recv_data(void)
 {
 	while (!(ps2_recv_stat() & 1)) {
-		xmhf_cpu_relax();
+		cpu_relax();
 	}
 	return inb(PS2_DATA_PORT);
 }
@@ -53,7 +53,7 @@ static u8 ps2_recv_data(void)
 static void ps2_send_data(u8 data)
 {
 	while (ps2_recv_stat() & 2) {
-		xmhf_cpu_relax();
+		cpu_relax();
 	}
 	outb(PS2_DATA_PORT, data);
 }
