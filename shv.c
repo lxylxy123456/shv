@@ -21,7 +21,7 @@
 
 void shv_main(VCPU * vcpu)
 {
-	console_vc_t vc    ;
+	console_vc_t vc     ;
 	console_get_vc(&vc, vcpu->idx, 0);
 	console_clear(&vc);
 	if (vcpu->isbsp) {
