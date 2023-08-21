@@ -232,15 +232,15 @@ extern u32 g_smp_lret_stack[2];
 /* paging.c */
 extern uintptr_t shv_page_table_init(void);
 #ifdef __amd64__
-extern volatile u64 shv_pml4t[P4L_NPLM4T * 512] ALIGNED_PAGE;
-extern volatile u64 shv_pdpt[P4L_NPDPT * 512] ALIGNED_PAGE;
-extern volatile u64 shv_pdt[P4L_NPDT * 512] ALIGNED_PAGE;
+extern volatile u64 shv_pml4t[P4L_NPLM4T * P4L_NEPT] ALIGNED_PAGE;
+extern volatile u64 shv_pdpt[P4L_NPDPT * P4L_NEPT] ALIGNED_PAGE;
+extern volatile u64 shv_pdt[P4L_NPDT * P4L_NEPT] ALIGNED_PAGE;
 #elif defined(__i386__)
 #if I386_PAE
-extern volatile u64 shv_pdpt[4] __attribute__ ((aligned (32)));
-extern volatile u64 shv_pdt[2048] ALIGNED_PAGE;
+extern volatile u64 shv_pdpt[PAE_NPDPTE] __attribute__ ((aligned (32)));
+extern volatile u64 shv_pdt[PAE_NPDT * PAE_NEPT] ALIGNED_PAGE;
 #else /* !I386_PAE */
-extern volatile u32 shv_pdt[1024] ALIGNED_PAGE;
+extern volatile u32 shv_pdt[P32_NPDT * P32_NEPT] ALIGNED_PAGE;
 #endif /* I386_PAE */
 #else /* !defined(__i386__) && !defined(__amd64__) */
     #error "Unsupported Arch"

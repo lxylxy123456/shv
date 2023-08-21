@@ -19,15 +19,15 @@
 #include <xmhf.h>
 
 #ifdef __amd64__
-volatile u64 shv_pml4t[P4L_NPLM4T * 512] ALIGNED_PAGE;
-volatile u64 shv_pdpt[P4L_NPDPT * 512] ALIGNED_PAGE;
-volatile u64 shv_pdt[P4L_NPDT * 512] ALIGNED_PAGE;
+volatile u64 shv_pml4t[P4L_NPLM4T * P4L_NEPT] ALIGNED_PAGE;
+volatile u64 shv_pdpt[P4L_NPDPT * P4L_NEPT] ALIGNED_PAGE;
+volatile u64 shv_pdt[P4L_NPDT * P4L_NEPT] ALIGNED_PAGE;
 #elif defined(__i386__)
 #if I386_PAE
-volatile u64 shv_pdpt[4] __attribute__ ((aligned (32)));
-volatile u64 shv_pdt[2048] ALIGNED_PAGE;
+volatile u64 shv_pdpt[PAE_NPDPTE] __attribute__ ((aligned (32)));
+volatile u64 shv_pdt[PAE_NPDT * PAE_NEPT] ALIGNED_PAGE;
 #else /* !I386_PAE */
-volatile u32 shv_pdt[1024] ALIGNED_PAGE;
+volatile u32 shv_pdt[P32_NPDT * P32_NEPT] ALIGNED_PAGE;
 #endif /* I386_PAE */
 #else /* !defined(__i386__) && !defined(__amd64__) */
     #error "Unsupported Arch"
@@ -62,16 +62,18 @@ uintptr_t shv_page_table_init(void)
 	return (uintptr_t)shv_pml4t;
 #elif defined(__i386__)
 #if I386_PAE
-	for (u64 i = 0, paddr = (uintptr_t)shv_pdt; i < 4; i++) {
+	for (u64 i = 0, paddr = (uintptr_t)shv_pdt; i < PAE_NPDPTE; i++) {
 		shv_pdpt[i] = 0x1U | paddr;
 		paddr += PAGE_SIZE_4K;
 	}
-	for (u64 i = 0, paddr = 0; i < 2048; i++, paddr += PA_PAGE_SIZE_2M) {
+	for (u64 i = 0, paddr = 0; i < PAE_NPDT * PAE_NEPT;
+		 i++, paddr += PA_PAGE_SIZE_2M) {
 		shv_pdt[i] = 0x83U | paddr;
 	}
 	return (uintptr_t)shv_pdpt;
 #else /* !I386_PAE */
-	for (u32 i = 0, paddr = 0; i < 1024; i++, paddr += PA_PAGE_SIZE_4M) {
+	for (u32 i = 0, paddr = 0; i < P32_NPDT * P32_NEPT;
+		 i++, paddr += PA_PAGE_SIZE_4M) {
 		shv_pdt[i] = 0x83U | paddr;
 	}
 	return (uintptr_t)shv_pdt;

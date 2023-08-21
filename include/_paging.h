@@ -260,7 +260,20 @@
 // TODO: make this configurable
 #define MAX_PHYS_ADDR 0x100000000UL
 
+// 32-bit paging specific definitions
+#define P32_NEPT    (PA_PAGE_SIZE_4K / sizeof(u32))
+#define P32_NPDT    1
+#define P32_NPT     (PA_PAGE_ALIGN_UP_4M(MAX_PHYS_ADDR) >> PAGE_SHIFT_4M)
+
+// PAE paging specific definitions
+#define PAE_NPDPTE  4
+#define PAE_NEPT    (PA_PAGE_SIZE_4K / sizeof(u64))
+#define PAE_NPDPT   (PA_PAGE_ALIGN_UP_512G(MAX_PHYS_ADDR) >> PAGE_SHIFT_512G)
+#define PAE_NPDT    (PA_PAGE_ALIGN_UP_1G(MAX_PHYS_ADDR) >> PAGE_SHIFT_1G)
+#define PAE_NPT     (PA_PAGE_ALIGN_UP_2M(MAX_PHYS_ADDR) >> PAGE_SHIFT_2M)
+
 // 4-level paging specific definitions
+#define P4L_NEPT    (PA_PAGE_SIZE_4K / sizeof(u64))
 #define P4L_NPLM4T  (PA_PAGE_ALIGN_UP_256T(MAX_PHYS_ADDR) >> PAGE_SHIFT_256T)
 #define P4L_NPDPT   (PA_PAGE_ALIGN_UP_512G(MAX_PHYS_ADDR) >> PAGE_SHIFT_512G)
 #define P4L_NPDT    (PA_PAGE_ALIGN_UP_1G(MAX_PHYS_ADDR) >> PAGE_SHIFT_1G)
