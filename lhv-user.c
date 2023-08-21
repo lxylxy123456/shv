@@ -43,8 +43,8 @@ static u64 user_pdpt[PAE_NPDPTE] __attribute__ ((aligned (32)));
 static u64 user_pdt[PAE_NPDPTE][PAE_NEPT] ALIGNED_PAGE;
 static u64 user_pt[PAE_NPDPTE][PAE_NEPT][PAE_NEPT] ALIGNED_PAGE;
 #else /* !I386_PAE */
-static u32 user_pdt[P4L_NEPT] ALIGNED_PAGE;
-static u32 user_pt[P4L_NEPT][P4L_NEPT] ALIGNED_PAGE;
+static u32 user_pdt[P32_NEPT] ALIGNED_PAGE;
+static u32 user_pt[P32_NEPT][P32_NEPT] ALIGNED_PAGE;
 #endif /* I386_PAE */
 #else /* !defined(__i386__) && !defined(__amd64__) */
     #error "Unsupported Arch"
@@ -98,9 +98,9 @@ static void set_user_mode_page_table(void)
 #else /* !I386_PAE */
 		/* Page table for 32-bit paging. */
 		u64 paddr = 0;
-		for (u32 i = 0; i < P4L_NEPT; i++) {
+		for (u32 i = 0; i < P32_NEPT; i++) {
 			user_pdt[i] = 7 | (uintptr_t) user_pt[i];
-			for (u32 j = 0; j < P4L_NEPT; j++) {
+			for (u32 j = 0; j < P32_NEPT; j++) {
 				user_pt[i][j] = 7 | paddr;
 				paddr += PA_PAGE_SIZE_4K;
 			}
