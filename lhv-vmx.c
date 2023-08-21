@@ -107,11 +107,11 @@ static void lhv_vmx_vmcs_init(VCPU *vcpu)
 		vcpu->my_vmexit_msrstore = vmexit_msrstore_entries[vcpu->idx][0];
 		vcpu->my_vmexit_msrload = vmexit_msrload_entries[vcpu->idx][0];
 		vcpu->my_vmentry_msrload = vmentry_msrload_entries[vcpu->idx][0];
-		vmcs_vmwrite64(vcpu, VMCS_control_VM_exit_MSR_store_address,
+		__vmx_vmwrite64(VMCS_control_VM_exit_MSR_store_address,
 					   hva2spa(vcpu->my_vmexit_msrstore));
-		vmcs_vmwrite64(vcpu, VMCS_control_VM_exit_MSR_load_address,
+		__vmx_vmwrite64(VMCS_control_VM_exit_MSR_load_address,
 					   hva2spa(vcpu->my_vmexit_msrload));
-		vmcs_vmwrite64(vcpu, VMCS_control_VM_entry_MSR_load_address,
+		__vmx_vmwrite64(VMCS_control_VM_entry_MSR_load_address,
 					   hva2spa(vcpu->my_vmentry_msrload));
 		printf("CPU(0x%02x): configured load/store MSR\n", vcpu->id);
 	}
@@ -127,16 +127,16 @@ static void lhv_vmx_vmcs_init(VCPU *vcpu)
 		seccpu = vmcs_vmread(vcpu, VMCS_control_VMX_seccpu_based);
 		seccpu |= (1U << VMX_SECPROCBASED_ENABLE_EPT);
 		vmcs_vmwrite(vcpu, VMCS_control_VMX_seccpu_based, seccpu);
-		vmcs_vmwrite64(vcpu, VMCS_control_EPT_pointer, eptp | 0x1eULL);
+		__vmx_vmwrite64(VMCS_control_EPT_pointer, eptp | 0x1eULL);
 #ifdef __i386__
 #if I386_PAE
 		/* For old LHV code, which uses PAE paging. SHV uses 32-bit paging. */
 		{
 			u64 *cr3 = (u64 *)read_cr3();
-			vmcs_vmwrite64(vcpu, VMCS_guest_PDPTE0, cr3[0]);
-			vmcs_vmwrite64(vcpu, VMCS_guest_PDPTE1, cr3[1]);
-			vmcs_vmwrite64(vcpu, VMCS_guest_PDPTE2, cr3[2]);
-			vmcs_vmwrite64(vcpu, VMCS_guest_PDPTE3, cr3[3]);
+			__vmx_vmwrite64(VMCS_guest_PDPTE0, cr3[0]);
+			__vmx_vmwrite64(VMCS_guest_PDPTE1, cr3[1]);
+			__vmx_vmwrite64(VMCS_guest_PDPTE2, cr3[2]);
+			__vmx_vmwrite64(VMCS_guest_PDPTE3, cr3[3]);
 		}
 #endif /* I386_PAE */
 #endif /* __i386__ */
@@ -246,7 +246,7 @@ static void lhv_vmx_vmcs_init(VCPU *vcpu)
 	vmcs_vmwrite(vcpu, VMCS_guest_SS_access_rights, 0xc093);
 
 	//setup VMCS link pointer
-	vmcs_vmwrite64(vcpu, VMCS_guest_VMCS_link_pointer, (u64)0xFFFFFFFFFFFFFFFFULL);
+	__vmx_vmwrite64(VMCS_guest_VMCS_link_pointer, (u64)0xFFFFFFFFFFFFFFFFULL);
 
 	//trap access to CR0 fixed 1-bits
 	{
@@ -414,7 +414,7 @@ void vmexit_handler(VCPU *vcpu, struct regs *r)
 		ASSERT(SHV_OPT & LHV_USE_EPT);
 		{
 			ulong_t q = vmcs_vmread(vcpu, VMCS_info_exit_qualification);
-			u64 paddr = vmcs_vmread64(vcpu, VMCS_guest_paddr);
+			u64 paddr = __vmx_vmread64(VMCS_guest_paddr);
 			ulong_t vaddr = vmcs_vmread(vcpu, VMCS_info_guest_linear_address);
 			/* Unknown EPT violation */
 			printf("CPU(0x%02x): ept: 0x%08lx\n", vcpu->id, q);

@@ -263,7 +263,7 @@ static void lhv_guest_test_ept_vmexit_handler(VCPU *vcpu, struct regs *r,
 	}
 	{
 		ulong_t q = vmcs_vmread(vcpu, VMCS_info_exit_qualification);
-		u64 paddr = vmcs_vmread64(vcpu, VMCS_guest_paddr);
+		u64 paddr = __vmx_vmread64(VMCS_guest_paddr);
 		ulong_t vaddr = vmcs_vmread(vcpu, VMCS_info_guest_linear_address);
 		if (paddr != 0x12340000 || vaddr != 0x12340000) {
 			/* Let the default handler report the error */
@@ -330,7 +330,7 @@ static void lhv_guest_switch_ept_vmexit_handler(VCPU *vcpu, struct regs *r,
 		vcpu->ept_num++;
 		vcpu->ept_num %= (LHV_EPT_COUNT << 4);
 		eptp = lhv_build_ept(vcpu, vcpu->ept_num);
-		vmcs_vmwrite64(vcpu, VMCS_control_EPT_pointer, eptp | 0x1eULL);
+		__vmx_vmwrite64(VMCS_control_EPT_pointer, eptp | 0x1eULL);
 	}
 	vmcs_vmwrite(vcpu, VMCS_guest_RIP, info->guest_rip + info->inst_len);
 	vmresume_asm(r);
