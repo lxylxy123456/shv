@@ -924,7 +924,7 @@ void lhv_guest_main(ulong_t cpu_id)
 				arrived++;
 				spin_unlock(&lock);
 				while (arrived < g_midtable_numentries) {
-					asm volatile ("pause");
+					cpu_relax();
 				}
 				printf("CPU(0x%02x): leave LHV barrier\n", vcpu->id);
 			} else {

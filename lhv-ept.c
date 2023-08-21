@@ -43,7 +43,7 @@ static u8 ept_target[256][PAGE_SIZE_4K]
 ALIGNED_PAGE;
 
 /* Large pages to be swapped */
-u8 large_pages[2][512 * 4096] __attribute__((aligned(512 * 4096)));
+u8 large_pages[2][PAGE_SIZE_2M] __attribute__((aligned(PAGE_SIZE_2M)));
 
 typedef struct {
 	hptw_ctx_t ctx;

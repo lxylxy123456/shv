@@ -32,19 +32,19 @@ ALIGNED_PAGE;
 static uintptr_t esp0[MAX_VCPU_ENTRIES];
 
 #ifdef __amd64__
-static u64 user_pml4t[P4L_NPLM4T * 512] ALIGNED_PAGE;
-static u64 user_pdpt[P4L_NPDPT * 512] ALIGNED_PAGE;
-static u64 user_pdt[P4L_NPDT * 512] ALIGNED_PAGE;
-static u64 user_pt[P4L_NPT * 512] ALIGNED_PAGE;
+static u64 user_pml4t[P4L_NPLM4T * P4L_NEPT] ALIGNED_PAGE;
+static u64 user_pdpt[P4L_NPDPT * P4L_NEPT] ALIGNED_PAGE;
+static u64 user_pdt[P4L_NPDT * P4L_NEPT] ALIGNED_PAGE;
+static u64 user_pt[P4L_NPT * P4L_NEPT] ALIGNED_PAGE;
 #elif defined(__i386__)
 #if I386_PAE
 /* Page table for PAE paging, currently not used */
-static u64 user_pdpt[4] __attribute__ ((aligned (32)));
-static u64 user_pdt[4][512] ALIGNED_PAGE;
-static u64 user_pt[4][512][512] ALIGNED_PAGE;
+static u64 user_pdpt[PAE_NPDPTE] __attribute__ ((aligned (32)));
+static u64 user_pdt[PAE_NPDPTE][PAE_NEPT] ALIGNED_PAGE;
+static u64 user_pt[PAE_NPDPTE][PAE_NEPT][PAE_NEPT] ALIGNED_PAGE;
 #else /* !I386_PAE */
-static u32 user_pdt[1024] ALIGNED_PAGE;
-static u32 user_pt[1024][1024] ALIGNED_PAGE;
+static u32 user_pdt[P4L_NEPT] ALIGNED_PAGE;
+static u32 user_pt[P4L_NEPT][P4L_NEPT] ALIGNED_PAGE;
 #endif /* I386_PAE */
 #else /* !defined(__i386__) && !defined(__amd64__) */
     #error "Unsupported Arch"
@@ -85,11 +85,11 @@ static void set_user_mode_page_table(void)
 		/* Page table for PAE paging. */
 		u32 i, j, k;
 		u64 paddr = 0;
-		for (i = 0; i < 4; i++) {
+		for (i = 0; i < PAE_NPDPTE; i++) {
 			user_pdpt[i] = 1 | (uintptr_t) user_pdt[i];
-			for (j = 0; j < 512; j++) {
+			for (j = 0; j < PAE_NEPT; j++) {
 				user_pdt[i][j] = 7 | (uintptr_t) user_pt[i][j];
-				for (k = 0; k < 512; k++) {
+				for (k = 0; k < PAE_NEPT; k++) {
 					user_pt[i][j][k] = 7 | paddr;
 					paddr += PA_PAGE_SIZE_4K;
 				}
@@ -99,9 +99,9 @@ static void set_user_mode_page_table(void)
 #else /* !I386_PAE */
 		/* Page table for 32-bit paging. */
 		u64 paddr = 0;
-		for (u32 i = 0; i < 1024; i++) {
+		for (u32 i = 0; i < P4L_NEPT; i++) {
 			user_pdt[i] = 7 | (uintptr_t) user_pt[i];
-			for (u32 j = 0; j < 1024; j++) {
+			for (u32 j = 0; j < P4L_NEPT; j++) {
 				user_pt[i][j] = 7 | paddr;
 				paddr += PA_PAGE_SIZE_4K;
 			}
@@ -295,7 +295,7 @@ void user_main(VCPU *vcpu, ulong_t arg)
 				u32 i;
 				spin_unlock(&pal_lock);
 				for (i = 0; i < 4096 && !pal_available; i++) {
-					asm volatile ("pause");		/* Save energy when waiting */
+					cpu_relax();	/* Save energy when waiting */
 				}
 			}
 		}

@@ -83,7 +83,7 @@ void vmlaunch_asm(struct regs *r);	/* Never returns */
 void vmresume_asm(struct regs *r);	/* Never returns */
 
 /* lhv-ept.c */
-extern u8 large_pages[2][512 * 4096] __attribute__((aligned(512 * 4096)));
+extern u8 large_pages[2][PAGE_SIZE_2M] __attribute__((aligned(PAGE_SIZE_2M)));
 
 /*
  * When this is larger than XMHF's VMX_NESTED_MAX_ACTIVE_EPT, should see a lot
