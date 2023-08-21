@@ -293,20 +293,26 @@ void vmcs_dump(VCPU *vcpu, int verbose)
 /* Write all existing VMCS fields from vcpu->vmcs to CPU. */
 void vmcs_load(VCPU *vcpu)
 {
-	// TODO
-	#define DECLARE_FIELD(encoding, name)								\
-		do {															\
-			if ((encoding & 0x6000) == 0x0000) {						\
-				__vmx_vmwrite16(encoding, vcpu->vmcs.name);				\
-			} else if ((encoding & 0x6000) == 0x2000) {					\
-				__vmx_vmwrite64(encoding, vcpu->vmcs.name);				\
-			} else if ((encoding & 0x6000) == 0x4000) {					\
-				__vmx_vmwrite32(encoding, vcpu->vmcs.name);				\
-			} else {													\
-				ASSERT((encoding & 0x6000) == 0x6000);		\
-				__vmx_vmwriteNW(encoding, vcpu->vmcs.name);				\
-			}															\
-		} while (0);
-	#include <_vmx_vmcs_fields.h>
-	#undef DECLARE_FIELD
+#define FIELD_CTLS_ARG (&vcpu->vmx_caps)
+#define DECLARE_FIELD_16(encoding, name, exist, ...) \
+	if (exist) { \
+		__vmx_vmwrite16(encoding, vcpu->vmcs.name); \
+	}
+#define DECLARE_FIELD_64(encoding, name, exist, ...) \
+	if (exist) { \
+		__vmx_vmwrite64(encoding, vcpu->vmcs.name); \
+	}
+#define DECLARE_FIELD_32(encoding, name, exist, ...) \
+	if (exist) { \
+		__vmx_vmwrite32(encoding, vcpu->vmcs.name); \
+	}
+#define DECLARE_FIELD_NW(encoding, name, exist, ...) \
+	if (exist) { \
+		__vmx_vmwriteNW(encoding, vcpu->vmcs.name); \
+	}
+#include <_vmx_vmcs_fields.h>
+#undef DECLARE_FIELD_16
+#undef DECLARE_FIELD_64
+#undef DECLARE_FIELD_32
+#undef DECLARE_FIELD_NW
 }
