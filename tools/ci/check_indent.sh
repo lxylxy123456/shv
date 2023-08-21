@@ -21,10 +21,8 @@ set -xe
 
 export LANG=C
 
-NOTHING_MSG='nothing to commit, working tree clean'
-
 check_git_status () {
-	diff <(echo "$NOTHING_MSG") <(git status | tail -n +2)
+	diff <(true) <(git status --porcelain=1)
 }
 
 check_git_status
@@ -34,6 +32,7 @@ for i in {1..10}; do
 	tools/indent.sh
 	if check_git_status; then
 		echo "git status succeeded at iteration $i"
+		git rev-list --max-count=1 HEAD
 		exit 0
 	else
 		echo "git status failed"
