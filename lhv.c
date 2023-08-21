@@ -44,26 +44,26 @@ void lhv_main(VCPU *vcpu)
 		}
 	}
 	/* Demonstrate disabling paging in hypervisor */
-	if (SHV_OPT & LHV_USE_UNRESTRICTED_GUEST) {
+	if (SHV_OPT & SHV_USE_UNRESTRICTED_GUEST) {
 #ifdef __amd64__
 		extern void lhv_disable_enable_paging(char *);
-		lhv_disable_enable_paging("LHV hypervisor can disable paging\n");
+		lhv_disable_enable_paging("SHV hypervisor can disable paging\n");
 #elif defined(__i386__)
 		ulong_t cr0 = read_cr0();
 		write_cr0(cr0 & 0x7fffffffUL);
-		printf("LHV hypervisor can disable paging\n");
+		printf("SHV hypervisor can disable paging\n");
 		write_cr0(cr0);
 #else /* !defined(__i386__) && !defined(__amd64__) */
     #error "Unsupported Arch"
 #endif /* !defined(__i386__) && !defined(__amd64__) */
 	}
 
-	if (!(SHV_OPT & LHV_NO_EFLAGS_IF)) {
+	if (!(SHV_OPT & SHV_NO_EFLAGS_IF)) {
 		/* Set EFLAGS.IF */
 		asm volatile ("sti");
 	}
 
-	if (SHV_OPT & LHV_USE_PS2_MOUSE) {
+	if (SHV_OPT & SHV_USE_PS2_MOUSE) {
 		if (vcpu->isbsp) {
 			mouse_init(vcpu);
 		}

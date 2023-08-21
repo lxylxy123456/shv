@@ -25,18 +25,18 @@ extern u8 _lhv_ept_low[];
 extern u8 _lhv_ept_high[];
 
 /* Whether the EPT is already built. If so, store EPTP */
-static u8 ept_valid[MAX_VCPU_ENTRIES][LHV_EPT_COUNT];
+static u8 ept_valid[MAX_VCPU_ENTRIES][SHV_EPT_COUNT];
 
 /* Root EPT pages */
-static u8 ept_root[MAX_VCPU_ENTRIES][LHV_EPT_COUNT][PAGE_SIZE_4K]
+static u8 ept_root[MAX_VCPU_ENTRIES][SHV_EPT_COUNT][PAGE_SIZE_4K]
 ALIGNED_PAGE;
 
 /* Physical memory for storing more  */
-static u8 ept_pool[MAX_VCPU_ENTRIES][LHV_EPT_COUNT][EPT_POOL_SIZE][PAGE_SIZE_4K]
+static u8 ept_pool[MAX_VCPU_ENTRIES][SHV_EPT_COUNT][EPT_POOL_SIZE][PAGE_SIZE_4K]
 ALIGNED_PAGE;
 
 /* Indicate whether the page in ept_pool is free */
-static u8 ept_alloc[MAX_VCPU_ENTRIES][LHV_EPT_COUNT][EPT_POOL_SIZE];
+static u8 ept_alloc[MAX_VCPU_ENTRIES][SHV_EPT_COUNT][EPT_POOL_SIZE];
 
 /* Memory to be mapped */
 static u8 ept_target[256][PAGE_SIZE_4K]
@@ -276,7 +276,7 @@ u64 lhv_build_ept(VCPU *vcpu, u8 ept_num)
 	}
 
 	/* Swap large_pages using 2M pages */
-	if (SHV_OPT & LHV_USE_LARGE_PAGE) {
+	if (SHV_OPT & SHV_USE_LARGE_PAGE) {
 		spa_t addr0 = hva2spa(large_pages[0]);
 		spa_t addr1 = hva2spa(large_pages[1]);
 		ASSERT(PA_PAGE_ALIGNED_2M(addr0));

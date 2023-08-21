@@ -95,7 +95,7 @@ void kernel_main_smp(VCPU *vcpu)
 		init_idt();
 	}
 
-	/* Transfer control to LHV */
+	/* Transfer control to SHV */
 	{
 		extern void lhv_main(VCPU *vcpu);
 		lhv_main(vcpu);

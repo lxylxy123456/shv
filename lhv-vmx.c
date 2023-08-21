@@ -103,7 +103,7 @@ static void lhv_vmx_vmcs_init(VCPU *vcpu)
 				vcpu->vmx_msrs[INDEX_IA32_VMX_PROCBASED_CTLS2_MSR]);
 
 	//Critical MSR load/store
-	if (SHV_OPT & LHV_USE_MSR_LOAD) {
+	if (SHV_OPT & SHV_USE_MSR_LOAD) {
 		vcpu->my_vmexit_msrstore = vmexit_msrstore_entries[vcpu->idx][0];
 		vcpu->my_vmexit_msrload = vmexit_msrload_entries[vcpu->idx][0];
 		vcpu->my_vmentry_msrload = vmentry_msrload_entries[vcpu->idx][0];
@@ -119,7 +119,7 @@ static void lhv_vmx_vmcs_init(VCPU *vcpu)
 	__vmx_vmwrite32(VMCS_control_VM_entry_MSR_load_count, 0);
 	__vmx_vmwrite32(VMCS_control_VM_exit_MSR_store_count, 0);
 
-	if (SHV_OPT & LHV_USE_EPT) {
+	if (SHV_OPT & SHV_USE_EPT) {
 		u64 eptp;
 		u32 seccpu;
 		lhv_ept_init(vcpu);
@@ -130,7 +130,7 @@ static void lhv_vmx_vmcs_init(VCPU *vcpu)
 		__vmx_vmwrite64(VMCS_control_EPT_pointer, eptp | 0x1eULL);
 #ifdef __i386__
 #if I386_PAE
-		/* For old LHV code, which uses PAE paging. SHV uses 32-bit paging. */
+		/* For old SHV code, which uses PAE paging. SHV uses 32-bit paging. */
 		{
 			u64 *cr3 = (u64 *)read_cr3();
 			__vmx_vmwrite64(VMCS_guest_PDPTE0, cr3[0]);
@@ -142,16 +142,16 @@ static void lhv_vmx_vmcs_init(VCPU *vcpu)
 #endif /* __i386__ */
 	}
 
-	if (SHV_OPT & LHV_USE_VPID) {
+	if (SHV_OPT & SHV_USE_VPID) {
 		u32 seccpu = __vmx_vmread32(VMCS_control_VMX_seccpu_based);
 		seccpu |= (1U << VMX_SECPROCBASED_ENABLE_VPID);
 		__vmx_vmwrite32(VMCS_control_VMX_seccpu_based, seccpu);
 		__vmx_vmwrite16(VMCS_control_vpid, 1);
 	}
 
-	if (SHV_OPT & LHV_USE_UNRESTRICTED_GUEST) {
+	if (SHV_OPT & SHV_USE_UNRESTRICTED_GUEST) {
 		u32 seccpu;
-		ASSERT(SHV_OPT & LHV_USE_EPT);
+		ASSERT(SHV_OPT & SHV_USE_EPT);
 		seccpu = __vmx_vmread32(VMCS_control_VMX_seccpu_based);
 		seccpu |= (1U << VMX_SECPROCBASED_UNRESTRICTED_GUEST);
 		__vmx_vmwrite32(VMCS_control_VMX_seccpu_based, seccpu);
@@ -411,7 +411,7 @@ void vmexit_handler(VCPU *vcpu, struct regs *r)
 			break;
 		}
 	case VMX_VMEXIT_EPT_VIOLATION:
-		ASSERT(SHV_OPT & LHV_USE_EPT);
+		ASSERT(SHV_OPT & SHV_USE_EPT);
 		{
 			ulong_t q = __vmx_vmreadNW(VMCS_info_exit_qualification);
 			u64 paddr = __vmx_vmread64(VMCS_guest_paddr);

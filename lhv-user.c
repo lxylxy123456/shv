@@ -128,7 +128,7 @@ void enter_user_mode(VCPU *vcpu, ulong_t arg)
 	ureg->eflags = 2 | (3 << 12);
 	ureg->esp = (uintptr_t) (&stack[-3]);
 	ureg->ss = __DS_R3;
-	if (!(SHV_OPT & LHV_NO_EFLAGS_IF)) {
+	if (!(SHV_OPT & SHV_NO_EFLAGS_IF)) {
 		ureg->eflags |= EFLAGS_IF;
 	}
 	{
@@ -235,7 +235,7 @@ static void user_main_pal_demo(VCPU *vcpu, ulong_t arg)
 
 	/*
 	 * Touch all pages used by PAL. If in nested virtualization (L0 = XMHF,
-	 * L1 = red hypervisor, L2 = LHV), hopefully the pages become cached in
+	 * L1 = red hypervisor, L2 = SHV), hopefully the pages become cached in
 	 * L1's EPT.
 	 */
 	for (u32 i = 0; i < sections.num_sections; i++) {

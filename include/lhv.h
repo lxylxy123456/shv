@@ -18,8 +18,8 @@
 
 #include <xmhf.h>
 
-#ifndef _LHV_H_
-#define _LHV_H_
+#ifndef _SHV_H_
+#define _SHV_H_
 
 #ifndef __ASSEMBLY__
 
@@ -32,19 +32,19 @@ typedef struct {
 } console_vc_t;
 
 /* Begin of bit definitions for SHV_OPT */
-#define LHV_USE_MSR_LOAD			0x0000000000000001ULL
-#define LHV_NO_EFLAGS_IF			0x0000000000000002ULL
-#define LHV_USE_EPT					0x0000000000000004ULL
-#define LHV_USE_SWITCH_EPT			0x0000000000000008ULL	/* Need 0x4 */
-#define LHV_USE_VPID				0x0000000000000010ULL
-#define LHV_USE_UNRESTRICTED_GUEST	0x0000000000000020ULL	/* Need 0x4 */
-#define LHV_USER_MODE				0x0000000000000040ULL	/* Need !0x2 */
-#define LHV_USE_VMXOFF				0x0000000000000080ULL
-#define LHV_USE_LARGE_PAGE			0x0000000000000100ULL	/* Need 0x4 */
-#define LHV_NO_INTERRUPT			0x0000000000000200ULL
-#define LHV_USE_MSRBITMAP			0x0000000000000400ULL
-#define LHV_NESTED_USER_MODE		0x0000000000000800ULL	/* Need !0x2 */
-#define LHV_USE_PS2_MOUSE			0x0000000000001000ULL
+#define SHV_USE_MSR_LOAD			0x0000000000000001ULL
+#define SHV_NO_EFLAGS_IF			0x0000000000000002ULL
+#define SHV_USE_EPT					0x0000000000000004ULL
+#define SHV_USE_SWITCH_EPT			0x0000000000000008ULL	/* Need 0x4 */
+#define SHV_USE_VPID				0x0000000000000010ULL
+#define SHV_USE_UNRESTRICTED_GUEST	0x0000000000000020ULL	/* Need 0x4 */
+#define SHV_USER_MODE				0x0000000000000040ULL	/* Need !0x2 */
+#define SHV_USE_VMXOFF				0x0000000000000080ULL
+#define SHV_USE_LARGE_PAGE			0x0000000000000100ULL	/* Need 0x4 */
+#define SHV_NO_INTERRUPT			0x0000000000000200ULL
+#define SHV_USE_MSRBITMAP			0x0000000000000400ULL
+#define SHV_NESTED_USER_MODE		0x0000000000000800ULL	/* Need !0x2 */
+#define SHV_USE_PS2_MOUSE			0x0000000000001000ULL
 /* End of bit definitions for SHV_OPT */
 
 /* lhv.c */
@@ -89,7 +89,7 @@ extern u8 large_pages[2][PAGE_SIZE_2M] __attribute__((aligned(PAGE_SIZE_2M)));
  * When this is larger than XMHF's VMX_NESTED_MAX_ACTIVE_EPT, should see a lot
  * of EPT cache misses.
  */
-#define LHV_EPT_COUNT 2
+#define SHV_EPT_COUNT 2
 
 void lhv_ept_init(VCPU *vcpu);
 u64 lhv_build_ept(VCPU *vcpu, u8 ept_num);
@@ -152,4 +152,4 @@ static inline void write_lapic(u32 reg, u32 val) {
 
 #endif /* !__ASSEMBLY__ */
 
-#endif /* _LHV_H_ */
+#endif /* _SHV_H_ */
