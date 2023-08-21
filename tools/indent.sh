@@ -22,7 +22,8 @@ set -xe
 FILES=()
 
 for i in *.c include/*.h; do
-	if [ "$i" != "include/_vmx_vmcs_fields.h" ]; then
+	if [ "$i" != "include/_vmx_vmcs_fields.h" -a \
+		 "$i" != "include/_vmx_ctls_fields.h" ]; then
 		FILES+=("$i")
 	fi
 done
