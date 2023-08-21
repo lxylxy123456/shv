@@ -9,33 +9,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Test
-      run: |
-        set -x
-        echo begin
-        git branch
-        git status
-        git fetch origin `git rev-parse --abbrev-ref HEAD` --depth 20
-        git branch
-        git status
-        git log | head -n 10
-        git checkout HEAD^
-        git log | head -n 4
-        git checkout HEAD^
-        git log | head -n 4
-        git checkout HEAD^
-        git log | head -n 4
-        echo done
     - name: Install package
       run: |
         sudo apt-get update && \
         sudo apt-get install -y indent
     - name: Check indent
       run: |
-<<<<<<< HEAD
-        git fetch --depth 20
-=======
         git fetch origin `git rev-parse --abbrev-ref HEAD` --depth 20
->>>>>>> master
         tools/ci/check_indent.sh
 
