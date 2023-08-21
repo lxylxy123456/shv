@@ -9,6 +9,26 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Test
+      run: |
+        set -x
+        echo 1
+        git fetch --depth 20
+        echo 2
+        git log | head -n 100
+        echo 3
+        git checkout HEAD^
+        echo 4
+        git log | head -n 4
+        echo 5
+        git checkout HEAD^
+        echo 6
+        git log | head -n 4
+        echo 7
+        git checkout HEAD^
+        echo 8
+        git log | head -n 4
+        echo 9
     - name: Install package
       run: |
         sudo apt-get update && \
