@@ -29,6 +29,7 @@ usage () {
 	echo '	-i, --i386          Use 32-bit paging.'
 	echo '	-p, --pae           Use 32-bit PAE paging.'
 	echo '	-a, --amd64         Use 64-bit 4-level paging.'
+	echo '	-m, --mem <MEM>     Set amd64 max physical mem.'
 	echo '	-O <level>          Set GCC optimization level.'
 	echo '	-S, --shv-opt <OPT> Set SHV_OPT.'
 	exit 1
@@ -41,8 +42,8 @@ SRCDIR='.'
 AC='n'
 
 # Parse arguments.
-opt=$(getopt -o 'hns:AipaO:S:' --long 'srcdir:,ac,i386,pae,amd64,shv-opt:' \
-	-- "$@")
+opt=$(getopt -o 'hns:Aipam:O:S:' \
+			--long 'srcdir:,ac,i386,pae,amd64,mem:,shv-opt:' -- "$@")
 [ "$?" == "0" ] || usage 'getopt failed'
 eval set -- "$opt"
 while true; do
@@ -69,6 +70,10 @@ while true; do
 		;;
 	-a|--amd64)
 		conf+=("--host=x86_64-linux-gnu")
+		;;
+	-m|--mem)
+		conf+=("--with-amd64-max-addr=$2")
+		shift
 		;;
 	-O)
 		[ "$2" = "0" -o "$2" = "1" -o "$2" = "2" -o "$2" = "3" -o \

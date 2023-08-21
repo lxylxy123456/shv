@@ -67,6 +67,14 @@ AC_ARG_ENABLE([i386_pae],
               [i386_pae=0])
 AC_DEFINE_UNQUOTED([I386_PAE],[${i386_pae}],[Whether use PAE paging in 32-bit])
 
+# AMD64_MAX_ADDR
+AC_ARG_WITH([amd64_max_addr],
+            [AS_HELP_STRING([--with-amd64-max-addr=AMD64_MAX_ADDR],
+                            [specify maximum physical address in amd64 mode])],
+            [amd64_max_addr="$withval"], [amd64_max_addr=0x100000000ULL])
+AC_DEFINE_UNQUOTED([AMD64_MAX_ADDR],[${amd64_max_addr}],
+                   [Max physical address for amd64 mode])
+
 # DEBUG_VGA
 AC_ARG_ENABLE([debug_vga],
               [AS_HELP_STRING([--enable-debug-vga@<:@=yes|no@:>@],

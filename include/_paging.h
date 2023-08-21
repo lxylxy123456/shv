@@ -257,8 +257,11 @@
 #define PA_PAGE_ALIGNED_512G(x) _PAGE_ALIGNED((x), PA_, 512G)
 #define PA_PAGE_ALIGNED_256T(x) _PAGE_ALIGNED((x), PA_, 256T)
 
-// TODO: make this configurable
-#define MAX_PHYS_ADDR 0x100000000UL
+#ifdef __amd64__
+#define MAX_PHYS_ADDR ((u64)(AMD64_MAX_ADDR))
+#else /* !__amd64__ */
+#define MAX_PHYS_ADDR ADDR_4GB
+#endif /* __amd64__ */
 
 // 32-bit paging specific definitions
 #define P32_NEPT    (PA_PAGE_SIZE_4K / sizeof(u32))
