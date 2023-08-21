@@ -37,7 +37,7 @@ for i in {1..10}; do
 	else
 		echo "git status failed"
 	fi
-	git clean -Xdf
+	git checkout .
 	check_git_status
 	git checkout HEAD^
 	check_git_status
