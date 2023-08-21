@@ -47,7 +47,7 @@ SECTIONS
 	 */
 	.text :
 	{
-		_lhv_ept_low = .;
+		_shv_ept_low = .;
 
 		KEEP(*(.multiboot))
 		*(.multiboot)
@@ -98,7 +98,7 @@ SECTIONS
 		. = ALIGN(16);
 		_end_multiboot_bss = .;
 		. = ALIGN(4096);
-		_lhv_ept_high = .;
+		_shv_ept_high = .;
 	}
 
 	/* debug sections */

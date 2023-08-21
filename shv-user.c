@@ -156,7 +156,7 @@ void enter_user_mode(VCPU *vcpu, ulong_t arg)
 	enter_user_mode_asm(ureg, pesp0);
 }
 
-void handle_lhv_syscall(VCPU *vcpu, int vector, struct regs *r)
+void handle_shv_syscall(VCPU *vcpu, int vector, struct regs *r)
 {
 	/* Currently the only syscall is to exit guest mode */
 	ASSERT(vector == 0x23);

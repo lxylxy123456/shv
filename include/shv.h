@@ -48,8 +48,8 @@ typedef struct {
 /* End of bit definitions for SHV_OPT */
 
 /* shv.c */
-void lhv_main(VCPU *vcpu);
-void handle_lhv_syscall(VCPU *vcpu, int vector, struct regs *r);
+void shv_main(VCPU *vcpu);
+void handle_shv_syscall(VCPU *vcpu, int vector, struct regs *r);
 
 /* shv-console.c */
 void console_cursor_clear(void);
@@ -74,7 +74,7 @@ void mouse_init(VCPU *vcpu);
 void handle_mouse_interrupt(VCPU *vcpu, int vector, int guest);
 
 /* shv-vmx.c */
-void lhv_vmx_main(VCPU *vcpu);
+void shv_vmx_main(VCPU *vcpu);
 void vmentry_error(ulong_t is_resume, ulong_t valid);
 
 /* shv-asm.S */
@@ -91,8 +91,8 @@ extern u8 large_pages[2][PAGE_SIZE_2M] __attribute__((aligned(PAGE_SIZE_2M)));
  */
 #define SHV_EPT_COUNT 2
 
-void lhv_ept_init(VCPU *vcpu);
-u64 lhv_build_ept(VCPU *vcpu, u8 ept_num);
+void shv_ept_init(VCPU *vcpu);
+u64 shv_build_ept(VCPU *vcpu, u8 ept_num);
 
 /* shv-vmcs.c */
 void __vmx_vmwrite16(u16 encoding, u16 value);
@@ -112,8 +112,8 @@ void vmcs_dump(VCPU *vcpu, int verbose);
 void vmcs_load(VCPU *vcpu);
 
 /* shv-guest-asm.S */
-void lhv_guest_entry(void);
-void lhv_guest_xcphandler(VCPU * vcpu, struct regs *r, iret_info_t * info);
+void shv_guest_entry(void);
+void shv_guest_xcphandler(VCPU * vcpu, struct regs *r, iret_info_t * info);
 
 /* shv-user.c */
 typedef struct ureg_t {

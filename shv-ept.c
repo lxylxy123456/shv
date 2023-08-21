@@ -21,8 +21,8 @@
 
 #define EPT_POOL_SIZE 128
 
-extern u8 _lhv_ept_low[];
-extern u8 _lhv_ept_high[];
+extern u8 _shv_ept_low[];
+extern u8 _shv_ept_high[];
 
 /* Whether the EPT is already built. If so, store EPTP */
 static u8 ept_valid[MAX_VCPU_ENTRIES][SHV_EPT_COUNT];
@@ -49,7 +49,7 @@ typedef struct {
 	hptw_ctx_t ctx;
 	u8 (*page_pool)[PAGE_SIZE_4K];
 	u8 *page_alloc;
-} lhv_ept_ctx_t;
+} shv_ept_ctx_t;
 
 // Structure that captures fixed MTRR properties
 struct _fixed_mtrr_prop_t {
@@ -71,9 +71,9 @@ struct _fixed_mtrr_prop_t {
 	{IA32_MTRR_FIX4K_F8000, 0x000F8000, 0x00001000, 0x00100000},
 };
 
-static void* lhv_ept_gzp(void *vctx, size_t alignment, size_t sz)
+static void* shv_ept_gzp(void *vctx, size_t alignment, size_t sz)
 {
-	lhv_ept_ctx_t *ept_ctx = (lhv_ept_ctx_t *)vctx;
+	shv_ept_ctx_t *ept_ctx = (shv_ept_ctx_t *)vctx;
 	u32 i;
 	ASSERT(alignment == PAGE_SIZE_4K);
 	ASSERT(sz == PAGE_SIZE_4K);
@@ -86,13 +86,13 @@ static void* lhv_ept_gzp(void *vctx, size_t alignment, size_t sz)
 	return NULL;
 }
 
-static hpt_pa_t lhv_ept_ptr2pa(void *vctx, void *ptr)
+static hpt_pa_t shv_ept_ptr2pa(void *vctx, void *ptr)
 {
 	(void)vctx;
 	return hva2spa(ptr);
 }
 
-static void* lhv_ept_pa2ptr(void *vctx, hpt_pa_t spa, size_t sz, hpt_prot_t access_type, hptw_cpl_t cpl, size_t *avail_sz)
+static void* shv_ept_pa2ptr(void *vctx, hpt_pa_t spa, size_t sz, hpt_prot_t access_type, hptw_cpl_t cpl, size_t *avail_sz)
 {
 	(void)vctx;
 	(void)access_type;
@@ -162,7 +162,7 @@ static u8 ept_get_mem_type(VCPU *vcpu, u64 pagebaseaddr)
 	return prev_type;
 }
 
-static void ept_map_continuous_addr(VCPU *vcpu, lhv_ept_ctx_t *ept_ctx,
+static void ept_map_continuous_addr(VCPU *vcpu, shv_ept_ctx_t *ept_ctx,
 									hpt_pmeo_t *pmeo, u64 low, u64 high)
 {
 	u64 paddr;
@@ -176,7 +176,7 @@ static void ept_map_continuous_addr(VCPU *vcpu, lhv_ept_ctx_t *ept_ctx,
 	}
 }
 
-void lhv_ept_init(VCPU *vcpu)
+void shv_ept_init(VCPU *vcpu)
 {
 	/* Obtain MAXPHYADDR and compute paddrmask */
 	{
@@ -224,17 +224,17 @@ void lhv_ept_init(VCPU *vcpu)
 	}
 }
 
-u64 lhv_build_ept(VCPU *vcpu, u8 ept_num)
+u64 shv_build_ept(VCPU *vcpu, u8 ept_num)
 {
-	u64 low = (uintptr_t)_lhv_ept_low;
-	u64 high = (uintptr_t)_lhv_ept_high;
-	lhv_ept_ctx_t ept_ctx;
+	u64 low = (uintptr_t)_shv_ept_low;
+	u64 high = (uintptr_t)_shv_ept_high;
+	shv_ept_ctx_t ept_ctx;
 	hpt_pmeo_t pmeo;
 
 	/* Assuming that ept_pool and ept_alloc are initialized to 0 by bss */
-	ept_ctx.ctx.gzp = lhv_ept_gzp;
-	ept_ctx.ctx.pa2ptr = lhv_ept_pa2ptr;
-	ept_ctx.ctx.ptr2pa = lhv_ept_ptr2pa;
+	ept_ctx.ctx.gzp = shv_ept_gzp;
+	ept_ctx.ctx.pa2ptr = shv_ept_pa2ptr;
+	ept_ctx.ctx.ptr2pa = shv_ept_ptr2pa;
 	ept_ctx.ctx.root_pa = hva2spa(ept_root[vcpu->idx][ept_num >> 4]);
 	ept_ctx.ctx.t = HPT_TYPE_EPT;
 	ept_ctx.page_pool = ept_pool[vcpu->idx][ept_num >> 4];

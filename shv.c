@@ -19,7 +19,7 @@
 #include <xmhf.h>
 #include <shv.h>
 
-void lhv_main(VCPU *vcpu)
+void shv_main(VCPU *vcpu)
 {
 	console_vc_t vc;
 	console_get_vc(&vc, vcpu->idx, 0);
@@ -46,8 +46,8 @@ void lhv_main(VCPU *vcpu)
 	/* Demonstrate disabling paging in hypervisor */
 	if (SHV_OPT & SHV_USE_UNRESTRICTED_GUEST) {
 #ifdef __amd64__
-		extern void lhv_disable_enable_paging(char *);
-		lhv_disable_enable_paging("SHV hypervisor can disable paging\n");
+		extern void shv_disable_enable_paging(char *);
+		shv_disable_enable_paging("SHV hypervisor can disable paging\n");
 #elif defined(__i386__)
 		ulong_t cr0 = read_cr0();
 		write_cr0(cr0 & 0x7fffffffUL);
@@ -70,7 +70,7 @@ void lhv_main(VCPU *vcpu)
 	}
 
 	/* Start VT related things */
-	lhv_vmx_main(vcpu);
+	shv_vmx_main(vcpu);
 
 	ASSERT(0 && "Should not reach here");
 }

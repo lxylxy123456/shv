@@ -106,16 +106,16 @@ static bool msr_writable(u32 index) {
 }
 
 /* Test whether MSR load / store during VMEXIT / VMENTRY are effective */
-typedef struct lhv_guest_test_msr_ls_data {
+typedef struct shv_guest_test_msr_ls_data {
 	bool skip_mc_msrs;
 	u32 mc_msrs[3];
 	u64 old_vals[3][3];
-} lhv_guest_test_msr_ls_data_t;
+} shv_guest_test_msr_ls_data_t;
 
-static void lhv_guest_test_msr_ls_vmexit_handler(VCPU *vcpu, struct regs *r,
+static void shv_guest_test_msr_ls_vmexit_handler(VCPU *vcpu, struct regs *r,
 												 vmexit_info_t *info)
 {
-	lhv_guest_test_msr_ls_data_t *data;
+	shv_guest_test_msr_ls_data_t *data;
 	if (info->vmexit_reason != VMX_VMEXIT_VMCALL) {
 		return;
 	}
@@ -243,11 +243,11 @@ static void lhv_guest_test_msr_ls_vmexit_handler(VCPU *vcpu, struct regs *r,
 	vmresume_asm(r);
 }
 
-static void lhv_guest_test_msr_ls(VCPU *vcpu)
+static void shv_guest_test_msr_ls(VCPU *vcpu)
 {
 	if (SHV_OPT & SHV_USE_MSR_LOAD) {
-		lhv_guest_test_msr_ls_data_t data;
-		vcpu->vmexit_handler_override = lhv_guest_test_msr_ls_vmexit_handler;
+		shv_guest_test_msr_ls_data_t data;
+		vcpu->vmexit_handler_override = shv_guest_test_msr_ls_vmexit_handler;
 		asm volatile ("vmcall" : : "a"(12), "b"(&data));
 		asm volatile ("vmcall" : : "a"(16), "b"(&data));
 		vcpu->vmexit_handler_override = NULL;
@@ -255,7 +255,7 @@ static void lhv_guest_test_msr_ls(VCPU *vcpu)
 }
 
 /* Test whether EPT VMEXITs happen as expected */
-static void lhv_guest_test_ept_vmexit_handler(VCPU *vcpu, struct regs *r,
+static void shv_guest_test_ept_vmexit_handler(VCPU *vcpu, struct regs *r,
 											  vmexit_info_t *info)
 {
 	if (info->vmexit_reason != VMX_VMEXIT_EPT_VIOLATION) {
@@ -280,12 +280,12 @@ static void lhv_guest_test_ept_vmexit_handler(VCPU *vcpu, struct regs *r,
 	vmresume_asm(r);
 }
 
-static void lhv_guest_test_ept(VCPU *vcpu)
+static void shv_guest_test_ept(VCPU *vcpu)
 {
 	if (SHV_OPT & SHV_USE_EPT) {
 		u32 expected_ept_count;
 		ASSERT(vcpu->ept_exit_count == 0);
-		vcpu->vmexit_handler_override = lhv_guest_test_ept_vmexit_handler;
+		vcpu->vmexit_handler_override = shv_guest_test_ept_vmexit_handler;
 		{
 			u32 a = 0xdeadbeef;
 			u32 *p = (u32 *)0x12340000;
@@ -315,7 +315,7 @@ static void lhv_guest_test_ept(VCPU *vcpu)
 }
 
 /* Switch EPT */
-static void lhv_guest_switch_ept_vmexit_handler(VCPU *vcpu, struct regs *r,
+static void shv_guest_switch_ept_vmexit_handler(VCPU *vcpu, struct regs *r,
 												vmexit_info_t *info)
 {
 	if (info->vmexit_reason != VMX_VMEXIT_VMCALL) {
@@ -329,25 +329,25 @@ static void lhv_guest_switch_ept_vmexit_handler(VCPU *vcpu, struct regs *r,
 		/* Swap EPT */
 		vcpu->ept_num++;
 		vcpu->ept_num %= (SHV_EPT_COUNT << 4);
-		eptp = lhv_build_ept(vcpu, vcpu->ept_num);
+		eptp = shv_build_ept(vcpu, vcpu->ept_num);
 		__vmx_vmwrite64(VMCS_control_EPT_pointer, eptp | 0x1eULL);
 	}
 	__vmx_vmwriteNW(VMCS_guest_RIP, info->guest_rip + info->inst_len);
 	vmresume_asm(r);
 }
 
-static void lhv_guest_switch_ept(VCPU *vcpu)
+static void shv_guest_switch_ept(VCPU *vcpu)
 {
 	if (SHV_OPT & SHV_USE_SWITCH_EPT) {
 		ASSERT(SHV_OPT & SHV_USE_EPT);
-		vcpu->vmexit_handler_override = lhv_guest_switch_ept_vmexit_handler;
+		vcpu->vmexit_handler_override = shv_guest_switch_ept_vmexit_handler;
 		asm volatile ("vmcall" : : "a"(17));
 		vcpu->vmexit_handler_override = NULL;
 	}
 }
 
 /* Test VMCLEAR and VMXOFF */
-static void lhv_guest_test_vmxoff_vmexit_handler(VCPU *vcpu, struct regs *r,
+static void shv_guest_test_vmxoff_vmexit_handler(VCPU *vcpu, struct regs *r,
 												 vmexit_info_t *info)
 {
 	if (info->vmexit_reason != VMX_VMEXIT_VMCALL) {
@@ -452,17 +452,17 @@ static void lhv_guest_test_vmxoff_vmexit_handler(VCPU *vcpu, struct regs *r,
 	vmlaunch_asm(r);
 }
 
-static void lhv_guest_test_vmxoff(VCPU *vcpu, bool test_vmxoff)
+static void shv_guest_test_vmxoff(VCPU *vcpu, bool test_vmxoff)
 {
 	if (SHV_OPT & SHV_USE_VMXOFF) {
-		vcpu->vmexit_handler_override = lhv_guest_test_vmxoff_vmexit_handler;
+		vcpu->vmexit_handler_override = shv_guest_test_vmxoff_vmexit_handler;
 		asm volatile ("vmcall" : : "a"(22), "b"((u32)test_vmxoff));
 		vcpu->vmexit_handler_override = NULL;
 	}
 }
 
 /* Test changing VPID and whether INVVPID returns the correct error code */
-static void lhv_guest_test_vpid_vmexit_handler(VCPU *vcpu, struct regs *r,
+static void shv_guest_test_vpid_vmexit_handler(VCPU *vcpu, struct regs *r,
 											   vmexit_info_t *info)
 {
 	if (info->vmexit_reason != VMX_VMEXIT_VMCALL) {
@@ -502,10 +502,10 @@ static void lhv_guest_test_vpid_vmexit_handler(VCPU *vcpu, struct regs *r,
 	vmresume_asm(r);
 }
 
-static void lhv_guest_test_vpid(VCPU *vcpu)
+static void shv_guest_test_vpid(VCPU *vcpu)
 {
 	if (SHV_OPT & SHV_USE_VPID) {
-		vcpu->vmexit_handler_override = lhv_guest_test_vpid_vmexit_handler;
+		vcpu->vmexit_handler_override = shv_guest_test_vpid_vmexit_handler;
 		asm volatile ("vmcall" : : "a"(19));
 		vcpu->vmexit_handler_override = NULL;
 	}
@@ -515,7 +515,7 @@ static void lhv_guest_test_vpid(VCPU *vcpu)
  * Wait for interrupt in hypervisor mode, nop when SHV_NO_EFLAGS_IF or
  * SHV_NO_INTERRUPT.
  */
-static void lhv_guest_wait_int_vmexit_handler(VCPU *vcpu, struct regs *r,
+static void shv_guest_wait_int_vmexit_handler(VCPU *vcpu, struct regs *r,
 											  vmexit_info_t *info)
 {
 	if (info->vmexit_reason != VMX_VMEXIT_VMCALL) {
@@ -529,24 +529,24 @@ static void lhv_guest_wait_int_vmexit_handler(VCPU *vcpu, struct regs *r,
 	vmresume_asm(r);
 }
 
-static void lhv_guest_wait_int(VCPU *vcpu)
+static void shv_guest_wait_int(VCPU *vcpu)
 {
-	vcpu->vmexit_handler_override = lhv_guest_wait_int_vmexit_handler;
+	vcpu->vmexit_handler_override = shv_guest_wait_int_vmexit_handler;
 	asm volatile ("vmcall" : : "a"(25));
 	vcpu->vmexit_handler_override = NULL;
 }
 
 /* Test unrestricted guest by disabling paging */
-static void lhv_guest_test_unrestricted_guest(VCPU *vcpu)
+static void shv_guest_test_unrestricted_guest(VCPU *vcpu)
 {
 	(void)vcpu;
 	if (SHV_OPT & SHV_USE_UNRESTRICTED_GUEST) {
 #ifdef __amd64__
-		extern void lhv_disable_enable_paging(char *);
+		extern void shv_disable_enable_paging(char *);
 		if ("quiet") {
-			lhv_disable_enable_paging("");
+			shv_disable_enable_paging("");
 		} else {
-			lhv_disable_enable_paging("SHV guest can disable paging\n");
+			shv_disable_enable_paging("SHV guest can disable paging\n");
 		}
 #elif defined(__i386__)
 		ulong_t cr0 = read_cr0();
@@ -566,7 +566,7 @@ static void lhv_guest_test_unrestricted_guest(VCPU *vcpu)
 }
 
 /* Test large page in EPT */
-static void lhv_guest_test_large_page(VCPU *vcpu)
+static void shv_guest_test_large_page(VCPU *vcpu)
 {
 	(void)vcpu;
 	if (SHV_OPT & SHV_USE_LARGE_PAGE) {
@@ -577,7 +577,7 @@ static void lhv_guest_test_large_page(VCPU *vcpu)
 }
 
 /* Test running TrustVisor */
-static void lhv_guest_test_user_vmexit_handler(VCPU *vcpu, struct regs *r,
+static void shv_guest_test_user_vmexit_handler(VCPU *vcpu, struct regs *r,
 											   vmexit_info_t *info)
 {
 	if (info->vmexit_reason != VMX_VMEXIT_VMCALL) {
@@ -589,18 +589,18 @@ static void lhv_guest_test_user_vmexit_handler(VCPU *vcpu, struct regs *r,
 	vmresume_asm(r);
 }
 
-static void lhv_guest_test_user(VCPU *vcpu)
+static void shv_guest_test_user(VCPU *vcpu)
 {
 	if (SHV_OPT & SHV_USER_MODE) {
 		ASSERT(!(SHV_OPT & SHV_NO_EFLAGS_IF));
-		vcpu->vmexit_handler_override = lhv_guest_test_user_vmexit_handler;
+		vcpu->vmexit_handler_override = shv_guest_test_user_vmexit_handler;
 		asm volatile ("vmcall" : : "a"(33));
 		vcpu->vmexit_handler_override = NULL;
 	}
 }
 
 /* Test running TrustVisor in L2 */
-static void lhv_guest_test_nested_user_vmexit_handler(VCPU *vcpu,
+static void shv_guest_test_nested_user_vmexit_handler(VCPU *vcpu,
 													  struct regs *r,
 													  vmexit_info_t *info)
 {
@@ -612,12 +612,12 @@ static void lhv_guest_test_nested_user_vmexit_handler(VCPU *vcpu,
 	ASSERT(0 && "VMEXIT not allowed");
 }
 
-static void lhv_guest_test_nested_user(VCPU *vcpu)
+static void shv_guest_test_nested_user(VCPU *vcpu)
 {
 	if (SHV_OPT & SHV_NESTED_USER_MODE) {
 		ASSERT(!(SHV_OPT & SHV_NO_EFLAGS_IF));
 		vcpu->vmexit_handler_override =
-			lhv_guest_test_nested_user_vmexit_handler;
+			shv_guest_test_nested_user_vmexit_handler;
 		// asm volatile ("vmcall" : : "a"(0x4c4150ffU));
 		enter_user_mode(vcpu, 0x4c415000U);
 		vcpu->vmexit_handler_override = NULL;
@@ -629,7 +629,7 @@ static void lhv_guest_test_nested_user(VCPU *vcpu)
 #define MSR_TEST_VMEXIT	0xf6d7a004
 #define MSR_TEST_EXCEPT	0xc23a16e5
 
-static void lhv_guest_msr_bitmap_vmexit_handler(VCPU *vcpu, struct regs *r,
+static void shv_guest_msr_bitmap_vmexit_handler(VCPU *vcpu, struct regs *r,
 												vmexit_info_t *info)
 {
 	static u8 msr_bitmap_allcpu[MAX_VCPU_ENTRIES][PAGE_SIZE_4K]
@@ -779,10 +779,10 @@ static void _test_wrmsr(u32 ecx, u32 expected_ebx, u64 val)
 	ASSERT(ebx == expected_ebx);
 }
 
-static void lhv_guest_msr_bitmap(VCPU *vcpu)
+static void shv_guest_msr_bitmap(VCPU *vcpu)
 {
 	if (SHV_OPT & SHV_USE_MSRBITMAP) {
-		vcpu->vmexit_handler_override = lhv_guest_msr_bitmap_vmexit_handler;
+		vcpu->vmexit_handler_override = shv_guest_msr_bitmap_vmexit_handler;
 		/* Enable MSR bitmap */
 		asm volatile ("vmcall" : : "a"(34));
 		/* Initial: ignore everything */
@@ -869,7 +869,7 @@ static void lhv_guest_msr_bitmap(VCPU *vcpu)
 #undef MSR_TEST_EXCEPT
 
 /* Main logic to call subsequent tests */
-void lhv_guest_main(ulong_t cpu_id)
+void shv_guest_main(ulong_t cpu_id)
 {
 	u64 iter = 0;
 	bool in_xmhf = false;
@@ -914,7 +914,7 @@ void lhv_guest_main(ulong_t cpu_id)
 			 * after running pal_demo. So we need to disable some tests.
 			 */
 			if (iter < 3) {
-				lhv_guest_test_msr_ls(vcpu);
+				shv_guest_test_msr_ls(vcpu);
 			} else if (iter == 3) {
 				/* Implement a barrier and make sure all CPUs arrive */
 				static spin_lock_t lock;
@@ -928,29 +928,29 @@ void lhv_guest_main(ulong_t cpu_id)
 				}
 				printf("CPU(0x%02x): leave SHV barrier\n", vcpu->id);
 			} else {
-				lhv_guest_test_user(vcpu);
-				lhv_guest_test_nested_user(vcpu);
+				shv_guest_test_user(vcpu);
+				shv_guest_test_nested_user(vcpu);
 			}
 		} else {
 			/* Only one of MSR or (user and nested user) will execute */
-			lhv_guest_test_msr_ls(vcpu);
-			lhv_guest_test_user(vcpu);
-			lhv_guest_test_nested_user(vcpu);
+			shv_guest_test_msr_ls(vcpu);
+			shv_guest_test_user(vcpu);
+			shv_guest_test_nested_user(vcpu);
 		}
-		lhv_guest_test_ept(vcpu);
-		lhv_guest_switch_ept(vcpu);
-		lhv_guest_test_vpid(vcpu);
+		shv_guest_test_ept(vcpu);
+		shv_guest_switch_ept(vcpu);
+		shv_guest_test_vpid(vcpu);
 		if (iter % 5 == 0) {
-			lhv_guest_test_vmxoff(vcpu, iter % 3 == 0);
+			shv_guest_test_vmxoff(vcpu, iter % 3 == 0);
 		}
-		lhv_guest_test_unrestricted_guest(vcpu);
-		lhv_guest_test_large_page(vcpu);
-		lhv_guest_msr_bitmap(vcpu);
-		lhv_guest_wait_int(vcpu);
+		shv_guest_test_unrestricted_guest(vcpu);
+		shv_guest_test_large_page(vcpu);
+		shv_guest_msr_bitmap(vcpu);
+		shv_guest_wait_int(vcpu);
 	}
 }
 
-void lhv_guest_xcphandler(VCPU * vcpu, struct regs *r, iret_info_t * info)
+void shv_guest_xcphandler(VCPU * vcpu, struct regs *r, iret_info_t * info)
 {
 	u8 vector = info->vector;
 
@@ -968,7 +968,7 @@ void lhv_guest_xcphandler(VCPU * vcpu, struct regs *r, iret_info_t * info)
 		break;
 
 	case 0x23:
-		handle_lhv_syscall(get_vcpu(), vector, r);
+		handle_shv_syscall(get_vcpu(), vector, r);
 		break;
 
 	case 0x27:

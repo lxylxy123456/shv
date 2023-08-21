@@ -108,8 +108,8 @@ vmentry_asm_template vmlaunch 0
 vmentry_asm_template vmresume 1
 
 #ifdef __amd64__
-.global lhv_disable_enable_paging
-lhv_disable_enable_paging:
+.global shv_disable_enable_paging
+shv_disable_enable_paging:
 	/* Argument %rdi is pointer to string to print */
 	movq	%rdi, %rcx
 

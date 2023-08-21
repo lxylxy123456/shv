@@ -153,7 +153,7 @@ static void handle_idt_host(VCPU * vcpu, struct regs *r, iret_info_t * info)
 		break;
 
 	case 0x23:
-		handle_lhv_syscall(vcpu, vector, r);
+		handle_shv_syscall(vcpu, vector, r);
 		break;
 
 	case 0x27:
@@ -219,6 +219,6 @@ void handle_idt(iret_info_t * info)
 	if (cpuid_ecx(1, 0) & (1U << 5)) {
 		handle_idt_host(vcpu, r, info);
 	} else {
-		lhv_guest_xcphandler(vcpu, r, info);
+		shv_guest_xcphandler(vcpu, r, info);
 	}
 }

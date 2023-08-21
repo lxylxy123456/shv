@@ -19,14 +19,14 @@
 #include <xmhf.h>
 #include <shv.h>
 
-.global lhv_guest_entry
+.global shv_guest_entry
 
-lhv_guest_entry:
+shv_guest_entry:
 #ifdef __i386__
 	push	%edi
 #elif !defined(__amd64__)
     #error "Unsupported Arch"
 #endif /* !defined(__amd64__) */
-	call	lhv_guest_main
+	call	shv_guest_main
 1:	jmp		1b		/* Should never return */
 

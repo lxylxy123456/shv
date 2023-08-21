@@ -198,8 +198,8 @@ typedef struct _vcpu {
 	struct _guestmtrrmsrs vmx_guestmtrrmsrs;
 	struct _vmx_vmcsfields vmcs;
 
-	int lhv_lapic_x[2];
-	int lhv_pit_x[2];
+	int shv_lapic_x[2];
+	int shv_pit_x[2];
 	u64 lapic_time;
 	u64 pit_time;
 

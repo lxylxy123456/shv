@@ -97,8 +97,8 @@ void kernel_main_smp(VCPU *vcpu)
 
 	/* Transfer control to SHV */
 	{
-		extern void lhv_main(VCPU *vcpu);
-		lhv_main(vcpu);
+		extern void shv_main(VCPU *vcpu);
+		shv_main(vcpu);
 	}
 
 	ASSERT(0 && "Should not reach here");

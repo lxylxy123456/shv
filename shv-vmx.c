@@ -41,7 +41,7 @@ __attribute__((aligned(16)));
 
 extern u64 x_gdt_start[MAX_VCPU_ENTRIES][GDT_NELEMS];
 
-static void lhv_vmx_vmcs_init(VCPU *vcpu)
+static void shv_vmx_vmcs_init(VCPU *vcpu)
 {
 	// From vmx_initunrestrictedguestVMCS
 	__vmx_vmwriteNW(VMCS_host_CR0, read_cr0());
@@ -122,8 +122,8 @@ static void lhv_vmx_vmcs_init(VCPU *vcpu)
 	if (SHV_OPT & SHV_USE_EPT) {
 		u64 eptp;
 		u32 seccpu;
-		lhv_ept_init(vcpu);
-		eptp = lhv_build_ept(vcpu, 0);
+		shv_ept_init(vcpu);
+		eptp = shv_build_ept(vcpu, 0);
 		seccpu = __vmx_vmread32(VMCS_control_VMX_seccpu_based);
 		seccpu |= (1U << VMX_SECPROCBASED_ENABLE_EPT);
 		__vmx_vmwrite32(VMCS_control_VMX_seccpu_based, seccpu);
@@ -213,7 +213,7 @@ static void lhv_vmx_vmcs_init(VCPU *vcpu)
 	//RIP
 	__vmx_vmwrite16(VMCS_guest_CS_selector, __CS);
 	__vmx_vmwriteNW(VMCS_guest_CS_base, 0);
-	__vmx_vmwriteNW(VMCS_guest_RIP, (u64)(ulong_t)lhv_guest_entry);
+	__vmx_vmwriteNW(VMCS_guest_RIP, (u64)(ulong_t)shv_guest_entry);
 	__vmx_vmwriteNW(VMCS_guest_RFLAGS, (1 << 1));
 	//CS, DS, ES, FS, GS and SS segments
 	__vmx_vmwrite32(VMCS_guest_CS_limit, 0xffffffff);
@@ -265,7 +265,7 @@ static void lhv_vmx_vmcs_init(VCPU *vcpu)
 	__vmx_vmwriteNW(VMCS_control_CR0_shadow, 0);
 }
 
-void lhv_vmx_main(VCPU *vcpu)
+void shv_vmx_main(VCPU *vcpu)
 {
 	u32 vmcs_revision_identifier;
 
@@ -358,7 +358,7 @@ void lhv_vmx_main(VCPU *vcpu)
 	}
 
 	/* Modify VMCS */
-	lhv_vmx_vmcs_init(vcpu);
+	shv_vmx_vmcs_init(vcpu);
 	vmcs_dump(vcpu, 0);
 
 	/* VMLAUNCH */
