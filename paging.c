@@ -76,7 +76,7 @@ uintptr_t shv_page_table_init(void)
 		 i++, paddr += PA_PAGE_SIZE_4M) {
 		shv_pdt[i] = 0x83U | paddr;
 	}
-	  return (uintptr_t) shv_pdt ;
+	  return (uintptr_t) shv_pdt  ;
 #endif							/* I386_PAE */
 #else							/* !defined(__i386__) && !defined(__amd64__) */
 #error "Unsupported Arch"
