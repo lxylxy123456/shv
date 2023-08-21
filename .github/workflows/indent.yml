@@ -15,7 +15,7 @@ jobs:
         echo begin
         git branch
         git status
-        git fetch --depth 20
+        git fetch origin `git rev-parse --abbrev-ref HEAD` --depth 20
         git branch
         git status
         git log | head -n 10
