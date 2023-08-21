@@ -66,37 +66,37 @@
 //author: amit vasudevan (amitvasudevan@acm.org)
 
 //Guest Interruptibility state
-#define VMX_GUEST_INTR_BLOCK_STI    (1U << 0)   // Blocking by STI
-#define VMX_GUEST_INTR_BLOCK_MOVSS  (1U << 1)   // Blocking by MOV SS
-#define VMX_GUEST_INTR_BLOCK_SMI    (1U << 2)   // Blocking by SMI
-#define VMX_GUEST_INTR_BLOCK_NMI    (1U << 3)   // Blocking by NMI
-#define VMX_GUEST_INTR_ENCLV_INT    (1U << 4)   // Enclave interruption
+#define VMX_GUEST_INTR_BLOCK_STI    (1U << 0)	// Blocking by STI
+#define VMX_GUEST_INTR_BLOCK_MOVSS  (1U << 1)	// Blocking by MOV SS
+#define VMX_GUEST_INTR_BLOCK_SMI    (1U << 2)	// Blocking by SMI
+#define VMX_GUEST_INTR_BLOCK_NMI    (1U << 3)	// Blocking by NMI
+#define VMX_GUEST_INTR_ENCLV_INT    (1U << 4)	// Enclave interruption
 
 //VM Exit Interruption-information format
-#define INTR_INFO_VECTOR_MASK           (0x000000ff)        // 7:0
-#define INTR_INFO_INTR_TYPE_MASK        (0x00000700)        // 10:8
-#define INTR_INFO_DELIVER_CODE_MASK     (0x00000800)        // 11
-#define INTR_INFO_VALID_MASK            (0x80000000)        // 31
+#define INTR_INFO_VECTOR_MASK           (0x000000ff)	// 7:0
+#define INTR_INFO_INTR_TYPE_MASK        (0x00000700)	// 10:8
+#define INTR_INFO_DELIVER_CODE_MASK     (0x00000800)	// 11
+#define INTR_INFO_VALID_MASK            (0x80000000)	// 31
 
 #define VECTORING_INFO_VECTOR_MASK            INTR_INFO_VECTOR_MASK
 #define VECTORING_INFO_TYPE_MASK              INTR_INFO_INTR_TYPE_MASK
 #define VECTORING_INFO_DELIVER_CODE_MASK      INTR_INFO_DELIVER_CODE_MASK
 #define VECTORING_INFO_VALID_MASK             INTR_INFO_VALID_MASK
 
-#define INTR_TYPE_HW_INTERRUPT        (0U << 8)  // hardware/external interrupt
-#define INTR_TYPE_NMI                 (2U << 8)  // NMI
-#define INTR_TYPE_HW_EXCEPTION        (3U << 8)  // processor exception
-#define INTR_TYPE_SW_INTERRUPT        (4U << 8)  // software interrupt
-#define INTR_TYPE_PRIV_SW_EXCEPTION   (5U << 8)  // privleged software exception (INT1)
-#define INTR_TYPE_SW_EXCEPTION        (6U << 8)  // software exception (INTO, INT3)
+#define INTR_TYPE_HW_INTERRUPT        (0U << 8)	// hardware/external interrupt
+#define INTR_TYPE_NMI                 (2U << 8)	// NMI
+#define INTR_TYPE_HW_EXCEPTION        (3U << 8)	// processor exception
+#define INTR_TYPE_SW_INTERRUPT        (4U << 8)	// software interrupt
+#define INTR_TYPE_PRIV_SW_EXCEPTION   (5U << 8)	// privleged software exception (INT1)
+#define INTR_TYPE_SW_EXCEPTION        (6U << 8)	// software exception (INTO, INT3)
 
 /* Used in bitfields (BF) */
-#define INTR_TYPE_BF_HW_INTERRUPT       (0U)  // hardware/external interrupt
-#define INTR_TYPE_BF_NMI                (2U)  // NMI
-#define INTR_TYPE_BF_HW_EXCEPTION       (3U)  // processor exception
-#define INTR_TYPE_BF_SW_INTERRUPT       (4U)  // software interrupt
-#define INTR_TYPE_BF_PRIV_SW_EXCEPTION  (5U)  // privleged software exception (INT1)
-#define INTR_TYPE_BF_SW_EXCEPTION       (6U)  // software exception (INTO, INT3)
+#define INTR_TYPE_BF_HW_INTERRUPT       (0U)	// hardware/external interrupt
+#define INTR_TYPE_BF_NMI                (2U)	// NMI
+#define INTR_TYPE_BF_HW_EXCEPTION       (3U)	// processor exception
+#define INTR_TYPE_BF_SW_INTERRUPT       (4U)	// software interrupt
+#define INTR_TYPE_BF_PRIV_SW_EXCEPTION  (5U)	// privleged software exception (INT1)
+#define INTR_TYPE_BF_SW_EXCEPTION       (6U)	// software exception (INTO, INT3)
 
 //
 #define VMX_EVENT_CANCEL  (0)
@@ -143,7 +143,6 @@
 #define INTERCEPT_EXCEPTIONS_1E (0x1E)
 #define INTERCEPT_EXCEPTIONS_1F (0x1F)
 #define INTERCEPT_EXCEPTIONS_20 (0x20)
-
 
 #define INTERCEPT_INVLPG          0x21
 #define INTERCEPT_CR3_READ        0x22
@@ -312,44 +311,39 @@
 #define IO_INSN_REP			0x1
 #define IO_INSN_OPCODE_IMM	0x1
 
-
 #ifndef __ASSEMBLY__
 
+typedef struct {
+	u32 writable;
+	u32 encoding;
+	u32 addressofvariable;
+} __attribute__((packed)) VMCSENCODINGS;
 
 typedef struct {
-  u32 writable;
-  u32 encoding;
-  u32 addressofvariable;
-} __attribute__ ((packed)) VMCSENCODINGS;
-
-
-typedef struct {
-	u32 type: 4;
-	u32 desctype: 1; //0=system, 1=code or data
-	u32 dpl: 2;
-	u32 p: 1;
-	u32 res1: 4;
-	u32 avl: 1;
-	u32 csmode: 1;
-	u32 s: 1; //0=16-bit segment, 1=32-bit segment
-	u32 g: 1;
-	u32 usable: 1; //0=usable, 1=unusable
-	u32 res2: 15;
-} __attribute__ ((packed)) segment_desc_accessrights;
-
+	u32 type:4;
+	u32 desctype:1;				//0=system, 1=code or data
+	u32 dpl:2;
+	u32 p:1;
+	u32 res1:4;
+	u32 avl:1;
+	u32 csmode:1;
+	u32 s:1;					//0=16-bit segment, 1=32-bit segment
+	u32 g:1;
+	u32 usable:1;				//0=usable, 1=unusable
+	u32 res2:15;
+} __attribute__((packed)) segment_desc_accessrights;
 
 /* cf. IA32_SDM_Vol3B table 24-7 */
-enum EPTViolationCode
-{
-	EPT_ERRORCODE_READ	   = 1 << 0,
-	EPT_ERRORCODE_WRITE	   = 1 << 1,
-	EPT_ERRORCODE_EXEC	   = 1 << 2,
+enum EPTViolationCode {
+	EPT_ERRORCODE_READ = 1 << 0,
+	EPT_ERRORCODE_WRITE = 1 << 1,
+	EPT_ERRORCODE_EXEC = 1 << 2,
 	EPT_ERRORCODE_READABLE = 1 << 3,
 	EPT_ERRORCODE_WRITABLE = 1 << 4,
 	EPT_ERRORCODE_EXECABLE = 1 << 5,
 	EPT_ERRORCODE_RESERVED = 1 << 6,
 	EPT_ERRORCODE_VADDR_VALID = 1 << 7,
-	EPT_ERRORCODE_TABLEWALK= 1 << 8,
+	EPT_ERRORCODE_TABLEWALK = 1 << 8,
 };
 #define  EPT_ERRORCODE_PRESENT ((EPT_ERRORCODE_READABLE)+(EPT_ERRORCODE_WRITABLE)+(EPT_ERRORCODE_EXECABLE))
 
@@ -382,9 +376,8 @@ enum EPTViolationCode
 #define EPT_PML4E_W_LO 1
 #define EPT_PML4E_R_HI 0
 #define EPT_PML4E_R_LO 0
-#define EPT_PML4E_NP_HI 2 /* not-present */
+#define EPT_PML4E_NP_HI 2		/* not-present */
 #define EPT_PML4E_NP_LO 0
-
 
 /* PDPTE bit fields */
 #define EPT_PDPTE_IGN0_HI 63
@@ -392,26 +385,26 @@ enum EPTViolationCode
 #define EPT_PDPTE_RSVD0_HI 51
 #define EPT_PDPTE_RSVD0_LO M
 /****** when ISPAGE==0 ********************/
-  #define EPT_PDPTE_PD_HI (M-1)
-  #define EPT_PDPTE_PD_LO 12
+#define EPT_PDPTE_PD_HI (M-1)
+#define EPT_PDPTE_PD_LO 12
 /******* when ISPAGE==1********************/
-  #define EPT_PDPTE_PAGE_HI (M-1)
-  #define EPT_PDPTE_PAGE_LO 30
-  #define EPT_PDPTE_RSVD1_HI 29
-  #define EPT_PDPTE_RSVD1_LO 12
+#define EPT_PDPTE_PAGE_HI (M-1)
+#define EPT_PDPTE_PAGE_LO 30
+#define EPT_PDPTE_RSVD1_HI 29
+#define EPT_PDPTE_RSVD1_LO 12
 /******************************************/
 #define EPT_PDPTE_IGN1_HI 11
 #define EPT_PDPTE_IGN1_LO 8
 #define EPT_PDPTE_ISPAGE_HI 7
 #define EPT_PDPTE_ISPAGE_LO 7
 /****** when ISPAGE==0 ********************/
-  #define EPT_PDPTE_RSVD2_HI 6
-  #define EPT_PDPTE_RSVD2_LO 3
+#define EPT_PDPTE_RSVD2_HI 6
+#define EPT_PDPTE_RSVD2_LO 3
 /****** when ISPAGE==1 ********************/
-  #define EPT_PDPTE_IPAT_HI 6
-  #define EPT_PDPTE_IPAT_LO 6
-  #define EPT_PDPTE_EPTMT_HI 5
-  #define EPT_PDPTE_EPTMT_LO 3
+#define EPT_PDPTE_IPAT_HI 6
+#define EPT_PDPTE_IPAT_LO 6
+#define EPT_PDPTE_EPTMT_HI 5
+#define EPT_PDPTE_EPTMT_LO 3
 /******************************************/
 #define EPT_PDPTE_X_HI 2
 #define EPT_PDPTE_X_LO 2
@@ -419,7 +412,7 @@ enum EPTViolationCode
 #define EPT_PDPTE_W_LO 1
 #define EPT_PDPTE_R_HI 0
 #define EPT_PDPTE_R_LO 0
-#define EPT_PDPTE_NP_HI 2 /* not-present */
+#define EPT_PDPTE_NP_HI 2		/* not-present */
 #define EPT_PDPTE_NP_LO 0
 #define EPT_PDPTE_PROT_HI 2
 #define EPT_PDPTE_PROT_LO 0
@@ -430,26 +423,26 @@ enum EPTViolationCode
 #define EPT_PDE_RSVD0_HI 51
 #define EPT_PDE_RSVD0_LO M
 /****** when ISPAGE==0 ********************/
-  #define EPT_PDE_PT_HI (M-1)
-  #define EPT_PDE_PT_LO 12
+#define EPT_PDE_PT_HI (M-1)
+#define EPT_PDE_PT_LO 12
 /******* when ISPAGE==1********************/
-  #define EPT_PDE_PAGE_HI (M-1)
-  #define EPT_PDE_PAGE_LO 21
-  #define EPT_PDE_RSVD1_HI 20
-  #define EPT_PDE_RSVD1_LO 12
+#define EPT_PDE_PAGE_HI (M-1)
+#define EPT_PDE_PAGE_LO 21
+#define EPT_PDE_RSVD1_HI 20
+#define EPT_PDE_RSVD1_LO 12
 /******************************************/
 #define EPT_PDE_IGN1_HI 11
 #define EPT_PDE_IGN1_LO 8
 #define EPT_PDE_ISPAGE_HI 7
 #define EPT_PDE_ISPAGE_LO 7
 /****** when ISPAGE==0 ********************/
-  #define EPT_PDE_RSVD2_HI 6
-  #define EPT_PDE_RSVD2_LO 3
+#define EPT_PDE_RSVD2_HI 6
+#define EPT_PDE_RSVD2_LO 3
 /****** when ISPAGE==1 ********************/
-  #define EPT_PDE_IPAT_HI 6
-  #define EPT_PDE_IPAT_LO 6
-  #define EPT_PDE_EPTMT_HI 5
-  #define EPT_PDE_EPTMT_LO 3
+#define EPT_PDE_IPAT_HI 6
+#define EPT_PDE_IPAT_LO 6
+#define EPT_PDE_EPTMT_HI 5
+#define EPT_PDE_EPTMT_LO 3
 /******************************************/
 #define EPT_PDE_X_HI 2
 #define EPT_PDE_X_LO 2
@@ -457,7 +450,7 @@ enum EPTViolationCode
 #define EPT_PDE_W_LO 1
 #define EPT_PDE_R_HI 0
 #define EPT_PDE_R_LO 0
-#define EPT_PDE_NP_HI 2 /* not-present */
+#define EPT_PDE_NP_HI 2			/* not-present */
 #define EPT_PDE_NP_LO 0
 #define EPT_PDE_PROT_HI 2
 #define EPT_PDE_PROT_LO 0
@@ -481,7 +474,7 @@ enum EPTViolationCode
 #define EPT_PTE_W_LO 1
 #define EPT_PTE_R_HI 0
 #define EPT_PTE_R_LO 0
-#define EPT_PTE_NP_HI 2 /* not-present */
+#define EPT_PTE_NP_HI 2			/* not-present */
 #define EPT_PTE_NP_LO 0
 #define EPT_PTE_PROT_HI 2
 #define EPT_PTE_PROT_LO 0
@@ -499,19 +492,17 @@ enum EPTViolationCode
 #define EPT_GPA_OFFSET_LO 0
 
 enum {
-  TASK_SWITCH_CALL = 0,
-  TASK_SWITCH_IRET = 1,
-  TASK_SWITCH_JMP = 2,
-  TASK_SWITCH_GATE = 3,
+	TASK_SWITCH_CALL = 0,
+	TASK_SWITCH_IRET = 1,
+	TASK_SWITCH_JMP = 2,
+	TASK_SWITCH_GATE = 3,
 };
-
 
 typedef struct msr_entry {
 	u32 index;
 	u32 reserved;
 	u64 data;
 } __attribute__((packed)) msr_entry_t;
-
 
 //VMX VMCS fields
 enum _vmcs_encodings {
@@ -537,116 +528,110 @@ struct _vmx_vmcsfields {
 
 /* VM-Entry Interruption-Information Field */
 struct _vmx_event_injection {
-    u32 vector:      8;
-    u32 type:        3;
-    u32 errorcode:   1;
-    u32 reserved:   19;
-    u32 valid:       1;
-} __attribute__ ((packed));
+	u32 vector:8;
+	u32 type:3;
+	u32 errorcode:1;
+	u32 reserved:19;
+	u32 valid:1;
+} __attribute__((packed));
 
 //VMX functions
-static inline u32 __vmx_vmxon(u64 vmxonRegion){
-  u32 status;
-  __asm__ __volatile__("vmxon %1			\r\n"
-	   	"jbe	1f    		\r\n"
-      "movl $1, %%eax \r\n"
-      "jmp  2f  \r\n"
-      "1: movl $0, %%eax \r\n"
-      "2: movl %%eax, %0 \r\n"
-    : "=m" (status)
-    : "m"(vmxonRegion)
-    : "%eax", "cc"
-  );
-  return status;
+static inline u32 __vmx_vmxon(u64 vmxonRegion)
+{
+	u32 status;
+	__asm__ __volatile__("vmxon %1			\r\n"
+						 "jbe	1f    		\r\n"
+						 "movl $1, %%eax \r\n"
+						 "jmp  2f  \r\n"
+						 "1: movl $0, %%eax \r\n"
+						 "2: movl %%eax, %0 \r\n":"=m"(status)
+						 :"m"(vmxonRegion)
+						 :"%eax", "cc");
+	return status;
 }
 
-static inline u32 __vmx_vmxoff(void){
-  u32 status;
-  __asm__ __volatile__("vmxoff			\r\n"
-	   	"jbe	1f    		\r\n"
-      "movl $1, %%eax \r\n"
-      "jmp  2f  \r\n"
-      "1: movl $0, %%eax \r\n"
-      "2: movl %%eax, %0 \r\n"
-    : "=m" (status)
-    :
-    : "%eax", "cc"
-  );
-  return status;
+static inline u32 __vmx_vmxoff(void)
+{
+	u32 status;
+	__asm__ __volatile__("vmxoff			\r\n"
+						 "jbe	1f    		\r\n"
+						 "movl $1, %%eax \r\n"
+						 "jmp  2f  \r\n"
+						 "1: movl $0, %%eax \r\n"
+						 "2: movl %%eax, %0 \r\n":"=m"(status)
+						 ::"%eax", "cc");
+	return status;
 }
 
-static inline u32 __vmx_vmwrite(unsigned long encoding, unsigned long value){
-  u32 status;
-  __asm__ __volatile__("vmwrite %2, %1 \r\n"
-                       "jbe 1f \r\n"
-                       "movl $1, %0 \r\n"
-                       "jmp 2f \r\n"
-                       "1: movl $0, %0 \r\n"
-                       "2: \r\n"
-    : "=g"(status)
-    : "r"(encoding), "rm"(value)
-    : "cc");
-  return status;
+static inline u32 __vmx_vmwrite(unsigned long encoding, unsigned long value)
+{
+	u32 status;
+	__asm__ __volatile__("vmwrite %2, %1 \r\n"
+						 "jbe 1f \r\n"
+						 "movl $1, %0 \r\n"
+						 "jmp 2f \r\n"
+						 "1: movl $0, %0 \r\n" "2: \r\n":"=g"(status)
+						 :"r"(encoding), "rm"(value)
+						 :"cc");
+	return status;
 }
 
-static inline u32 __vmx_vmread(unsigned long encoding, unsigned long *value){
-  u32 status;
-  __asm__ __volatile__("vmread %2, %0 \r\n"
-                       "jbe 1f \r\n"
-                       "movl $1, %1 \r\n"
-                       "jmp 2f \r\n"
-                       "1: movl $0, %1 \r\n"
-                       "2: \r\n"
-    : "=rm"(*value), "=g"(status)
-    : "r"(encoding)
-    : "cc");
-  return status;
+static inline u32 __vmx_vmread(unsigned long encoding, unsigned long *value)
+{
+	u32 status;
+	__asm__ __volatile__("vmread %2, %0 \r\n"
+						 "jbe 1f \r\n"
+						 "movl $1, %1 \r\n"
+						 "jmp 2f \r\n"
+						 "1: movl $0, %1 \r\n"
+						 "2: \r\n":"=rm"(*value), "=g"(status)
+						 :"r"(encoding)
+						 :"cc");
+	return status;
 }
 
-static inline u32 __vmx_vmclear(u64 vmcs){
-  u32 status;
-  __asm__ __volatile__("vmclear %1 \r\n"
-                       "jbe 1f \r\n"
-                       "movl $1, %0 \r\n"
-                       "jmp 2f \r\n"
-                       "1: movl $0, %0 \r\n"
-                       "2: \r\n"
-    : "=m" (status)
-    : "m"(vmcs)
-    : "cc");
-  return status;
+static inline u32 __vmx_vmclear(u64 vmcs)
+{
+	u32 status;
+	__asm__ __volatile__("vmclear %1 \r\n"
+						 "jbe 1f \r\n"
+						 "movl $1, %0 \r\n"
+						 "jmp 2f \r\n"
+						 "1: movl $0, %0 \r\n" "2: \r\n":"=m"(status)
+						 :"m"(vmcs)
+						 :"cc");
+	return status;
 }
 
-static inline u32 __vmx_vmptrld(u64 vmcs){
-  u32 status;
-  __asm__ __volatile__("vmptrld %1        \r\n"
-                       "jbe  1f           \r\n"
-                       "movl $1, %0       \r\n"
-                       "jmp  2f           \r\n"
-                       "1: movl $0, %0    \r\n"
-                       "2:                \r\n"
-    : "=m" (status)
-    : "m"(vmcs)
-    : "cc");
-  return status;
+static inline u32 __vmx_vmptrld(u64 vmcs)
+{
+	u32 status;
+	__asm__ __volatile__("vmptrld %1        \r\n"
+						 "jbe  1f           \r\n"
+						 "movl $1, %0       \r\n"
+						 "jmp  2f           \r\n"
+						 "1: movl $0, %0    \r\n"
+						 "2:                \r\n":"=m"(status)
+						 :"m"(vmcs)
+						 :"cc");
+	return status;
 }
 
-static inline u32 __vmx_vmptrst(u64 *vmcs){
-  u32 status;
-  __asm__ __volatile__("vmptrst %1        \r\n"
-                       "jbe  1f           \r\n"
-                       "movl $1, %0       \r\n"
-                       "jmp  2f           \r\n"
-                       "1: movl $0, %0    \r\n"
-                       "2:                \r\n"
-    : "=m" (status), "=m"(*vmcs)
-    :
-    : "cc");
-  return status;
+static inline u32 __vmx_vmptrst(u64 * vmcs)
+{
+	u32 status;
+	__asm__ __volatile__("vmptrst %1        \r\n"
+						 "jbe  1f           \r\n"
+						 "movl $1, %0       \r\n"
+						 "jmp  2f           \r\n"
+						 "1: movl $0, %0    \r\n"
+						 "2:                \r\n":"=m"(status), "=m"(*vmcs)
+						 ::"cc");
+	return status;
 }
 
 // VMX instruction INVVPID
-//		Invalidate Translations Based on VPID
+//      Invalidate Translations Based on VPID
 // INVVPID r32, m128
 //returns 1 on success, 0 on failure
 
@@ -655,14 +640,16 @@ static inline u32 __vmx_vmptrst(u64 *vmcs){
 #define VMX_INVVPID_ALLCONTEXTS				2
 #define VMX_INVVPID_SINGLECONTEXTGLOBAL		3
 
-static inline u32 __vmx_invvpid(int invalidation_type, u16 vpid, uintptr_t linearaddress){
+static inline u32 __vmx_invvpid(int invalidation_type, u16 vpid,
+								uintptr_t linearaddress)
+{
 	//return status (1 or 0)
 	u32 status;
 
 	//invvpid descriptor
 	volatile struct {
-		u64 vpid : 16;
-		u64 reserved : 48;
+		u64 vpid:16;
+		u64 reserved:48;
 		u64 linearaddress;
 	} invvpiddescriptor = { vpid, 0, linearaddress };
 
@@ -670,27 +657,24 @@ static inline u32 __vmx_invvpid(int invalidation_type, u16 vpid, uintptr_t linea
 	//note: GCC does not seem to support this instruction directly
 	//so we encode it as hex
 	__asm__ __volatile__(".byte 0x66, 0x0f, 0x38, 0x81, 0x08 \r\n"
-	                     "movl $1, %0 \r\n"
-	                     "ja 1f \r\n"
-	                     "movl $0, %0 \r\n"
-	                     "1: \r\n"
-	  : "=m" (status)
-	  : "a"(&invvpiddescriptor), "c"(invalidation_type)
-	  : "cc", "memory");
+						 "movl $1, %0 \r\n"
+						 "ja 1f \r\n" "movl $0, %0 \r\n" "1: \r\n":"=m"(status)
+						 :"a"(&invvpiddescriptor), "c"(invalidation_type)
+						 :"cc", "memory");
 
 	return status;
 }
 
-
 // VMX instruction INVEPT
-//		Invalidate Translations Derived from EPT
+//      Invalidate Translations Derived from EPT
 // INVEPT r32, m128
 //returns 1 on success, 0 on failure
 
 #define	VMX_INVEPT_SINGLECONTEXT			1
 #define VMX_INVEPT_GLOBAL					2
 
-static inline u32 __vmx_invept(int invalidation_type, u64 eptp){
+static inline u32 __vmx_invept(int invalidation_type, u64 eptp)
+{
 	//return status (1 or 0)
 	u32 status;
 
@@ -698,24 +682,18 @@ static inline u32 __vmx_invept(int invalidation_type, u64 eptp){
 	volatile struct {
 		u64 eptp;
 		u64 reserved;
-	} inveptdescriptor = { eptp, 0};
+	} inveptdescriptor = { eptp, 0 };
 
 	//issue invept instruction
 	//note: GCC does not seem to support this instruction directly
 	//so we encode it as hex
 	__asm__ __volatile__(".byte 0x66, 0x0f, 0x38, 0x80, 0x08 \r\n"
-	                     "movl $1, %0 \r\n"
-	                     "ja 1f \r\n"
-	                     "movl $0, %0 \r\n"
-	                     "1: \r\n"
-	  : "=m" (status)
-	  : "a"(&inveptdescriptor), "c"(invalidation_type)
-	  : "cc", "memory");
+						 "movl $1, %0 \r\n"
+						 "ja 1f \r\n" "movl $0, %0 \r\n" "1: \r\n":"=m"(status)
+						 :"a"(&inveptdescriptor), "c"(invalidation_type)
+						 :"cc", "memory");
 
 	return status;
 }
-
-
-
 
 #endif

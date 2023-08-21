@@ -28,4 +28,4 @@ uintptr_t g_cr3;
 uintptr_t g_cr4;
 #ifdef __amd64__
 u32 g_smp_lret_stack[2];
-#endif /* __amd64__ */
+#endif							/* __amd64__ */

@@ -21,27 +21,30 @@
 #include <limits.h>
 
 #define MAX_GUESTS 4
-#define MAX_MSR_LS 16	/* Max number of MSRs in MSR load / store */
+#define MAX_MSR_LS 16			/* Max number of MSRs in MSR load / store */
 
 static u8 all_vmxon_region[MAX_VCPU_ENTRIES][PAGE_SIZE_4K]
-ALIGNED_PAGE;
+ ALIGNED_PAGE;
 
 static u8 all_vmcs[MAX_VCPU_ENTRIES][MAX_GUESTS][PAGE_SIZE_4K]
-ALIGNED_PAGE;
+ ALIGNED_PAGE;
 
 static u8 all_guest_stack[MAX_VCPU_ENTRIES][MAX_GUESTS][PAGE_SIZE_4K]
-ALIGNED_PAGE;
+ ALIGNED_PAGE;
 
-static msr_entry_t vmexit_msrstore_entries[MAX_VCPU_ENTRIES][MAX_GUESTS][MAX_MSR_LS]
-__attribute__((aligned(16)));
-static msr_entry_t vmexit_msrload_entries[MAX_VCPU_ENTRIES][MAX_GUESTS][MAX_MSR_LS]
-__attribute__((aligned(16)));
-static msr_entry_t vmentry_msrload_entries[MAX_VCPU_ENTRIES][MAX_GUESTS][MAX_MSR_LS]
-__attribute__((aligned(16)));
+static msr_entry_t
+	vmexit_msrstore_entries[MAX_VCPU_ENTRIES][MAX_GUESTS][MAX_MSR_LS]
+	__attribute__((aligned(16)));
+static msr_entry_t
+	vmexit_msrload_entries[MAX_VCPU_ENTRIES][MAX_GUESTS][MAX_MSR_LS]
+	__attribute__((aligned(16)));
+static msr_entry_t
+	vmentry_msrload_entries[MAX_VCPU_ENTRIES][MAX_GUESTS][MAX_MSR_LS]
+	__attribute__((aligned(16)));
 
 extern u64 x_gdt_start[MAX_VCPU_ENTRIES][GDT_NELEMS];
 
-static void shv_vmx_vmcs_init(VCPU *vcpu)
+static void shv_vmx_vmcs_init(VCPU * vcpu)
 {
 	// From vmx_initunrestrictedguestVMCS
 	__vmx_vmwriteNW(VMCS_host_CR0, read_cr0());
@@ -54,15 +57,15 @@ static void shv_vmx_vmcs_init(VCPU *vcpu)
 	__vmx_vmwrite16(VMCS_host_GS_selector, read_gs());
 	__vmx_vmwrite16(VMCS_host_SS_selector, read_ss());
 	__vmx_vmwrite16(VMCS_host_TR_selector, read_tr());
-	__vmx_vmwriteNW(VMCS_host_GDTR_base, (uintptr_t)g_gdt[vcpu->idx]);
-	__vmx_vmwriteNW(VMCS_host_IDTR_base, (uintptr_t)g_idt);
-	__vmx_vmwriteNW(VMCS_host_TR_base, (u64)(hva_t)g_tss[vcpu->idx]);
-	__vmx_vmwriteNW(VMCS_host_RIP, (u64)(hva_t)vmexit_asm);
+	__vmx_vmwriteNW(VMCS_host_GDTR_base, (uintptr_t) g_gdt[vcpu->idx]);
+	__vmx_vmwriteNW(VMCS_host_IDTR_base, (uintptr_t) g_idt);
+	__vmx_vmwriteNW(VMCS_host_TR_base, (u64) (hva_t) g_tss[vcpu->idx]);
+	__vmx_vmwriteNW(VMCS_host_RIP, (u64) (hva_t) vmexit_asm);
 
 	//store vcpu at TOS
 	vcpu->sp = vcpu->sp - sizeof(hva_t);
-	*(hva_t *)vcpu->sp = (hva_t)vcpu;
-	__vmx_vmwriteNW(VMCS_host_RSP, (u64)vcpu->sp);
+	*(hva_t *) vcpu->sp = (hva_t) vcpu;
+	__vmx_vmwriteNW(VMCS_host_RSP, (u64) vcpu->sp);
 
 	__vmx_vmwrite32(VMCS_host_SYSENTER_CS, rdmsr64(IA32_SYSENTER_CS_MSR));
 	__vmx_vmwriteNW(VMCS_host_SYSENTER_ESP, rdmsr64(IA32_SYSENTER_ESP_MSR));
@@ -72,7 +75,7 @@ static void shv_vmx_vmcs_init(VCPU *vcpu)
 
 	//setup default VMX controls
 	__vmx_vmwrite32(VMCS_control_VMX_pin_based,
-				vcpu->vmx_msrs[INDEX_IA32_VMX_PINBASED_CTLS_MSR]);
+					vcpu->vmx_msrs[INDEX_IA32_VMX_PINBASED_CTLS_MSR]);
 	//activate secondary processor controls
 	{
 		u32 proc_ctls = vcpu->vmx_msrs[INDEX_IA32_VMX_PROCBASED_CTLS_MSR];
@@ -86,8 +89,8 @@ static void shv_vmx_vmcs_init(VCPU *vcpu)
 #ifdef __amd64__
 		vmexit_ctls |= (1UL << 9);
 #elif !defined(__i386__)
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) */
 		__vmx_vmwrite32(VMCS_control_VM_exit_controls, vmexit_ctls);
 	}
 	{
@@ -95,12 +98,12 @@ static void shv_vmx_vmcs_init(VCPU *vcpu)
 #ifdef __amd64__
 		vmentry_ctls |= (1UL << 9);
 #elif !defined(__i386__)
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) */
 		__vmx_vmwrite32(VMCS_control_VM_entry_controls, vmentry_ctls);
 	}
 	__vmx_vmwrite32(VMCS_control_VMX_seccpu_based,
-				vcpu->vmx_msrs[INDEX_IA32_VMX_PROCBASED_CTLS2_MSR]);
+					vcpu->vmx_msrs[INDEX_IA32_VMX_PROCBASED_CTLS2_MSR]);
 
 	//Critical MSR load/store
 	if (SHV_OPT & SHV_USE_MSR_LOAD) {
@@ -108,11 +111,11 @@ static void shv_vmx_vmcs_init(VCPU *vcpu)
 		vcpu->my_vmexit_msrload = vmexit_msrload_entries[vcpu->idx][0];
 		vcpu->my_vmentry_msrload = vmentry_msrload_entries[vcpu->idx][0];
 		__vmx_vmwrite64(VMCS_control_VM_exit_MSR_store_address,
-					   hva2spa(vcpu->my_vmexit_msrstore));
+						hva2spa(vcpu->my_vmexit_msrstore));
 		__vmx_vmwrite64(VMCS_control_VM_exit_MSR_load_address,
-					   hva2spa(vcpu->my_vmexit_msrload));
+						hva2spa(vcpu->my_vmexit_msrload));
 		__vmx_vmwrite64(VMCS_control_VM_entry_MSR_load_address,
-					   hva2spa(vcpu->my_vmentry_msrload));
+						hva2spa(vcpu->my_vmentry_msrload));
 		printf("CPU(0x%02x): configured load/store MSR\n", vcpu->id);
 	}
 	__vmx_vmwrite32(VMCS_control_VM_exit_MSR_load_count, 0);
@@ -132,14 +135,14 @@ static void shv_vmx_vmcs_init(VCPU *vcpu)
 #if I386_PAE
 		/* For old SHV code, which uses PAE paging. SHV uses 32-bit paging. */
 		{
-			u64 *cr3 = (u64 *)read_cr3();
+			u64 *cr3 = (u64 *) read_cr3();
 			__vmx_vmwrite64(VMCS_guest_PDPTE0, cr3[0]);
 			__vmx_vmwrite64(VMCS_guest_PDPTE1, cr3[1]);
 			__vmx_vmwrite64(VMCS_guest_PDPTE2, cr3[2]);
 			__vmx_vmwrite64(VMCS_guest_PDPTE3, cr3[3]);
 		}
-#endif /* I386_PAE */
-#endif /* __i386__ */
+#endif							/* I386_PAE */
+#endif							/* __i386__ */
 	}
 
 	if (SHV_OPT & SHV_USE_VPID) {
@@ -174,24 +177,22 @@ static void shv_vmx_vmcs_init(VCPU *vcpu)
 		ulong_t cr4 = vcpu->vmx_msrs[INDEX_IA32_VMX_CR4_FIXED0_MSR];
 #ifdef __amd64__
 		cr4 |= CR4_PAE;
-#else /* __i386__ */
+#else							/* __i386__ */
 #if I386_PAE
 		cr4 |= CR4_PAE;
-#else /* !I386_PAE */
+#else							/* !I386_PAE */
 		cr4 |= CR4_PSE;
-#endif /* I386_PAE */
-#endif /* __amd64__ */
+#endif							/* I386_PAE */
+#endif							/* __amd64__ */
 		__vmx_vmwriteNW(VMCS_guest_CR4, cr4);
 	}
 	//CR3 set to 0, does not matter
 	__vmx_vmwriteNW(VMCS_guest_CR3, read_cr3());
 	//IDTR
-	__vmx_vmwriteNW(VMCS_guest_IDTR_base,
-				__vmx_vmreadNW(VMCS_host_IDTR_base));
+	__vmx_vmwriteNW(VMCS_guest_IDTR_base, __vmx_vmreadNW(VMCS_host_IDTR_base));
 	__vmx_vmwrite32(VMCS_guest_IDTR_limit, 0xffff);
 	//GDTR
-	__vmx_vmwriteNW(VMCS_guest_GDTR_base,
-				__vmx_vmreadNW(VMCS_host_GDTR_base));
+	__vmx_vmwriteNW(VMCS_guest_GDTR_base, __vmx_vmreadNW(VMCS_host_GDTR_base));
 	__vmx_vmwrite32(VMCS_guest_GDTR_limit, 0xffff);
 	//LDTR, unusable
 	__vmx_vmwriteNW(VMCS_guest_LDTR_base, 0);
@@ -199,7 +200,7 @@ static void shv_vmx_vmcs_init(VCPU *vcpu)
 	__vmx_vmwrite16(VMCS_guest_LDTR_selector, 0);
 	__vmx_vmwrite32(VMCS_guest_LDTR_access_rights, 0x10000);
 	// TR, should be usable for VMX to work, but not used by guest
-	__vmx_vmwriteNW(VMCS_guest_TR_base, (u64)(hva_t)g_tss[vcpu->idx]);
+	__vmx_vmwriteNW(VMCS_guest_TR_base, (u64) (hva_t) g_tss[vcpu->idx]);
 	__vmx_vmwrite32(VMCS_guest_TR_limit, 0x67);
 	__vmx_vmwrite16(VMCS_guest_TR_selector, __TRSEL);
 	__vmx_vmwrite32(VMCS_guest_TR_access_rights, 0x8b);
@@ -208,12 +209,12 @@ static void shv_vmx_vmcs_init(VCPU *vcpu)
 	//RSP
 	{
 		vcpu->my_stack = &all_guest_stack[vcpu->idx][0][PAGE_SIZE_4K];
-		__vmx_vmwriteNW(VMCS_guest_RSP, (u64)(ulong_t)vcpu->my_stack);
+		__vmx_vmwriteNW(VMCS_guest_RSP, (u64) (ulong_t) vcpu->my_stack);
 	}
 	//RIP
 	__vmx_vmwrite16(VMCS_guest_CS_selector, __CS);
 	__vmx_vmwriteNW(VMCS_guest_CS_base, 0);
-	__vmx_vmwriteNW(VMCS_guest_RIP, (u64)(ulong_t)shv_guest_entry);
+	__vmx_vmwriteNW(VMCS_guest_RIP, (u64) (ulong_t) shv_guest_entry);
 	__vmx_vmwriteNW(VMCS_guest_RFLAGS, (1 << 1));
 	//CS, DS, ES, FS, GS and SS segments
 	__vmx_vmwrite32(VMCS_guest_CS_limit, 0xffffffff);
@@ -221,9 +222,9 @@ static void shv_vmx_vmcs_init(VCPU *vcpu)
 	__vmx_vmwrite32(VMCS_guest_CS_access_rights, 0xa09b);
 #elif defined(__i386__)
 	__vmx_vmwrite32(VMCS_guest_CS_access_rights, 0xc09b);
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
+#else							/* !defined(__i386__) && !defined(__amd64__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) && !defined(__amd64__) */
 	__vmx_vmwrite16(VMCS_guest_DS_selector, __DS);
 	__vmx_vmwriteNW(VMCS_guest_DS_base, 0);
 	__vmx_vmwrite32(VMCS_guest_DS_limit, 0xffffffff);
@@ -246,7 +247,7 @@ static void shv_vmx_vmcs_init(VCPU *vcpu)
 	__vmx_vmwrite32(VMCS_guest_SS_access_rights, 0xc093);
 
 	//setup VMCS link pointer
-	__vmx_vmwrite64(VMCS_guest_VMCS_link_pointer, (u64)0xFFFFFFFFFFFFFFFFULL);
+	__vmx_vmwrite64(VMCS_guest_VMCS_link_pointer, (u64) 0xFFFFFFFFFFFFFFFFULL);
 
 	//trap access to CR0 fixed 1-bits
 	{
@@ -261,11 +262,11 @@ static void shv_vmx_vmcs_init(VCPU *vcpu)
 
 	//trap access to CR4 fixed bits (this includes the VMXE bit)
 	__vmx_vmwriteNW(VMCS_control_CR4_mask,
-				vcpu->vmx_msrs[INDEX_IA32_VMX_CR4_FIXED0_MSR]);
+					vcpu->vmx_msrs[INDEX_IA32_VMX_CR4_FIXED0_MSR]);
 	__vmx_vmwriteNW(VMCS_control_CR0_shadow, 0);
 }
 
-void shv_vmx_main(VCPU *vcpu)
+void shv_vmx_main(VCPU * vcpu)
 {
 	u32 vmcs_revision_identifier;
 
@@ -279,25 +280,31 @@ void shv_vmx_main(VCPU *vcpu)
 	}
 
 	/* Save contents of MSRs (from _vmx_initVT) */
-	for(u32 i = 0; i < IA32_VMX_MSRCOUNT; i++) {
+	for (u32 i = 0; i < IA32_VMX_MSRCOUNT; i++) {
 		vcpu->vmx_msrs[i] = rdmsr64(IA32_VMX_BASIC_MSR + i);
 	}
 
 	/* Initialize vcpu->vmx_caps */
 	if (vcpu->vmx_msrs[INDEX_IA32_VMX_BASIC_MSR] & (1ULL << 55)) {
-		vcpu->vmx_pinbased_ctls = vcpu->vmx_msrs[INDEX_IA32_VMX_TRUE_PINBASED_CTLS_MSR];
-		vcpu->vmx_procbased_ctls = vcpu->vmx_msrs[INDEX_IA32_VMX_TRUE_PROCBASED_CTLS_MSR];
+		vcpu->vmx_pinbased_ctls =
+			vcpu->vmx_msrs[INDEX_IA32_VMX_TRUE_PINBASED_CTLS_MSR];
+		vcpu->vmx_procbased_ctls =
+			vcpu->vmx_msrs[INDEX_IA32_VMX_TRUE_PROCBASED_CTLS_MSR];
 		vcpu->vmx_exit_ctls = vcpu->vmx_msrs[INDEX_IA32_VMX_TRUE_EXIT_CTLS_MSR];
-		vcpu->vmx_entry_ctls = vcpu->vmx_msrs[INDEX_IA32_VMX_TRUE_ENTRY_CTLS_MSR];
+		vcpu->vmx_entry_ctls =
+			vcpu->vmx_msrs[INDEX_IA32_VMX_TRUE_ENTRY_CTLS_MSR];
 	} else {
-		vcpu->vmx_pinbased_ctls = vcpu->vmx_msrs[INDEX_IA32_VMX_PINBASED_CTLS_MSR];
-		vcpu->vmx_procbased_ctls = vcpu->vmx_msrs[INDEX_IA32_VMX_PROCBASED_CTLS_MSR];
+		vcpu->vmx_pinbased_ctls =
+			vcpu->vmx_msrs[INDEX_IA32_VMX_PINBASED_CTLS_MSR];
+		vcpu->vmx_procbased_ctls =
+			vcpu->vmx_msrs[INDEX_IA32_VMX_PROCBASED_CTLS_MSR];
 		vcpu->vmx_exit_ctls = vcpu->vmx_msrs[INDEX_IA32_VMX_EXIT_CTLS_MSR];
 		vcpu->vmx_entry_ctls = vcpu->vmx_msrs[INDEX_IA32_VMX_ENTRY_CTLS_MSR];
 	}
 	vcpu->vmx_caps.pinbased_ctls = (vcpu->vmx_pinbased_ctls >> 32);
 	vcpu->vmx_caps.procbased_ctls = (vcpu->vmx_procbased_ctls >> 32);
-	vcpu->vmx_caps.procbased_ctls2 = (vcpu->vmx_msrs[INDEX_IA32_VMX_PROCBASED_CTLS2_MSR] >> 32);
+	vcpu->vmx_caps.procbased_ctls2 =
+		(vcpu->vmx_msrs[INDEX_IA32_VMX_PROCBASED_CTLS2_MSR] >> 32);
 	vcpu->vmx_caps.exit_ctls = (vcpu->vmx_exit_ctls >> 32);
 	vcpu->vmx_caps.entry_ctls = (vcpu->vmx_entry_ctls >> 32);
 
@@ -312,7 +319,7 @@ void shv_vmx_main(VCPU *vcpu)
 	{
 		u64 basic_msr = vcpu->vmx_msrs[INDEX_IA32_VMX_BASIC_MSR];
 		vmcs_revision_identifier = (u32) basic_msr & 0x7fffffffU;
-		vcpu->vmxon_region = (void *) all_vmxon_region[vcpu->idx];
+		vcpu->vmxon_region = (void *)all_vmxon_region[vcpu->idx];
 		*((u32 *) vcpu->vmxon_region) = vmcs_revision_identifier;
 	}
 
@@ -351,7 +358,8 @@ void shv_vmx_main(VCPU *vcpu)
 		ASSERT(__vmx_vmptrld(hva2spa(vcpu->my_vmcs)));
 		if (!"test_vmclear" && vcpu->isbsp) {
 			for (u32 i = 0; i < 0x1000 / sizeof(u32); i++) {
-				printf("vmcs[0x%03x] = 0x%08x\n", i, ((u32 *)vcpu->my_vmcs)[i]);
+				printf("vmcs[0x%03x] = 0x%08x\n", i,
+					   ((u32 *) vcpu->my_vmcs)[i]);
 			}
 			vmcs_print_all(vcpu);
 		}
@@ -372,7 +380,7 @@ void shv_vmx_main(VCPU *vcpu)
 	ASSERT(0 && "vmlaunch_asm() should never return");
 }
 
-void vmexit_handler(VCPU *vcpu, struct regs *r)
+void vmexit_handler(VCPU * vcpu, struct regs *r)
 {
 	u32 vmexit_reason = __vmx_vmread32(VMCS_info_vmexit_reason);
 	ulong_t guest_rip = __vmx_vmreadNW(VMCS_guest_RIP);
@@ -380,9 +388,9 @@ void vmexit_handler(VCPU *vcpu, struct regs *r)
 
 	if (vcpu->vmexit_handler_override) {
 		vmexit_info_t vmexit_info = {
-			.vmexit_reason=vmexit_reason,
-			.guest_rip=guest_rip,
-			.inst_len=inst_len,
+			.vmexit_reason = vmexit_reason,
+			.guest_rip = guest_rip,
+			.inst_len = inst_len,
 		};
 		vcpu->vmexit_handler_override(vcpu, r, &vmexit_info);
 	}
@@ -392,9 +400,9 @@ void vmexit_handler(VCPU *vcpu, struct regs *r)
 	case VMX_VMEXIT_CPUID:
 		{
 			u32 old_eax = r->eax;
-			asm volatile ("cpuid\r\n"
-				  :"=a"(r->eax), "=b"(r->ebx), "=c"(r->ecx), "=d"(r->edx)
-				  :"a"(r->eax), "c" (r->ecx));
+			asm volatile ("cpuid\r\n":"=a" (r->eax), "=b"(r->ebx), "=c"(r->ecx),
+						  "=d"(r->edx)
+						  :"a"(r->eax), "c"(r->ecx));
 			if (old_eax == 0x1) {
 				/* Clear VMX capability */
 				r->ecx &= ~(1U << 5);
@@ -404,9 +412,8 @@ void vmexit_handler(VCPU *vcpu, struct regs *r)
 		}
 	case VMX_VMEXIT_RDMSR:
 		{
-			asm volatile ("rdmsr\r\n"
-				  :"=a"(r->eax), "=d"(r->edx)
-				  :"c" (r->ecx));
+			asm volatile ("rdmsr\r\n":"=a" (r->eax), "=d"(r->edx)
+						  :"c"(r->ecx));
 			__vmx_vmwriteNW(VMCS_guest_RIP, guest_rip + inst_len);
 			break;
 		}
@@ -445,7 +452,7 @@ void vmentry_error(ulong_t is_resume, ulong_t valid)
 	/* 29.4 VM INSTRUCTION ERROR NUMBERS */
 	ulong_t vminstr_error = __vmx_vmread32(VMCS_info_vminstr_error);
 	printf("CPU(0x%02x): is_resume = %ld, valid = %ld, err = %ld\n",
-			vcpu->id, is_resume, valid, vminstr_error);
+		   vcpu->id, is_resume, valid, vminstr_error);
 	ASSERT(is_resume && valid && 0);
 	ASSERT(0);
 }

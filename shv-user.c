@@ -22,11 +22,11 @@
 
 /* Stack for user program */
 static u8 user_stack[MAX_VCPU_ENTRIES][PAGE_SIZE_4K]
-ALIGNED_PAGE;
+ ALIGNED_PAGE;
 
 /* Stack for interrupt and system call during user mode */
 static u8 interrupt_stack[MAX_VCPU_ENTRIES][PAGE_SIZE_4K]
-ALIGNED_PAGE;
+ ALIGNED_PAGE;
 
 /* When running user program, ESP of kernel code (used when user exits) */
 static uintptr_t esp0[MAX_VCPU_ENTRIES];
@@ -39,16 +39,16 @@ static u64 user_pt[P4L_NPT * P4L_NEPT] ALIGNED_PAGE;
 #elif defined(__i386__)
 #if I386_PAE
 /* Page table for PAE paging, currently not used */
-static u64 user_pdpt[PAE_NPDPTE] __attribute__ ((aligned (32)));
+static u64 user_pdpt[PAE_NPDPTE] __attribute__((aligned(32)));
 static u64 user_pdt[PAE_NPDPTE][PAE_NEPT] ALIGNED_PAGE;
 static u64 user_pt[PAE_NPDPTE][PAE_NEPT][PAE_NEPT] ALIGNED_PAGE;
-#else /* !I386_PAE */
+#else							/* !I386_PAE */
 static u32 user_pdt[P32_NEPT] ALIGNED_PAGE;
 static u32 user_pt[P32_NEPT][P32_NEPT] ALIGNED_PAGE;
-#endif /* I386_PAE */
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
+#endif							/* I386_PAE */
+#else							/* !defined(__i386__) && !defined(__amd64__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) && !defined(__amd64__) */
 
 static void set_user_mode_page_table(void)
 {
@@ -95,7 +95,7 @@ static void set_user_mode_page_table(void)
 			}
 		}
 		initialized = (uintptr_t) user_pdpt;
-#else /* !I386_PAE */
+#else							/* !I386_PAE */
 		/* Page table for 32-bit paging. */
 		u64 paddr = 0;
 		for (u32 i = 0; i < P32_NEPT; i++) {
@@ -106,22 +106,22 @@ static void set_user_mode_page_table(void)
 			}
 		}
 		initialized = (uintptr_t) user_pdt;
-#endif /* I386_PAE */
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
+#endif							/* I386_PAE */
+#else							/* !defined(__i386__) && !defined(__amd64__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) && !defined(__amd64__) */
 	}
 	write_cr3(initialized);
 	spin_unlock(&lock);
 }
 
 /* arg indicates VMCALL EAX offset. Used by pal_demo code during nested virt */
-void enter_user_mode(VCPU *vcpu, ulong_t arg)
+void enter_user_mode(VCPU * vcpu, ulong_t arg)
 {
 	uintptr_t stack_top = ((uintptr_t) user_stack[vcpu->idx]) + PAGE_SIZE_4K;
-	uintptr_t *stack = (uintptr_t *)stack_top;
+	uintptr_t *stack = (uintptr_t *) stack_top;
 	uintptr_t *pesp0 = &esp0[vcpu->idx];
-	ureg_t *ureg = (ureg_t *)((uintptr_t)(&stack[-3]) - sizeof(ureg_t));
+	ureg_t *ureg = (ureg_t *) ((uintptr_t) (&stack[-3]) - sizeof(ureg_t));
 	memset(&ureg->r, 0, sizeof(ureg->r));
 	ureg->eip = (uintptr_t) user_main;
 	ureg->cs = __CS_R3;
@@ -138,17 +138,17 @@ void enter_user_mode(VCPU *vcpu, ulong_t arg)
 		ureg->r.rdi = (uintptr_t) vcpu;
 		stack[-3] = 0xdeadbeef;
 		/* Setup TSS */
-		*(u64 *)(g_tss[vcpu->idx] + 4) = top;
+		*(u64 *) (g_tss[vcpu->idx] + 4) = top;
 #elif defined(__i386__)
 		stack[-1] = arg;
 		stack[-2] = (uintptr_t) vcpu;
 		stack[-3] = 0xdeadbeef;
 		/* Setup TSS */
-		*(u32 *)(g_tss[vcpu->idx] + 4) = top;
-		*(u16 *)(g_tss[vcpu->idx] + 8) = __DS;
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
+		*(u32 *) (g_tss[vcpu->idx] + 4) = top;
+		*(u16 *) (g_tss[vcpu->idx] + 8) = __DS;
+#else							/* !defined(__i386__) && !defined(__amd64__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) && !defined(__amd64__) */
 	}
 	/* Setup page table */
 	set_user_mode_page_table();
@@ -156,7 +156,7 @@ void enter_user_mode(VCPU *vcpu, ulong_t arg)
 	enter_user_mode_asm(ureg, pesp0);
 }
 
-void handle_shv_syscall(VCPU *vcpu, int vector, struct regs *r)
+void handle_shv_syscall(VCPU * vcpu, int vector, struct regs *r)
 {
 	/* Currently the only syscall is to exit guest mode */
 	ASSERT(vector == 0x23);
@@ -166,10 +166,13 @@ void handle_shv_syscall(VCPU *vcpu, int vector, struct regs *r)
 
 /* Below are for pal_demo */
 
-void begin_pal_c(void) {}
+void begin_pal_c(void)
+{
+}
 
-uintptr_t my_pal(uintptr_t arg1, uintptr_t arg2) {
-	u32 eax=0x7a567254U, ebx, ecx=arg2, edx;
+uintptr_t my_pal(uintptr_t arg1, uintptr_t arg2)
+{
+	u32 eax = 0x7a567254U, ebx, ecx = arg2, edx;
 	cpuid_raw(&eax, &ebx, &ecx, &edx);
 	if (eax != 0x7a767274U) {
 		return 0xdeadbee1U;
@@ -180,27 +183,28 @@ uintptr_t my_pal(uintptr_t arg1, uintptr_t arg2) {
 	return arg1 + 0x1234abcd;
 }
 
-void end_pal_c(void) {}
+void end_pal_c(void)
+{
+}
 
-static u8 pal_demo_code[MAX_VCPU_ENTRIES][PAGE_SIZE_4K]
-ALIGNED_PAGE;
-static u8 pal_demo_data[MAX_VCPU_ENTRIES][PAGE_SIZE_4K]
-ALIGNED_PAGE;
-static u8 pal_demo_stack[MAX_VCPU_ENTRIES][PAGE_SIZE_4K]
-ALIGNED_PAGE;
-static u8 pal_demo_param[MAX_VCPU_ENTRIES][PAGE_SIZE_4K]
-ALIGNED_PAGE;
+static u8 pal_demo_code[MAX_VCPU_ENTRIES][PAGE_SIZE_4K] ALIGNED_PAGE;
+static u8 pal_demo_data[MAX_VCPU_ENTRIES][PAGE_SIZE_4K] ALIGNED_PAGE;
+static u8 pal_demo_stack[MAX_VCPU_ENTRIES][PAGE_SIZE_4K] ALIGNED_PAGE;
+static u8 pal_demo_param[MAX_VCPU_ENTRIES][PAGE_SIZE_4K] ALIGNED_PAGE;
 
 static inline uintptr_t vmcall(uintptr_t eax, uintptr_t ecx, uintptr_t edx,
-								uintptr_t esi, uintptr_t edi) {
-	asm volatile ("vmcall\n\t" : "=a"(eax) : "a"(eax), "c"(ecx), "d"(edx),
-					"S"(esi), "D"(edi));
+							   uintptr_t esi, uintptr_t edi)
+{
+	asm volatile ("vmcall\n\t":"=a" (eax):"a"(eax), "c"(ecx), "d"(edx),
+				  "S"(esi), "D"(edi));
 	return eax;
 }
 
 /* Above are for pal_demo */
 
-__attribute__((__noreturn__)) void leave_user_mode(void) {
+__attribute__((__noreturn__))
+void leave_user_mode(void)
+{
 	asm volatile ("movl $0xdeaddead, %eax; int $0x23;");
 	ASSERT(0 && "system call returned");
 }
@@ -208,22 +212,22 @@ __attribute__((__noreturn__)) void leave_user_mode(void) {
 static spin_lock_t pal_lock;
 static volatile u32 pal_available = 3;
 
-static void user_main_pal_demo(VCPU *vcpu, ulong_t arg)
+static void user_main_pal_demo(VCPU * vcpu, ulong_t arg)
 {
 	struct tv_pal_sections sections = {
-		num_sections: 4,
-		sections: {
-			{ TV_PAL_SECTION_CODE, 1, (uintptr_t) pal_demo_code[vcpu->idx] },
-			{ TV_PAL_SECTION_DATA, 1, (uintptr_t) pal_demo_data[vcpu->idx] },
-			{ TV_PAL_SECTION_STACK, 1, (uintptr_t) pal_demo_stack[vcpu->idx] },
-			{ TV_PAL_SECTION_PARAM, 1, (uintptr_t) pal_demo_param[vcpu->idx] }
-		}
+ num_sections:4,
+ sections:{
+		 {TV_PAL_SECTION_CODE, 1, (uintptr_t) pal_demo_code[vcpu->idx]},
+		 {TV_PAL_SECTION_DATA, 1, (uintptr_t) pal_demo_data[vcpu->idx]},
+		 {TV_PAL_SECTION_STACK, 1, (uintptr_t) pal_demo_stack[vcpu->idx]},
+		 {TV_PAL_SECTION_PARAM, 1, (uintptr_t) pal_demo_param[vcpu->idx]}
+		 }
 	};
 	struct tv_pal_params params = {
-		num_params: 2,
-		params: {
-			{ TV_PAL_PM_INTEGER, 4 }, { TV_PAL_PM_INTEGER, 4 }
-		}
+ num_params:2,
+ params:{
+		 {TV_PAL_PM_INTEGER, 4}, {TV_PAL_PM_INTEGER, 4}
+		 }
 	};
 	/* Copy code */
 	uintptr_t src_begin = (uintptr_t) begin_pal_c;
@@ -241,15 +245,15 @@ static void user_main_pal_demo(VCPU *vcpu, ulong_t arg)
 	for (u32 i = 0; i < sections.num_sections; i++) {
 		for (u32 j = 0; j < sections.sections[i].page_num; j++) {
 			u64 addr = sections.sections[i].start_addr + PAGE_SIZE_4K * j;
-			volatile u8 *ptr = (volatile u8 *)(uintptr_t)addr;
+			volatile u8 *ptr = (volatile u8 *)(uintptr_t) addr;
 			*ptr;
 		}
 	}
 
 	/* Register PAL */
 	printf("CPU(0x%02x): starting PAL 0x%x\n", vcpu->id, arg);
-	ASSERT(!vmcall(TV_HC_REG + arg, (uintptr_t)&sections, 0,
-							  (uintptr_t)&params, pal_entry));
+	ASSERT(!vmcall(TV_HC_REG + arg, (uintptr_t) & sections, 0,
+				   (uintptr_t) & params, pal_entry));
 
 	/* Call PAL function */
 	{
@@ -267,20 +271,20 @@ static void user_main_pal_demo(VCPU *vcpu, ulong_t arg)
 	}
 
 	if (0 && "invalid access") {
-		printf("", *(u32*)pal_entry);
+		printf("", *(u32 *) pal_entry);
 	}
 
 	/* Unregister PAL */
 	ASSERT(!vmcall(TV_HC_UNREG + arg, pal_entry, 0, 0, 0));
 
 	if ("valid access") {
-		printf("", *(u32*)pal_entry);
+		printf("", *(u32 *) pal_entry);
 	}
 
 	printf("CPU(0x%02x): completed PAL 0x%x\n", vcpu->id, arg);
 }
 
-void user_main(VCPU *vcpu, ulong_t arg)
+void user_main(VCPU * vcpu, ulong_t arg)
 {
 	/* Acquire semaphore */
 	{
@@ -305,7 +309,7 @@ void user_main(VCPU *vcpu, ulong_t arg)
 		cpuid(0x46484d58U, &eax, &ebx, &ecx, &edx);
 		if (eax == 0x46484d58U) {
 			/* Test TrustVisor presence using CPUID */
-			u32 eax=0x7a567254U, ebx, ecx=arg, edx;
+			u32 eax = 0x7a567254U, ebx, ecx = arg, edx;
 			cpuid_raw(&eax, &ebx, &ecx, &edx);
 			ASSERT(eax == 0x7a767274U && "TrustVisor not present 1");
 			ASSERT(ebx == 0xffffffffU && "TrustVisor not present 2");
@@ -320,4 +324,3 @@ void user_main(VCPU *vcpu, ulong_t arg)
 	spin_unlock(&pal_lock);
 	leave_user_mode();
 }
-

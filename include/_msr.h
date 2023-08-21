@@ -68,17 +68,17 @@
 #ifndef __MSR_H__
 #define __MSR_H__
 
-#define MSR_EFER 0xc0000080     // prevent write to efer.sce
+#define MSR_EFER 0xc0000080		// prevent write to efer.sce
 #define MSR_K6_STAR                     0xc0000081
 #define VM_CR_MSR 0xc0010114
-#define VM_HSAVE_PA 0xc0010117  //this is critical
-#define IGNNE 0xc0010115        //can be used to freeze/restart
-#define SMM_CTL 0xc0010116      //SMRAM control
+#define VM_HSAVE_PA 0xc0010117	//this is critical
+#define IGNNE 0xc0010115		//can be used to freeze/restart
+#define SMM_CTL 0xc0010116		//SMRAM control
 
 #define MSR_IA32_PAT	0x277	//Page Attribute Table MSR
 
-#define MSR_AMD64_PATCH_LEVEL 0x0000008b //AMD-specific microcode patch level MSR
-#define MSR_AMD64_PATCH_CLEAR 0xc0010021 //AMD-specific microcode patch clear
+#define MSR_AMD64_PATCH_LEVEL 0x0000008b	//AMD-specific microcode patch level MSR
+#define MSR_AMD64_PATCH_CLEAR 0xc0010021	//AMD-specific microcode patch clear
 
 #define MSR_APIC_BASE 0x0000001B
 
@@ -86,16 +86,15 @@
 #define IA32_X2APIC_EOI                     0x80B
 #define IA32_X2APIC_ICR                     0x830
 
-
 #define IA32_PERF_GLOBAL_CTRL 0x38f
 #define IA32_PKRS 0x6e1
 
 // EFER bits
-#define EFER_SCE 0  /* SYSCALL/SYSRET */
-#define EFER_LME 8  /* Long Mode enable */
-#define EFER_LMA 10 /* Long Mode Active (read-only) */
-#define EFER_NXE 11  /* no execute */
-#define EFER_SVME 12   /* SVM extensions enable */
+#define EFER_SCE 0				/* SYSCALL/SYSRET */
+#define EFER_LME 8				/* Long Mode enable */
+#define EFER_LMA 10				/* Long Mode Active (read-only) */
+#define EFER_NXE 11				/* no execute */
+#define EFER_SVME 12			/* SVM extensions enable */
 
 // VM CR MSR bits
 #define VM_CR_DPD 0
@@ -132,7 +131,7 @@
 #define IA32_MSR_FS_BASE               0xC0000100
 #define IA32_MSR_GS_BASE               0xC0000101
 
-#define MSR_EFCR   0x0000003A	        // index for Extended Feature Control
+#define MSR_EFCR   0x0000003A	// index for Extended Feature Control
 
 //#define MSR_IA32_FEATURE_CONTROL               0x03a tboot version trumped by our own
 #define IA32_FEATURE_CONTROL_MSR_LOCK                 0x1
@@ -242,13 +241,13 @@
 #define IA32_BIOS_SIGN_ID       0x8b
 
 /* AMD64 MSR's */
-#define MSR_EFER        0xc0000080      /* extended features */
+#define MSR_EFER        0xc0000080	/* extended features */
 
 /* EFER bits */
-#define _EFER_LME     8               /* Long mode enable */
+#define _EFER_LME     8			/* Long mode enable */
 
 #define MTRR_TYPE_UNCACHABLE     0
 #define MTRR_TYPE_WRTHROUGH      4
 #define MTRR_TYPE_WRBACK         6
 
-#endif/* __MSR_H__ */
+#endif							/* __MSR_H__ */

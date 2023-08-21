@@ -63,7 +63,7 @@
  */
 
 #include <xmhf.h>
-#include <string.h> /* for memset */
+#include <string.h>				/* for memset */
 
 #include "euchk.h"
 
@@ -71,32 +71,24 @@
  * Get the root page map object (pmo) for context (ctx)
  * For example, in 32-bit paging it gives the PDE pointed to by CR3
  */
-static int hptw_get_root( hptw_ctx_t *ctx, hpt_pmo_t *pmo)
+static int hptw_get_root(hptw_ctx_t * ctx, hpt_pmo_t * pmo)
 {
-  int lvl = hpt_type_max_lvl[ ctx->t];
-  size_t pm_sz = hpt_pm_size( ctx->t, lvl);
-  size_t avail;
-  hpt_pm_t pm;
-  int err = 1;
+	int lvl = hpt_type_max_lvl[ctx->t];
+	size_t pm_sz = hpt_pm_size(ctx->t, lvl);
+	size_t avail;
+	hpt_pm_t pm;
+	int err = 1;
 
-  pm = ctx->pa2ptr( ctx,
-                    ctx->root_pa,
-                    pm_sz,
-                    HPT_PROTS_RW,
-                    HPTW_CPL0,
-                    &avail);
-  EU_CHK( pm);
-  EU_CHK( avail == pm_sz);
+	pm = ctx->pa2ptr(ctx, ctx->root_pa, pm_sz, HPT_PROTS_RW, HPTW_CPL0, &avail);
+	EU_CHK(pm);
+	EU_CHK(avail == pm_sz);
 
-  *pmo = (hpt_pmo_t) {
-    .t = ctx->t,
-    .pm = pm,
-    .lvl = lvl,
-  };
+	*pmo = (hpt_pmo_t) {
+	.t = ctx->t,.pm = pm,.lvl = lvl,};
 
-  err = 0;
+	err = 0;
  out:
-  return err;
+	return err;
 }
 
 /*
@@ -105,124 +97,110 @@ static int hptw_get_root( hptw_ctx_t *ctx, hpt_pmo_t *pmo)
  * function will walk the page directory to find the page table, then change
  * the page table entry.
  */
-int hptw_insert_pmeo(hptw_ctx_t *ctx,
-                     const hpt_pmeo_t *pmeo,
-                     hpt_va_t va)
+int hptw_insert_pmeo(hptw_ctx_t * ctx, const hpt_pmeo_t * pmeo, hpt_va_t va)
 {
-  hpt_pmo_t pmo;
-  int err = 1;
+	hpt_pmo_t pmo;
+	int err = 1;
 
-  hptw_get_pmo( &pmo, ctx, pmeo->lvl, va);
-  EU_CHK( pmo.pm);
-  EU_CHK( pmo.lvl == pmeo->lvl);
+	hptw_get_pmo(&pmo, ctx, pmeo->lvl, va);
+	EU_CHK(pmo.pm);
+	EU_CHK(pmo.lvl == pmeo->lvl);
 
-  hpt_pmo_set_pme_by_va( &pmo, pmeo, va);
+	hpt_pmo_set_pme_by_va(&pmo, pmeo, va);
 
-  err = 0;
+	err = 0;
  out:
-  return err;
+	return err;
 }
 
 /*
  * Get the page map object (pmo) at level (end_lvl) to context (ctx) at virtual
  * address (va), allocate empty page tables if needed.
  */
-int hptw_get_pmo_alloc(hpt_pmo_t *pmo,
-                       hptw_ctx_t *ctx,
-                       int end_lvl,
-                       hpt_va_t va)
+int hptw_get_pmo_alloc(hpt_pmo_t * pmo,
+					   hptw_ctx_t * ctx, int end_lvl, hpt_va_t va)
 {
-  int err = 1;
+	int err = 1;
 
-  EU_CHKN( hptw_get_root( ctx, pmo));
+	EU_CHKN(hptw_get_root(ctx, pmo));
 
-  while(pmo->lvl > end_lvl) {
-    hpt_pmeo_t pmeo;
-    hpt_pm_get_pmeo_by_va(&pmeo, pmo, va);
-    EU_CHK( !hpt_pmeo_is_page(&pmeo));
+	while (pmo->lvl > end_lvl) {
+		hpt_pmeo_t pmeo;
+		hpt_pm_get_pmeo_by_va(&pmeo, pmo, va);
+		EU_CHK(!hpt_pmeo_is_page(&pmeo));
 
-    if (!hpt_pmeo_is_present(&pmeo)) {
-      hpt_pm_t pm;
-      hpt_pmo_t new_pmo;
+		if (!hpt_pmeo_is_present(&pmeo)) {
+			hpt_pm_t pm;
+			hpt_pmo_t new_pmo;
 
-      EU_CHK_W( pm = ctx->gzp(ctx,
-                              HPT_PM_SIZE, /*FIXME*/
-                              hpt_pm_size(pmo->t, pmo->lvl-1)));
-      new_pmo = (hpt_pmo_t) {
-        .pm = pm,
-        .lvl = pmo->lvl-1,
-        .t = pmo->t,
-      };
-      hpt_pmeo_set_address(&pmeo, ctx->ptr2pa(ctx, new_pmo.pm));
-      hpt_pmeo_setprot(    &pmeo, HPT_PROTS_RWX);
-      hpt_pmeo_setuser(    &pmeo, true);
+			EU_CHK_W(pm = ctx->gzp(ctx,
+								   HPT_PM_SIZE, /*FIXME*/
+								   hpt_pm_size(pmo->t, pmo->lvl - 1)));
+			new_pmo = (hpt_pmo_t) {
+			.pm = pm,.lvl = pmo->lvl - 1,.t = pmo->t,};
+			hpt_pmeo_set_address(&pmeo, ctx->ptr2pa(ctx, new_pmo.pm));
+			hpt_pmeo_setprot(&pmeo, HPT_PROTS_RWX);
+			hpt_pmeo_setuser(&pmeo, true);
 
-      hpt_pmo_set_pme_by_va(pmo, &pmeo, va);
-    }
-    {
-      bool walked_next_lvl;
-      walked_next_lvl = hptw_next_lvl(ctx, pmo, va);
-      assert(walked_next_lvl);
-    }
-  }
+			hpt_pmo_set_pme_by_va(pmo, &pmeo, va);
+		}
+		{
+			bool walked_next_lvl;
+			walked_next_lvl = hptw_next_lvl(ctx, pmo, va);
+			assert(walked_next_lvl);
+		}
+	}
 
-  err = 0;
+	err = 0;
  out:
-  return err;
+	return err;
 }
 
 /*
  * Insert page map entry object (pmeo) to context (ctx) at virtual address (va),
  * allocate empty page tables if needed.
  */
-int hptw_insert_pmeo_alloc(hptw_ctx_t *ctx,
-                           const hpt_pmeo_t *pmeo,
-                           hpt_va_t va)
+int hptw_insert_pmeo_alloc(hptw_ctx_t * ctx,
+						   const hpt_pmeo_t * pmeo, hpt_va_t va)
 {
-  hpt_pmo_t pmo;
-  int err=1;
+	hpt_pmo_t pmo;
+	int err = 1;
 
-  EU_CHKN_W( hptw_get_pmo_alloc( &pmo, ctx, pmeo->lvl, va));
-  EU_CHK( pmo.pm);
-  EU_CHK( pmo.lvl == pmeo->lvl);
+	EU_CHKN_W(hptw_get_pmo_alloc(&pmo, ctx, pmeo->lvl, va));
+	EU_CHK(pmo.pm);
+	EU_CHK(pmo.lvl == pmeo->lvl);
 
-  hpt_pmo_set_pme_by_va(&pmo, pmeo, va);
+	hpt_pmo_set_pme_by_va(&pmo, pmeo, va);
 
-  err=0;
+	err = 0;
  out:
-  return err;
+	return err;
 }
 
 /*
  * Get the page map object (pmo) at level (end_lvl) to context (ctx) at virtual
  * address (va).
  */
-void hptw_get_pmo( hpt_pmo_t *pmo,
-                   hptw_ctx_t *ctx,
-                   int end_lvl,
-                   hpt_va_t va)
+void hptw_get_pmo(hpt_pmo_t * pmo, hptw_ctx_t * ctx, int end_lvl, hpt_va_t va)
 {
-  int err=1;
-  EU_CHKN( hptw_get_root( ctx, pmo));
-  while (pmo->lvl > end_lvl
-         && hptw_next_lvl(ctx, pmo, va));
-  err=0;
+	int err = 1;
+	EU_CHKN(hptw_get_root(ctx, pmo));
+	while (pmo->lvl > end_lvl && hptw_next_lvl(ctx, pmo, va)) ;
+	err = 0;
  out:
-  EU_VERIFYN( err); /* XXX */
+	EU_VERIFYN(err);			/* XXX */
 }
 
 /*
  * Get the page map entry object (pmeo) at level (end_lvl) to context (ctx) at
  * virtual address (va).
  */
-void hptw_get_pmeo(hpt_pmeo_t *pmeo,
-                   hptw_ctx_t *ctx,
-                   int end_lvl,
-                   hpt_va_t va)
+void hptw_get_pmeo(hpt_pmeo_t * pmeo,
+				   hptw_ctx_t * ctx, int end_lvl, hpt_va_t va)
 {
-  hpt_pmo_t end_pmo;
-  hptw_get_pmo(&end_pmo, ctx, end_lvl, va);
-  hpt_pm_get_pmeo_by_va(pmeo, &end_pmo, va);
+	hpt_pmo_t end_pmo;
+	hptw_get_pmo(&end_pmo, ctx, end_lvl, va);
+	hpt_pm_get_pmeo_by_va(pmeo, &end_pmo, va);
 }
 
 /*
@@ -231,43 +209,43 @@ void hptw_get_pmeo(hpt_pmeo_t *pmeo,
  * For example, in 32-bit paging, if pmo points to a page directory when
  * calling this function, it will point to a page table after calling.
  */
-bool hptw_next_lvl(hptw_ctx_t *ctx, hpt_pmo_t *pmo, hpt_va_t va)
+bool hptw_next_lvl(hptw_ctx_t * ctx, hpt_pmo_t * pmo, hpt_va_t va)
 {
-  hpt_pmeo_t pmeo;
-  hpt_pm_get_pmeo_by_va(&pmeo, pmo, va);
+	hpt_pmeo_t pmeo;
+	hpt_pm_get_pmeo_by_va(&pmeo, pmo, va);
 
-  assert(pmo->pm);
+	assert(pmo->pm);
 
-  if (!hpt_pmeo_is_present(&pmeo)
-      || hpt_pmeo_is_page(&pmeo)) {
-    eu_trace("at leaf. is-present:%d is-page:%d",
-                  hpt_pmeo_is_present(&pmeo), hpt_pmeo_is_page(&pmeo));
-    return false;
-  } else {
-    size_t avail;
-    size_t pm_sz = hpt_pm_size(pmo->t, pmo->lvl-1);
-    pmo->pm = ctx->pa2ptr(ctx, hpt_pmeo_get_address(&pmeo),
-                          pm_sz, HPT_PROTS_R, HPTW_CPL0, &avail);
-    eu_trace("next-lvl:%d pm-sz:%d pmo->pm:%p avail:%d",
-                  pmo->lvl-1, pm_sz, pmo->pm, avail);
-    if(!pmo->pm) {
-      /* didn't descend, and this is an error. we ran into trouble
-         accessing the page tables themselves, which should only
-         happen if the entity that set up the page tables, whether the
-         guest OS or the hypervisor, is buggy or malicious */
-      pmo->t = HPT_TYPE_INVALID;
-      pmo->lvl = 0;
-      return false;
-    }
-    assert(avail == pm_sz); /* this could in principle be false if,
-                               e.g., a host page table has a smaller
-                               page size than the size of the given
-                               page map. we don't handle this
-                               case. will never happen with current
-                               x86 page types */
-    pmo->lvl--;
-    return true;
-  }
+	if (!hpt_pmeo_is_present(&pmeo)
+		|| hpt_pmeo_is_page(&pmeo)) {
+		eu_trace("at leaf. is-present:%d is-page:%d",
+				 hpt_pmeo_is_present(&pmeo), hpt_pmeo_is_page(&pmeo));
+		return false;
+	} else {
+		size_t avail;
+		size_t pm_sz = hpt_pm_size(pmo->t, pmo->lvl - 1);
+		pmo->pm = ctx->pa2ptr(ctx, hpt_pmeo_get_address(&pmeo),
+							  pm_sz, HPT_PROTS_R, HPTW_CPL0, &avail);
+		eu_trace("next-lvl:%d pm-sz:%d pmo->pm:%p avail:%d",
+				 pmo->lvl - 1, pm_sz, pmo->pm, avail);
+		if (!pmo->pm) {
+			/* didn't descend, and this is an error. we ran into trouble
+			   accessing the page tables themselves, which should only
+			   happen if the entity that set up the page tables, whether the
+			   guest OS or the hypervisor, is buggy or malicious */
+			pmo->t = HPT_TYPE_INVALID;
+			pmo->lvl = 0;
+			return false;
+		}
+		assert(avail == pm_sz);	/* this could in principle be false if,
+								   e.g., a host page table has a smaller
+								   page size than the size of the given
+								   page map. we don't handle this
+								   case. will never happen with current
+								   x86 page types */
+		pmo->lvl--;
+		return true;
+	}
 }
 
 /*
@@ -278,76 +256,71 @@ bool hptw_next_lvl(hptw_ctx_t *ctx, hpt_pmo_t *pmo, hpt_va_t va)
  * According to hardware, this is usually the logical AND for the permission
  * bits in all levels of page map entries during the page table walk.
  */
-hpt_prot_t hptw_get_effective_prots(hptw_ctx_t *ctx,
-                                    hpt_va_t va,
-                                    bool *user_accessible)
+hpt_prot_t hptw_get_effective_prots(hptw_ctx_t * ctx,
+									hpt_va_t va, bool *user_accessible)
 {
-  hpt_prot_t prots_rv = HPT_PROTS_RWX;
-  bool user_accessible_rv = true;
-  hpt_pmo_t pmo;
-  int err = 1;
+	hpt_prot_t prots_rv = HPT_PROTS_RWX;
+	bool user_accessible_rv = true;
+	hpt_pmo_t pmo;
+	int err = 1;
 
-  EU_CHKN( hptw_get_root( ctx, &pmo));
+	EU_CHKN(hptw_get_root(ctx, &pmo));
 
-  do {
-    hpt_pmeo_t pmeo;
-    hpt_pm_get_pmeo_by_va(&pmeo, &pmo, va);
-    prots_rv &= hpt_pmeo_getprot(&pmeo);
-    user_accessible_rv = user_accessible_rv && hpt_pmeo_getuser(&pmeo);
-  } while (hptw_next_lvl(ctx, &pmo, va));
+	do {
+		hpt_pmeo_t pmeo;
+		hpt_pm_get_pmeo_by_va(&pmeo, &pmo, va);
+		prots_rv &= hpt_pmeo_getprot(&pmeo);
+		user_accessible_rv = user_accessible_rv && hpt_pmeo_getuser(&pmeo);
+	} while (hptw_next_lvl(ctx, &pmo, va));
 
-  /* XXX should more clearly indicate an error */
-  EU_CHK( pmo.t != HPT_TYPE_INVALID);
+	/* XXX should more clearly indicate an error */
+	EU_CHK(pmo.t != HPT_TYPE_INVALID);
 
-  if(user_accessible != NULL) {
-    *user_accessible = user_accessible_rv;
-  }
+	if (user_accessible != NULL) {
+		*user_accessible = user_accessible_rv;
+	}
 
-  err=0;
+	err = 0;
  out:
-  if (err) {
-    prots_rv = HPT_PROTS_NONE;
-  }
-  return prots_rv;
+	if (err) {
+		prots_rv = HPT_PROTS_NONE;
+	}
+	return prots_rv;
 }
 
 /* Set protection bits (prot) for a virtual address (va) in context (ctx) */
-void hptw_set_prot(hptw_ctx_t *ctx,
-                   hpt_va_t va,
-                   hpt_prot_t prot)
+void hptw_set_prot(hptw_ctx_t * ctx, hpt_va_t va, hpt_prot_t prot)
 {
-  hpt_pmo_t pmo;
-  hpt_pmeo_t pmeo;
+	hpt_pmo_t pmo;
+	hpt_pmeo_t pmeo;
 
-  hptw_get_pmo (&pmo, ctx, 1, va);
-  assert (pmo.pm);
-  assert (pmo.lvl == 1);
+	hptw_get_pmo(&pmo, ctx, 1, va);
+	assert(pmo.pm);
+	assert(pmo.lvl == 1);
 
-  hpt_pm_get_pmeo_by_va (&pmeo, &pmo, va);
-  hpt_pmeo_setprot (&pmeo, prot);
-  hpt_pmo_set_pme_by_va (&pmo, &pmeo, va);
+	hpt_pm_get_pmeo_by_va(&pmeo, &pmo, va);
+	hpt_pmeo_setprot(&pmeo, prot);
+	hpt_pmo_set_pme_by_va(&pmo, &pmeo, va);
 }
 
 /*
  * Translate virtual address (va) in context (ctx) to physical address
  * (i.e. walk the page table in software).
  */
-hpt_pa_t hptw_va_to_pa(hptw_ctx_t *ctx,
-                       hpt_va_t va)
+hpt_pa_t hptw_va_to_pa(hptw_ctx_t * ctx, hpt_va_t va)
 {
-  hpt_pmeo_t pmeo;
-  hptw_get_pmeo(&pmeo, ctx, 1, va);
-  return hpt_pmeo_va_to_pa(&pmeo, va);
+	hpt_pmeo_t pmeo;
+	hptw_get_pmeo(&pmeo, ctx, 1, va);
+	return hpt_pmeo_va_to_pa(&pmeo, va);
 }
 
 // translate guest paddr to system paddr (spa)
-uintptr_t hptw_gpa_to_spa(hptw_ctx_t *ctx,
-                       hpt_pa_t gpa)
+uintptr_t hptw_gpa_to_spa(hptw_ctx_t * ctx, hpt_pa_t gpa)
 {
-  hpt_pa_t result = 0;
+	hpt_pa_t result = 0;
 
-  result = hptw_va_to_pa(ctx, (hpt_va_t) gpa);
-  return (uintptr_t)result;
+	result = hptw_va_to_pa(ctx, (hpt_va_t) gpa);
+	return (uintptr_t) result;
 }
 
 /*
@@ -357,21 +330,18 @@ uintptr_t hptw_gpa_to_spa(hptw_ctx_t *ctx,
  * avail_sz is the size available in the same page.
  * If avail_sz < requested_sz, the caller needs to call this function again.
  */
-void* hptw_access_va(hptw_ctx_t *ctx,
-                     hpt_va_t va,
-                     size_t requested_sz,
-                     size_t *avail_sz)
+void *hptw_access_va(hptw_ctx_t * ctx,
+					 hpt_va_t va, size_t requested_sz, size_t *avail_sz)
 {
-  hpt_pmeo_t pmeo;
-  hpt_pa_t pa;
+	hpt_pmeo_t pmeo;
+	hpt_pa_t pa;
 
-  hptw_get_pmeo(&pmeo, ctx, 1, va);
+	hptw_get_pmeo(&pmeo, ctx, 1, va);
 
-  pa = hpt_pmeo_va_to_pa(&pmeo, va);
-  *avail_sz = MIN(requested_sz, hpt_remaining_on_page(&pmeo, pa));
+	pa = hpt_pmeo_va_to_pa(&pmeo, va);
+	*avail_sz = MIN(requested_sz, hpt_remaining_on_page(&pmeo, pa));
 
-  return ctx->pa2ptr(ctx, pa,
-                     *avail_sz, HPT_PROTS_R, HPTW_CPL0, avail_sz);
+	return ctx->pa2ptr(ctx, pa, *avail_sz, HPT_PROTS_R, HPTW_CPL0, avail_sz);
 }
 
 /*
@@ -381,43 +351,41 @@ void* hptw_access_va(hptw_ctx_t *ctx,
  * access_type and cpl are used to check permissions when accessing va.
  * pmeo is undefined when this function returns 1.
  */
-int hptw_checked_get_pmeo(hpt_pmeo_t *pmeo,
-                          hptw_ctx_t *ctx,
-                          hpt_prot_t access_type,
-                          hptw_cpl_t cpl,
-                          hpt_va_t va)
+int hptw_checked_get_pmeo(hpt_pmeo_t * pmeo,
+						  hptw_ctx_t * ctx,
+						  hpt_prot_t access_type, hptw_cpl_t cpl, hpt_va_t va)
 {
-  hpt_pmo_t pmo;
+	hpt_pmo_t pmo;
 
-  EU_CHKN( hptw_get_root( ctx, &pmo));
+	EU_CHKN(hptw_get_root(ctx, &pmo));
 
-  eu_trace("va:0x%llx access_type %lld cpl:%d",
-           va, access_type, cpl);
+	eu_trace("va:0x%llx access_type %lld cpl:%d", va, access_type, cpl);
 
-  do {
-    eu_trace("pmo t:%d pm:%p lvl:%d",
-             pmo.t, pmo.pm, pmo.lvl);
-    hpt_pm_get_pmeo_by_va( pmeo, &pmo, va);
-    EU_CHK_W(((access_type & hpt_pmeo_getprot(pmeo)) == access_type)
-           && (cpl == HPTW_CPL0 || hpt_pmeo_getuser(pmeo)),
-           eu_warn_e("req-priv:%lld req-cpl:%d priv:%lld user-accessible:%d",
-                    access_type, cpl, hpt_pmeo_getprot(pmeo), hpt_pmeo_getuser(pmeo)));
-  } while (hptw_next_lvl(ctx, &pmo, va));
+	do {
+		eu_trace("pmo t:%d pm:%p lvl:%d", pmo.t, pmo.pm, pmo.lvl);
+		hpt_pm_get_pmeo_by_va(pmeo, &pmo, va);
+		EU_CHK_W(((access_type & hpt_pmeo_getprot(pmeo)) == access_type)
+				 && (cpl == HPTW_CPL0 || hpt_pmeo_getuser(pmeo)),
+				 eu_warn_e
+				 ("req-priv:%lld req-cpl:%d priv:%lld user-accessible:%d",
+				  access_type, cpl, hpt_pmeo_getprot(pmeo),
+				  hpt_pmeo_getuser(pmeo)));
+	} while (hptw_next_lvl(ctx, &pmo, va));
 
-  EU_CHK( pmo.t != HPT_TYPE_INVALID);
+	EU_CHK(pmo.t != HPT_TYPE_INVALID);
 
-  EU_CHK( hpt_pmeo_is_present(pmeo));
+	EU_CHK(hpt_pmeo_is_present(pmeo));
 
-  /* exiting loop means hptw_next_lvl failed, which means either the
-   * current pmeo is a page, or the current pmeo is not present.
-   * however, we should have already returned if not present, so pmeo
-   * must be a page */
-  EU_VERIFY(hpt_pmeo_is_page(pmeo));
+	/* exiting loop means hptw_next_lvl failed, which means either the
+	 * current pmeo is a page, or the current pmeo is not present.
+	 * however, we should have already returned if not present, so pmeo
+	 * must be a page */
+	EU_VERIFY(hpt_pmeo_is_page(pmeo));
 
-  return 0;
+	return 0;
 
  out:
-  return 1;
+	return 1;
 }
 
 /*
@@ -429,28 +397,25 @@ int hptw_checked_get_pmeo(hpt_pmeo_t *pmeo,
  * avail_sz is the size available in the same page.
  * If avail_sz < requested_sz, the caller needs to call this function again.
  */
-void* hptw_checked_access_va(hptw_ctx_t *ctx,
-                             hpt_prot_t access_type,
-                             hptw_cpl_t cpl,
-                             hpt_va_t va,
-                             size_t requested_sz,
-                             size_t *avail_sz)
+void *hptw_checked_access_va(hptw_ctx_t * ctx,
+							 hpt_prot_t access_type,
+							 hptw_cpl_t cpl,
+							 hpt_va_t va, size_t requested_sz, size_t *avail_sz)
 {
-  hpt_pmeo_t pmeo;
-  hpt_pa_t pa;
-  void *rv=NULL;
-  *avail_sz=0;
+	hpt_pmeo_t pmeo;
+	hpt_pa_t pa;
+	void *rv = NULL;
+	*avail_sz = 0;
 
-  EU_CHKN_W(hptw_checked_get_pmeo(&pmeo, ctx, access_type, cpl, va));
+	EU_CHKN_W(hptw_checked_get_pmeo(&pmeo, ctx, access_type, cpl, va));
 
-  pa = hpt_pmeo_va_to_pa(&pmeo, va);
-  *avail_sz = MIN(requested_sz, hpt_remaining_on_page(&pmeo, pa));
-  eu_trace("got pa:%llx sz:%d", pa, *avail_sz);
-  rv = ctx->pa2ptr(ctx, pa,
-                   *avail_sz, access_type, cpl, avail_sz);
+	pa = hpt_pmeo_va_to_pa(&pmeo, va);
+	*avail_sz = MIN(requested_sz, hpt_remaining_on_page(&pmeo, pa));
+	eu_trace("got pa:%llx sz:%d", pa, *avail_sz);
+	rv = ctx->pa2ptr(ctx, pa, *avail_sz, access_type, cpl, avail_sz);
 
  out:
-  return rv;
+	return rv;
 }
 
 /*
@@ -458,27 +423,27 @@ void* hptw_checked_access_va(hptw_ctx_t *ctx,
  * assuming privilege level at (cpl) when reading from source.
  * Return 0 if successful, 1 if failed.
  */
-int hptw_checked_copy_from_va(hptw_ctx_t *ctx,
-                              hptw_cpl_t cpl,
-                              void *dst,
-                              hpt_va_t src_va_base,
-                              size_t len)
+int hptw_checked_copy_from_va(hptw_ctx_t * ctx,
+							  hptw_cpl_t cpl,
+							  void *dst, hpt_va_t src_va_base, size_t len)
 {
-  size_t copied=0;
+	size_t copied = 0;
 
-  while(copied < len) {
-    hpt_va_t src_va = src_va_base + copied;
-    size_t to_copy;
-    void *src;
+	while (copied < len) {
+		hpt_va_t src_va = src_va_base + copied;
+		size_t to_copy;
+		void *src;
 
-    src = hptw_checked_access_va(ctx, HPT_PROTS_R, cpl, src_va, len-copied, &to_copy);
-    if(!src) {
-      return 1;
-    }
-    memcpy(dst+copied, src, to_copy);
-    copied += to_copy;
-  }
-  return 0;
+		src =
+			hptw_checked_access_va(ctx, HPT_PROTS_R, cpl, src_va, len - copied,
+								   &to_copy);
+		if (!src) {
+			return 1;
+		}
+		memcpy(dst + copied, src, to_copy);
+		copied += to_copy;
+	}
+	return 0;
 }
 
 /*
@@ -486,27 +451,27 @@ int hptw_checked_copy_from_va(hptw_ctx_t *ctx,
  * assuming privilege level at (cpl) when writing to destination.
  * Return 0 if successful, 1 if failed.
  */
-int hptw_checked_copy_to_va(hptw_ctx_t *ctx,
-                            hptw_cpl_t cpl,
-                            hpt_va_t dst_va_base,
-                            void *src,
-                            size_t len)
+int hptw_checked_copy_to_va(hptw_ctx_t * ctx,
+							hptw_cpl_t cpl,
+							hpt_va_t dst_va_base, void *src, size_t len)
 {
-  size_t copied=0;
+	size_t copied = 0;
 
-  while(copied < len) {
-    hpt_va_t dst_va = dst_va_base + copied;
-    size_t to_copy;
-    void *dst;
+	while (copied < len) {
+		hpt_va_t dst_va = dst_va_base + copied;
+		size_t to_copy;
+		void *dst;
 
-    dst = hptw_checked_access_va(ctx, HPT_PROTS_W, cpl, dst_va, len-copied, &to_copy);
-    if (!dst) {
-      return 1;
-    }
-    memcpy(dst, src+copied, to_copy);
-    copied += to_copy;
-  }
-  return 0;
+		dst =
+			hptw_checked_access_va(ctx, HPT_PROTS_W, cpl, dst_va, len - copied,
+								   &to_copy);
+		if (!dst) {
+			return 1;
+		}
+		memcpy(dst, src + copied, to_copy);
+		copied += to_copy;
+	}
+	return 0;
 }
 
 /*
@@ -514,48 +479,42 @@ int hptw_checked_copy_to_va(hptw_ctx_t *ctx,
  * (dst_va_base), assuming privilege level at (cpl) when reading / writing.
  * Return 0 if successful, 1 if failed.
  */
-int hptw_checked_copy_va_to_va(hptw_ctx_t *dst_ctx,
-                               hptw_cpl_t dst_cpl,
-                               hpt_va_t dst_va_base,
-                               hptw_ctx_t *src_ctx,
-                               hptw_cpl_t src_cpl,
-                               hpt_va_t src_va_base,
-                               size_t len)
+int hptw_checked_copy_va_to_va(hptw_ctx_t * dst_ctx,
+							   hptw_cpl_t dst_cpl,
+							   hpt_va_t dst_va_base,
+							   hptw_ctx_t * src_ctx,
+							   hptw_cpl_t src_cpl,
+							   hpt_va_t src_va_base, size_t len)
 {
-  size_t copied=0;
-  int rv=1;
+	size_t copied = 0;
+	int rv = 1;
 
-  while(copied < len) {
-    hpt_va_t dst_va = dst_va_base + copied;
-    hpt_va_t src_va = src_va_base + copied;
-    size_t to_copy;
-    void *src, *dst;
+	while (copied < len) {
+		hpt_va_t dst_va = dst_va_base + copied;
+		hpt_va_t src_va = src_va_base + copied;
+		size_t to_copy;
+		void *src, *dst;
 
-    eu_trace("dst_va:0x%llx src_va:0x%llx", dst_va, src_va);
+		eu_trace("dst_va:0x%llx src_va:0x%llx", dst_va, src_va);
 
-    EU_CHK( dst = hptw_checked_access_va(dst_ctx,
-                                         HPT_PROTS_W,
-                                         dst_cpl,
-                                         dst_va,
-                                         len-copied,
-                                         &to_copy));
-    EU_CHK( src = hptw_checked_access_va(src_ctx,
-                                         HPT_PROTS_R,
-                                         src_cpl,
-                                         src_va,
-                                         to_copy,
-                                         &to_copy));
-    eu_trace("dst-ptr:%p src-ptr:%p to-copy:%d",
-             dst, src, to_copy);
+		EU_CHK(dst = hptw_checked_access_va(dst_ctx,
+											HPT_PROTS_W,
+											dst_cpl,
+											dst_va, len - copied, &to_copy));
+		EU_CHK(src = hptw_checked_access_va(src_ctx,
+											HPT_PROTS_R,
+											src_cpl,
+											src_va, to_copy, &to_copy));
+		eu_trace("dst-ptr:%p src-ptr:%p to-copy:%d", dst, src, to_copy);
 
-    memcpy(dst, src, to_copy);
-    copied += to_copy;
-  }
+		memcpy(dst, src, to_copy);
+		copied += to_copy;
+	}
 
-  eu_trace("hptw_checked_copy_va_to_va: returning");
-  rv=0;
+	eu_trace("hptw_checked_copy_va_to_va: returning");
+	rv = 0;
  out:
-  return rv;
+	return rv;
 }
 
 /*
@@ -563,35 +522,30 @@ int hptw_checked_copy_va_to_va(hptw_ctx_t *dst_ctx,
  * (cpl) when reading / writing.
  * Return 0 if successful, 1 if failed.
  */
-int hptw_checked_memset_va(hptw_ctx_t *ctx,
-                           hptw_cpl_t cpl,
-                           hpt_va_t dst_va_base,
-                           int c,
-                           size_t len)
+int hptw_checked_memset_va(hptw_ctx_t * ctx,
+						   hptw_cpl_t cpl,
+						   hpt_va_t dst_va_base, int c, size_t len)
 {
-  size_t set=0;
-  int rv=1;
-  eu_trace("hptw_checked_memset_va entering");
+	size_t set = 0;
+	int rv = 1;
+	eu_trace("hptw_checked_memset_va entering");
 
-  while(set < len) {
-    hpt_va_t dst_va = dst_va_base + set;
-    size_t to_set;
-    void *dst;
+	while (set < len) {
+		hpt_va_t dst_va = dst_va_base + set;
+		size_t to_set;
+		void *dst;
 
-    eu_trace("calling hptw_checked_access_va");
-    EU_CHK(dst = hptw_checked_access_va(ctx,
-                                        HPT_PROTS_W,
-                                        cpl,
-                                        dst_va,
-                                        len-set,
-                                        &to_set));
-    eu_trace("got pointer %p, size %d", dst, to_set);
-    memset(dst, c, to_set);
-    set += to_set;
-  }
-  eu_trace("hptw_checked_memset_va returning");
+		eu_trace("calling hptw_checked_access_va");
+		EU_CHK(dst = hptw_checked_access_va(ctx,
+											HPT_PROTS_W,
+											cpl, dst_va, len - set, &to_set));
+		eu_trace("got pointer %p, size %d", dst, to_set);
+		memset(dst, c, to_set);
+		set += to_set;
+	}
+	eu_trace("hptw_checked_memset_va returning");
 
-  rv=0;
+	rv = 0;
  out:
-  return rv;
+	return rv;
 }

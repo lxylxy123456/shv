@@ -69,31 +69,31 @@
  * Hyper-Call constants
  */
 enum HCcmd {
-  /* pal manipulation ops */
-  TV_HC_REG =1,
-  TV_HC_UNREG =2,
-  TV_HC_SHARE =6,
+	/* pal manipulation ops */
+	TV_HC_REG = 1,
+	TV_HC_UNREG = 2,
+	TV_HC_SHARE = 6,
 
-  /* uTPM ops */
-  TV_HC_UTPM_SEAL_DEPRECATED    =3,
-  TV_HC_UTPM_UNSEAL_DEPRECATED =4,
-  TV_HC_UTPM_QUOTE_DEPRECATED =5,
-  TV_HC_UTPM_PCRREAD =7,
-  TV_HC_UTPM_PCREXT  =8,
-  TV_HC_UTPM_GENRAND =9,
-  TV_HC_UTPM_SEAL   =10,
-  TV_HC_UTPM_UNSEAL =11,
-  TV_HC_UTPM_QUOTE =12,
-  TV_HC_UTPM_ID_GETPUB =13,
-  /* Reserving up through 20 for more UTPM stuff; don't touch! */
+	/* uTPM ops */
+	TV_HC_UTPM_SEAL_DEPRECATED = 3,
+	TV_HC_UTPM_UNSEAL_DEPRECATED = 4,
+	TV_HC_UTPM_QUOTE_DEPRECATED = 5,
+	TV_HC_UTPM_PCRREAD = 7,
+	TV_HC_UTPM_PCREXT = 8,
+	TV_HC_UTPM_GENRAND = 9,
+	TV_HC_UTPM_SEAL = 10,
+	TV_HC_UTPM_UNSEAL = 11,
+	TV_HC_UTPM_QUOTE = 12,
+	TV_HC_UTPM_ID_GETPUB = 13,
+	/* Reserving up through 20 for more UTPM stuff; don't touch! */
 
-  /* These are privileged commands; only a special PAL can use them */
-  TV_HC_TPMNVRAM_GETSIZE = 21,
-  TV_HC_TPMNVRAM_READALL = 22,
-  TV_HC_TPMNVRAM_WRITEALL = 23,
+	/* These are privileged commands; only a special PAL can use them */
+	TV_HC_TPMNVRAM_GETSIZE = 21,
+	TV_HC_TPMNVRAM_READALL = 22,
+	TV_HC_TPMNVRAM_WRITEALL = 23,
 
-  /* misc */
-  TV_HC_TEST =255,
+	/* misc */
+	TV_HC_TEST = 255,
 };
 
 /*
@@ -101,47 +101,47 @@ enum HCcmd {
  */
 
 enum tv_pal_section_type {
-  TV_PAL_SECTION_CODE =1,
-  TV_PAL_SECTION_DATA =2,
-  TV_PAL_SECTION_PARAM =3,
-  TV_PAL_SECTION_STACK =4,
-  TV_PAL_SECTION_SHARED_CODE =5,
+	TV_PAL_SECTION_CODE = 1,
+	TV_PAL_SECTION_DATA = 2,
+	TV_PAL_SECTION_PARAM = 3,
+	TV_PAL_SECTION_STACK = 4,
+	TV_PAL_SECTION_SHARED_CODE = 5,
 
-  /* for internal use. */
-  TV_PAL_SECTION_SHARED =6,
-  TV_PAL_SECTION_GUEST_PAGE_TABLES =7,
+	/* for internal use. */
+	TV_PAL_SECTION_SHARED = 6,
+	TV_PAL_SECTION_GUEST_PAGE_TABLES = 7,
 };
 
 struct tv_pal_section {
-  enum tv_pal_section_type type;
-  uint32_t page_num; /* size of section in pages */
-  uint64_t start_addr;
+	enum tv_pal_section_type type;
+	uint32_t page_num;			/* size of section in pages */
+	uint64_t start_addr;
 } __attribute__((packed));
 
-#define TV_MAX_SECTIONS 10  /* max sections that are allowed in pal registration */
+#define TV_MAX_SECTIONS 10		/* max sections that are allowed in pal registration */
 struct tv_pal_sections {
-  uint32_t num_sections;
-  uint32_t :32; /* Padding */
-  struct tv_pal_section sections[TV_MAX_SECTIONS];
+	uint32_t num_sections;
+	 uint32_t:32;				/* Padding */
+	struct tv_pal_section sections[TV_MAX_SECTIONS];
 } __attribute__((packed));
 
 /* parameter type */
 enum tv_pal_param_type {
-  TV_PAL_PM_INTEGER =1,
-  TV_PAL_PM_POINTER =2,
+	TV_PAL_PM_INTEGER = 1,
+	TV_PAL_PM_POINTER = 2,
 };
 
 struct tv_pal_param {
-  enum tv_pal_param_type type;  /* 1: integer ;  2:pointer*/
-  uint32_t :32; /* Padding */
-  uint64_t size;
+	enum tv_pal_param_type type;	/* 1: integer ;  2:pointer */
+	 uint32_t:32;				/* Padding */
+	uint64_t size;
 } __attribute__((packed));
 
 #define TV_MAX_PARAMS 10
 struct tv_pal_params {
-  uint32_t num_params;
-  uint32_t :32; /* Padding */
-  struct tv_pal_param params[TV_MAX_PARAMS];
+	uint32_t num_params;
+	 uint32_t:32;				/* Padding */
+	struct tv_pal_param params[TV_MAX_PARAMS];
 } __attribute__((packed));
 
 #endif

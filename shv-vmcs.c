@@ -20,13 +20,15 @@
 #include <shv.h>
 
 /* Write 16-bit VMCS field, never fails */
-void __vmx_vmwrite16(u16 encoding, u16 value) {
+void __vmx_vmwrite16(u16 encoding, u16 value)
+{
 	ASSERT((encoding >> 12) == 0UL);
 	ASSERT(__vmx_vmwrite(encoding, value));
 }
 
 /* Write 64-bit VMCS field, never fails */
-void __vmx_vmwrite64(u16 encoding, u64 value) {
+void __vmx_vmwrite64(u16 encoding, u64 value)
+{
 	ASSERT((encoding >> 12) == 2UL);
 	ASSERT((encoding & 0x1) == 0x0);
 #ifdef __amd64__
@@ -34,45 +36,48 @@ void __vmx_vmwrite64(u16 encoding, u64 value) {
 #elif defined(__i386__)
 	ASSERT(__vmx_vmwrite(encoding, value));
 	ASSERT(__vmx_vmwrite(encoding + 1, value >> 32));
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
+#else							/* !defined(__i386__) && !defined(__amd64__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) && !defined(__amd64__) */
 }
 
 /* Write 32-bit VMCS field, never fails */
-void __vmx_vmwrite32(u16 encoding, u32 value) {
+void __vmx_vmwrite32(u16 encoding, u32 value)
+{
 	ASSERT((encoding >> 12) == 4UL);
 	ASSERT(__vmx_vmwrite(encoding, value));
 }
 
 /* Write natural width (NW) VMCS field, never fails */
-void __vmx_vmwriteNW(u16 encoding, ulong_t value) {
+void __vmx_vmwriteNW(u16 encoding, ulong_t value)
+{
 	ASSERT((encoding >> 12) == 6UL);
 	ASSERT(__vmx_vmwrite(encoding, value));
 }
 
 /* Read 16-bit VMCS field, return whether succeed */
-bool __vmx_vmread16_safe(u16 encoding, u16 *result)
+bool __vmx_vmread16_safe(u16 encoding, u16 * result)
 {
 	unsigned long value;
 	ASSERT((encoding >> 12) == 0UL);
 	if (!__vmx_vmread(encoding, &value)) {
 		return false;
 	}
-	ASSERT(value == (unsigned long)(u16)value);
+	ASSERT(value == (unsigned long)(u16) value);
 	*result = value;
 	return true;
 }
 
 /* Read 16-bit VMCS field, never fails */
-u16 __vmx_vmread16(u16 encoding) {
+u16 __vmx_vmread16(u16 encoding)
+{
 	u16 value;
 	ASSERT(__vmx_vmread16_safe(encoding, &value));
 	return value;
 }
 
 /* Read 64-bit VMCS field, return whether succeed */
-bool __vmx_vmread64_safe(u16 encoding, u64 *result)
+bool __vmx_vmread64_safe(u16 encoding, u64 * result)
 {
 #ifdef __amd64__
 	unsigned long value;
@@ -99,9 +104,9 @@ bool __vmx_vmread64_safe(u16 encoding, u64 *result)
 	ASSERT(__vmx_vmread(encoding + 1, &ans.high));
 	*result = ans.full;
 	return true;
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
+#else							/* !defined(__i386__) && !defined(__amd64__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) && !defined(__amd64__) */
 }
 
 /* Read 64-bit VMCS field, never fails */
@@ -113,14 +118,14 @@ u64 __vmx_vmread64(u16 encoding)
 }
 
 /* Read 32-bit VMCS field, return whether succeed */
-bool __vmx_vmread32_safe(u16 encoding, u32 *result)
+bool __vmx_vmread32_safe(u16 encoding, u32 * result)
 {
 	unsigned long value;
 	ASSERT((encoding >> 12) == 4UL);
 	if (!__vmx_vmread(encoding, &value)) {
 		return false;
 	}
-	ASSERT(value == (unsigned long)(u32)value);
+	ASSERT(value == (unsigned long)(u32) value);
 	*result = value;
 	return true;
 }
@@ -134,14 +139,14 @@ u32 __vmx_vmread32(u16 encoding)
 }
 
 /* Read natural width (NW) VMCS field, return whether succeed */
-bool __vmx_vmreadNW_safe(u16 encoding, ulong_t *result)
+bool __vmx_vmreadNW_safe(u16 encoding, ulong_t * result)
 {
 	unsigned long value;
 	ASSERT((encoding >> 12) == 6UL);
 	if (!__vmx_vmread(encoding, &value)) {
 		return false;
 	}
-	ASSERT(value == (unsigned long)(ulong_t)value);
+	ASSERT(value == (unsigned long)(ulong_t) value);
 	*result = value;
 	return true;
 }
@@ -155,7 +160,7 @@ ulong_t __vmx_vmreadNW(u16 encoding)
 }
 
 /* Read all VMCS fields defined in SDM from CPU and print. */
-void vmcs_print_all(VCPU *vcpu)
+void vmcs_print_all(VCPU * vcpu)
 {
 #define FIELD_CTLS_ARG (&vcpu->vmx_caps)
 #define DECLARE_FIELD_16(encoding, name, exist, ...) \
@@ -218,7 +223,7 @@ void vmcs_print_all(VCPU *vcpu)
 }
 
 /* Read all existing VMCS fields from CPU to vcpu->vmcs, print if verbose. */
-void vmcs_dump(VCPU *vcpu, int verbose)
+void vmcs_dump(VCPU * vcpu, int verbose)
 {
 #define FIELD_CTLS_ARG (&vcpu->vmx_caps)
 #define DECLARE_FIELD_16(encoding, name, exist, ...) \
@@ -261,7 +266,7 @@ void vmcs_dump(VCPU *vcpu, int verbose)
 }
 
 /* Write all existing VMCS fields from vcpu->vmcs to CPU. */
-void vmcs_load(VCPU *vcpu)
+void vmcs_load(VCPU * vcpu)
 {
 #define FIELD_CTLS_ARG (&vcpu->vmx_caps)
 #define DECLARE_FIELD_16(encoding, name, exist, ...) \

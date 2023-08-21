@@ -20,109 +20,109 @@ __attribute__((noreturn))
 static inline void cpu_halt(void)
 {
 	while (1) {
-		asm volatile("hlt");
+		asm volatile ("hlt");
 	}
 }
 
 static inline void cpu_relax(void)
 {
-	asm volatile("pause");
+	asm volatile ("pause");
 }
 
 static inline u8 inb(u16 port)
 {
 	u8 ans;
-	asm volatile("inb %1, %0" : "=a"(ans) : "d"(port));
+	asm volatile ("inb %1, %0":"=a" (ans):"d"(port));
 	return ans;
 }
 
 static inline void outb(u16 port, u8 val)
 {
-	asm volatile("outb %1, %0" : : "d"(port), "a"(val));
+	asm volatile ("outb %1, %0"::"d" (port), "a"(val));
 }
 
 static inline ulong_t read_cr0(void)
 {
 	ulong_t ans;
-	asm volatile("mov %%cr0, %0" : "=r"(ans));
+	asm volatile ("mov %%cr0, %0":"=r" (ans));
 	return ans;
 }
 
 static inline void write_cr0(ulong_t val)
 {
-	asm volatile("mov %0, %%cr0" : : "r"(val));
+	asm volatile ("mov %0, %%cr0"::"r" (val));
 }
 
 static inline ulong_t read_cr3(void)
 {
 	ulong_t ans;
-	asm volatile("mov %%cr3, %0" : "=r"(ans));
+	asm volatile ("mov %%cr3, %0":"=r" (ans));
 	return ans;
 }
 
 static inline void write_cr3(ulong_t val)
 {
-	asm volatile("mov %0, %%cr3" : : "r"(val));
+	asm volatile ("mov %0, %%cr3"::"r" (val));
 }
 
 static inline ulong_t read_cr4(void)
 {
 	ulong_t ans;
-	asm volatile("mov %%cr4, %0" : "=r"(ans));
+	asm volatile ("mov %%cr4, %0":"=r" (ans));
 	return ans;
 }
 
 static inline void write_cr4(ulong_t val)
 {
-	asm volatile("mov %0, %%cr4" : : "r"(val));
+	asm volatile ("mov %0, %%cr4"::"r" (val));
 }
 
 static inline u16 read_cs(void)
 {
 	u16 ans;
-	asm volatile("mov %%cs, %0" : "=g"(ans));
+	asm volatile ("mov %%cs, %0":"=g" (ans));
 	return ans;
 }
 
 static inline u16 read_ds(void)
 {
 	u16 ans;
-	asm volatile("mov %%ds, %0" : "=g"(ans));
+	asm volatile ("mov %%ds, %0":"=g" (ans));
 	return ans;
 }
 
 static inline u16 read_es(void)
 {
 	u16 ans;
-	asm volatile("mov %%es, %0" : "=g"(ans));
+	asm volatile ("mov %%es, %0":"=g" (ans));
 	return ans;
 }
 
 static inline u16 read_fs(void)
 {
 	u16 ans;
-	asm volatile("mov %%fs, %0" : "=g"(ans));
+	asm volatile ("mov %%fs, %0":"=g" (ans));
 	return ans;
 }
 
 static inline u16 read_gs(void)
 {
 	u16 ans;
-	asm volatile("mov %%gs, %0" : "=g"(ans));
+	asm volatile ("mov %%gs, %0":"=g" (ans));
 	return ans;
 }
 
 static inline u16 read_ss(void)
 {
 	u16 ans;
-	asm volatile("mov %%ss, %0" : "=g"(ans));
+	asm volatile ("mov %%ss, %0":"=g" (ans));
 	return ans;
 }
 
 static inline u16 read_tr(void)
 {
 	u16 ans;
-	asm volatile("str %0" : "=g"(ans));
+	asm volatile ("str %0":"=g" (ans));
 	return ans;
 }
 
@@ -135,7 +135,7 @@ static inline u64 rdmsr64(u32 msr)
 		};
 		u64 eaxedx;
 	} ans;
-	asm volatile("rdmsr" : "=a"(ans.eax), "=d"(ans.edx) : "c"(msr));
+	asm volatile ("rdmsr":"=a" (ans.eax), "=d"(ans.edx):"c"(msr));
 	return ans.eaxedx;
 }
 
@@ -147,55 +147,55 @@ static inline void wrmsr64(u32 msr, u64 val)
 			u32 edx;
 		};
 		u64 eaxedx;
-	} ans = { .eaxedx=val };
-	asm volatile("wrmsr" : : "a"(ans.eax), "d"(ans.edx), "c"(msr));
+	} ans = {.eaxedx = val };
+	asm volatile ("wrmsr"::"a" (ans.eax), "d"(ans.edx), "c"(msr));
 }
 
-static inline void cpuid(u32 func, u32 *eax, u32 *ebx, u32 *ecx, u32 *edx)
+static inline void cpuid(u32 func, u32 * eax, u32 * ebx, u32 * ecx, u32 * edx)
 {
-	asm volatile("cpuid" : "=a"(*eax), "=b"(*ebx), "=c"(*ecx), "=d"(*edx) :
-				 "a"(func), "c"(0));
+	asm volatile ("cpuid":"=a" (*eax), "=b"(*ebx), "=c"(*ecx), "=d"(*edx):
+				  "a"(func), "c"(0));
 }
 
-static inline void cpuid_raw(u32 *eax, u32 *ebx, u32 *ecx, u32 *edx)
+static inline void cpuid_raw(u32 * eax, u32 * ebx, u32 * ecx, u32 * edx)
 {
-	asm volatile("cpuid" : "+a"(*eax), "=b"(*ebx), "+c"(*ecx), "=d"(*edx));
+	asm volatile ("cpuid":"+a" (*eax), "=b"(*ebx), "+c"(*ecx), "=d"(*edx));
 }
 
 static inline u32 cpuid_eax(u32 eax, u32 ecx)
 {
-	asm volatile("cpuid" : "+a"(eax) : "c"(ecx) : "ebx", "edx");
+	asm volatile ("cpuid":"+a" (eax):"c"(ecx):"ebx", "edx");
 	return eax;
 }
 
 static inline u32 cpuid_ebx(u32 eax, u32 ecx)
 {
 	u32 ebx;
-	asm volatile("cpuid" : "=b"(ebx) : "a"(eax), "c"(ecx) : "edx");
+	asm volatile ("cpuid":"=b" (ebx):"a"(eax), "c"(ecx):"edx");
 	return ebx;
 }
 
 static inline u32 cpuid_ecx(u32 eax, u32 ecx)
 {
-	asm volatile("cpuid" : "+c"(ecx) : "a"(eax) : "ebx", "edx");
+	asm volatile ("cpuid":"+c" (ecx):"a"(eax):"ebx", "edx");
 	return ecx;
 }
 
 static inline u32 cpuid_edx(u32 eax, u32 ecx)
 {
 	u32 edx;
-	asm volatile("cpuid" : "=d"(edx) : "a"(eax), "c"(ecx) : "ebx");
+	asm volatile ("cpuid":"=d" (edx):"a"(eax), "c"(ecx):"ebx");
 	return edx;
 }
 
-static inline void lock_incl(volatile u32 *num)
+static inline void lock_incl(volatile u32 * num)
 {
-	asm volatile("lock incl %0" : "+m"(*num));
+	asm volatile ("lock incl %0":"+m" (*num));
 }
 
 static inline u64 rdtsc(void)
 {
 	u32 eax, edx;
-	asm volatile("rdtsc" : "=a"(eax), "=d"(edx));
-	return ((u64)edx << 32) | eax;
+	asm volatile ("rdtsc":"=a" (eax), "=d"(edx));
+	return ((u64) edx << 32) | eax;
 }

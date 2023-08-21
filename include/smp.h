@@ -63,20 +63,19 @@
  */
 
 typedef struct _midtab {
-    union {
-        u32 cpu_lapic_id;       // CPU LAPIC id (unique)
-        uintptr_t _cpu_lapic_id_64; // Keep struct aligned in amd64; don't use this
-    };
-    uintptr_t vcpu_vaddr_ptr;   // virt. addr. pointer to vcpu struct for this CPU
+	union {
+		u32 cpu_lapic_id;		// CPU LAPIC id (unique)
+		uintptr_t _cpu_lapic_id_64;	// Keep struct aligned in amd64; don't use this
+	};
+	uintptr_t vcpu_vaddr_ptr;	// virt. addr. pointer to vcpu struct for this CPU
 } __attribute__((packed)) MIDTAB;
 
 typedef struct _pcpu {
-  u32 lapic_id;
-  u32 lapic_ver;
-  u32 lapic_base;
-  u32 isbsp;
+	u32 lapic_id;
+	u32 lapic_ver;
+	u32 lapic_base;
+	u32 isbsp;
 } __attribute__((packed)) PCPU;
 
 extern void init_core_lowlevel_setup(void);
 extern void smp_init(void);
-

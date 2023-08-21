@@ -50,12 +50,12 @@ void kernel_main(void)
 		/* Enable CR4.PAE. */
 		ASSERT((cpuid_edx(1U, 0U) & (1U << 6)));
 		g_cr4 |= CR4_PAE;
-#else /* !I386_PAE */
+#else							/* !I386_PAE */
 		/* Enable CR4.PSE, so we can use 4MB pages. */
 		ASSERT((cpuid_edx(1U, 0U) & (1U << 3)));
 		g_cr4 |= CR4_PSE;
-#endif /* I386_PAE */
-#endif /* !__i386__ */
+#endif							/* I386_PAE */
+#endif							/* !__i386__ */
 	}
 
 	/* Initialize SMP. */
@@ -67,7 +67,7 @@ void kernel_main(void)
 }
 
 /* This function is called from smp-asm.S, both BSP and AP. */
-void kernel_main_smp(VCPU *vcpu)
+void kernel_main_smp(VCPU * vcpu)
 {
 	printf("Hello, %s World %d!\n", "smp", vcpu->id);
 
@@ -78,7 +78,7 @@ void kernel_main_smp(VCPU *vcpu)
 
 	/* Enable paging. */
 	write_cr0(read_cr0() | CR0_PG);
-#endif /* !__i386__ */
+#endif							/* !__i386__ */
 
 	/* Barrier */
 	{
@@ -97,7 +97,7 @@ void kernel_main_smp(VCPU *vcpu)
 
 	/* Transfer control to SHV */
 	{
-		extern void shv_main(VCPU *vcpu);
+		extern void shv_main(VCPU * vcpu);
 		shv_main(vcpu);
 	}
 

@@ -25,73 +25,60 @@
  * If successful, return 0. If RDMSR causes #GP, return 1.
  * Implementation similar to Linux's native_read_msr_safe().
  */
-static u32 _rdmsr_safe(u32 index, u64 *value) {
-    u32 result;
-    u32 eax, edx;
-    asm volatile ("1:\r\n"
-                  "rdmsr\r\n"
-                  "xor %%ebx, %%ebx\r\n"
-                  "jmp 3f\r\n"
-                  "2:\r\n"
-                  "movl $1, %%ebx\r\n"
-                  "jmp 3f\r\n"
-                  ".section .xcph_table\r\n"
+static u32 _rdmsr_safe(u32 index, u64 * value)
+{
+	u32 result;
+	u32 eax, edx;
+	asm volatile ("1:\r\n"
+				  "rdmsr\r\n"
+				  "xor %%ebx, %%ebx\r\n"
+				  "jmp 3f\r\n"
+				  "2:\r\n"
+				  "movl $1, %%ebx\r\n" "jmp 3f\r\n" ".section .xcph_table\r\n"
 #ifdef __amd64__
-                  ".quad 0xd\r\n"
-                  ".quad 1b\r\n"
-                  ".quad 2b\r\n"
+				  ".quad 0xd\r\n" ".quad 1b\r\n" ".quad 2b\r\n"
 #elif defined(__i386__)
-                  ".long 0xd\r\n"
-                  ".long 1b\r\n"
-                  ".long 2b\r\n"
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
-                  ".previous\r\n"
-                  "3:\r\n"
-                  : "=a"(eax), "=d"(edx), "=b"(result)
-                  : "c" (index));
+				  ".long 0xd\r\n" ".long 1b\r\n" ".long 2b\r\n"
+#else							/* !defined(__i386__) && !defined(__amd64__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) && !defined(__amd64__) */
+				  ".previous\r\n" "3:\r\n":"=a" (eax), "=d"(edx), "=b"(result)
+				  :"c"(index));
 	if (result == 0) {
 		*value = ((u64) edx << 32) | eax;
 	}
-    return result;
+	return result;
 }
 
 /*
  * Perform WRMSR instruction.
  * If successful, return 0. If WRMSR causes #GP, return 1.
  */
-static u32 _wrmsr_safe(u32 index, u64 value) {
-    u32 result;
-    u32 eax = value, edx = value >> 32;
-    asm volatile ("1:\r\n"
-                  "wrmsr\r\n"
-                  "xor %%ebx, %%ebx\r\n"
-                  "jmp 3f\r\n"
-                  "2:\r\n"
-                  "movl $1, %%ebx\r\n"
-                  "jmp 3f\r\n"
-                  ".section .xcph_table\r\n"
+static u32 _wrmsr_safe(u32 index, u64 value)
+{
+	u32 result;
+	u32 eax = value, edx = value >> 32;
+	asm volatile ("1:\r\n"
+				  "wrmsr\r\n"
+				  "xor %%ebx, %%ebx\r\n"
+				  "jmp 3f\r\n"
+				  "2:\r\n"
+				  "movl $1, %%ebx\r\n" "jmp 3f\r\n" ".section .xcph_table\r\n"
 #ifdef __amd64__
-                  ".quad 0xd\r\n"
-                  ".quad 1b\r\n"
-                  ".quad 2b\r\n"
+				  ".quad 0xd\r\n" ".quad 1b\r\n" ".quad 2b\r\n"
 #elif defined(__i386__)
-                  ".long 0xd\r\n"
-                  ".long 1b\r\n"
-                  ".long 2b\r\n"
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
-                  ".previous\r\n"
-                  "3:\r\n"
-                  : "=b"(result)
-                  : "c" (index), "a"(eax), "d"(edx));
-    return result;
+				  ".long 0xd\r\n" ".long 1b\r\n" ".long 2b\r\n"
+#else							/* !defined(__i386__) && !defined(__amd64__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) && !defined(__amd64__) */
+				  ".previous\r\n" "3:\r\n":"=b" (result)
+				  :"c"(index), "a"(eax), "d"(edx));
+	return result;
 }
 
 /* Return whether MSR is writable with a wild value. */
-static bool msr_writable(u32 index) {
+static bool msr_writable(u32 index)
+{
 	u64 old_val;
 	u64 new_val;
 	if (_rdmsr_safe(index, &old_val)) {
@@ -112,8 +99,8 @@ typedef struct shv_guest_test_msr_ls_data {
 	u64 old_vals[3][3];
 } shv_guest_test_msr_ls_data_t;
 
-static void shv_guest_test_msr_ls_vmexit_handler(VCPU *vcpu, struct regs *r,
-												 vmexit_info_t *info)
+static void shv_guest_test_msr_ls_vmexit_handler(VCPU * vcpu, struct regs *r,
+												 vmexit_info_t * info)
 {
 	shv_guest_test_msr_ls_data_t *data;
 	if (info->vmexit_reason != VMX_VMEXIT_VMCALL) {
@@ -123,9 +110,9 @@ static void shv_guest_test_msr_ls_vmexit_handler(VCPU *vcpu, struct regs *r,
 	data = (void *)r->rbx;
 #elif defined(__i386__)
 	data = (void *)r->ebx;
-#else /* !defined(__i386__) && !defined(__amd64__) */
-	#error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
+#else							/* !defined(__i386__) && !defined(__amd64__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) && !defined(__amd64__) */
 	switch (r->eax) {
 	case 12:
 		/*
@@ -202,21 +189,16 @@ static void shv_guest_test_msr_ls_vmexit_handler(VCPU *vcpu, struct regs *r,
 		break;
 	case 16:
 		/* Check effects */
-		ASSERT(vcpu->my_vmexit_msrstore[0].data ==
-						  0x00000000aaaaa000ULL);
+		ASSERT(vcpu->my_vmexit_msrstore[0].data == 0x00000000aaaaa000ULL);
 		ASSERT(rdmsr64(0x20bU) == 0x00000000bbbbb000ULL);
 		ASSERT(rdmsr64(0x20cU) == 0x00000000ccccc000ULL);
-		ASSERT(vcpu->my_vmexit_msrstore[1].data ==
-						  rdmsr64(MSR_EFER));
+		ASSERT(vcpu->my_vmexit_msrstore[1].data == rdmsr64(MSR_EFER));
 		ASSERT(rdmsr64(MSR_IA32_PAT) == 0x0007060400070604ULL);
 		ASSERT(rdmsr64(0xc0000081U) == 0x0000000011111000ULL);
 		if (!data->skip_mc_msrs) {
-			ASSERT(vcpu->my_vmexit_msrstore[2].data ==
-							  0x2222222222222222ULL);
-			ASSERT(rdmsr64(data->mc_msrs[1]) ==
-							  0x3333333333333333ULL);
-			ASSERT(rdmsr64(data->mc_msrs[2]) ==
-							  0x6666666666666666ULL);
+			ASSERT(vcpu->my_vmexit_msrstore[2].data == 0x2222222222222222ULL);
+			ASSERT(rdmsr64(data->mc_msrs[1]) == 0x3333333333333333ULL);
+			ASSERT(rdmsr64(data->mc_msrs[2]) == 0x6666666666666666ULL);
 		}
 		/* Reset state */
 		__vmx_vmwrite32(VMCS_control_VM_exit_MSR_store_count, 0);
@@ -243,20 +225,20 @@ static void shv_guest_test_msr_ls_vmexit_handler(VCPU *vcpu, struct regs *r,
 	vmresume_asm(r);
 }
 
-static void shv_guest_test_msr_ls(VCPU *vcpu)
+static void shv_guest_test_msr_ls(VCPU * vcpu)
 {
 	if (SHV_OPT & SHV_USE_MSR_LOAD) {
 		shv_guest_test_msr_ls_data_t data;
 		vcpu->vmexit_handler_override = shv_guest_test_msr_ls_vmexit_handler;
-		asm volatile ("vmcall" : : "a"(12), "b"(&data));
-		asm volatile ("vmcall" : : "a"(16), "b"(&data));
+		asm volatile ("vmcall"::"a" (12), "b"(&data));
+		asm volatile ("vmcall"::"a" (16), "b"(&data));
 		vcpu->vmexit_handler_override = NULL;
 	}
 }
 
 /* Test whether EPT VMEXITs happen as expected */
-static void shv_guest_test_ept_vmexit_handler(VCPU *vcpu, struct regs *r,
-											  vmexit_info_t *info)
+static void shv_guest_test_ept_vmexit_handler(VCPU * vcpu, struct regs *r,
+											  vmexit_info_t * info)
 {
 	if (info->vmexit_reason != VMX_VMEXIT_EPT_VIOLATION) {
 		return;
@@ -280,7 +262,7 @@ static void shv_guest_test_ept_vmexit_handler(VCPU *vcpu, struct regs *r,
 	vmresume_asm(r);
 }
 
-static void shv_guest_test_ept(VCPU *vcpu)
+static void shv_guest_test_ept(VCPU * vcpu)
 {
 	if (SHV_OPT & SHV_USE_EPT) {
 		u32 expected_ept_count;
@@ -288,11 +270,8 @@ static void shv_guest_test_ept(VCPU *vcpu)
 		vcpu->vmexit_handler_override = shv_guest_test_ept_vmexit_handler;
 		{
 			u32 a = 0xdeadbeef;
-			u32 *p = (u32 *)0x12340000;
-			asm volatile("movl (%1), %%eax" :
-						 "+a" (a) :
-						 "b" (p) :
-						 "cc", "memory");
+			u32 *p = (u32 *) 0x12340000;
+			asm volatile ("movl (%1), %%eax":"+a" (a):"b"(p):"cc", "memory");
 			if (0) {
 				printf("CPU(0x%02x): EPT result: 0x%08x 0x%02x\n", vcpu->id, a,
 					   vcpu->ept_num);
@@ -315,8 +294,8 @@ static void shv_guest_test_ept(VCPU *vcpu)
 }
 
 /* Switch EPT */
-static void shv_guest_switch_ept_vmexit_handler(VCPU *vcpu, struct regs *r,
-												vmexit_info_t *info)
+static void shv_guest_switch_ept_vmexit_handler(VCPU * vcpu, struct regs *r,
+												vmexit_info_t * info)
 {
 	if (info->vmexit_reason != VMX_VMEXIT_VMCALL) {
 		return;
@@ -336,19 +315,19 @@ static void shv_guest_switch_ept_vmexit_handler(VCPU *vcpu, struct regs *r,
 	vmresume_asm(r);
 }
 
-static void shv_guest_switch_ept(VCPU *vcpu)
+static void shv_guest_switch_ept(VCPU * vcpu)
 {
 	if (SHV_OPT & SHV_USE_SWITCH_EPT) {
 		ASSERT(SHV_OPT & SHV_USE_EPT);
 		vcpu->vmexit_handler_override = shv_guest_switch_ept_vmexit_handler;
-		asm volatile ("vmcall" : : "a"(17));
+		asm volatile ("vmcall"::"a" (17));
 		vcpu->vmexit_handler_override = NULL;
 	}
 }
 
 /* Test VMCLEAR and VMXOFF */
-static void shv_guest_test_vmxoff_vmexit_handler(VCPU *vcpu, struct regs *r,
-												 vmexit_info_t *info)
+static void shv_guest_test_vmxoff_vmexit_handler(VCPU * vcpu, struct regs *r,
+												 vmexit_info_t * info)
 {
 	if (info->vmexit_reason != VMX_VMEXIT_VMCALL) {
 		return;
@@ -386,23 +365,16 @@ static void shv_guest_test_vmxoff_vmexit_handler(VCPU *vcpu, struct regs *r,
 						  "jmp 3f\r\n"
 						  "2:\r\n"
 						  "movl $1, %%ebx\r\n"
-						  "jmp 3f\r\n"
-						  ".section .xcph_table\r\n"
+						  "jmp 3f\r\n" ".section .xcph_table\r\n"
 #ifdef __amd64__
-						  ".quad 0x6\r\n"
-						  ".quad 1b\r\n"
-						  ".quad 2b\r\n"
+						  ".quad 0x6\r\n" ".quad 1b\r\n" ".quad 2b\r\n"
 #elif defined(__i386__)
-						  ".long 0x6\r\n"
-						  ".long 1b\r\n"
-						  ".long 2b\r\n"
-#else /* !defined(__i386__) && !defined(__amd64__) */
-	#error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
-						  ".previous\r\n"
-						  "3:\r\n"
-						  : "=b"(result)
-						  : "r"(0UL), "rm"(0UL));
+						  ".long 0x6\r\n" ".long 1b\r\n" ".long 2b\r\n"
+#else							/* !defined(__i386__) && !defined(__amd64__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) && !defined(__amd64__) */
+						  ".previous\r\n" "3:\r\n":"=b" (result)
+						  :"r"(0UL), "rm"(0UL));
 
 			/* Make sure that VMWRITE raises #UD exception */
 			ASSERT(result == 1);
@@ -435,8 +407,7 @@ static void shv_guest_test_vmxoff_vmexit_handler(VCPU *vcpu, struct regs *r,
 		{
 			u64 basic_msr = vcpu->vmx_msrs[INDEX_IA32_VMX_BASIC_MSR];
 			u32 vmcs_revision_identifier = basic_msr & 0x7fffffffU;
-			ASSERT(*((u32 *) vcpu->my_vmcs) ==
-							  vmcs_revision_identifier);
+			ASSERT(*((u32 *) vcpu->my_vmcs) == vmcs_revision_identifier);
 		}
 		ASSERT(__vmx_vmptrld(hva2spa(vcpu->my_vmcs)));
 		/* Make sure all VMCS fields stay the same */
@@ -452,18 +423,18 @@ static void shv_guest_test_vmxoff_vmexit_handler(VCPU *vcpu, struct regs *r,
 	vmlaunch_asm(r);
 }
 
-static void shv_guest_test_vmxoff(VCPU *vcpu, bool test_vmxoff)
+static void shv_guest_test_vmxoff(VCPU * vcpu, bool test_vmxoff)
 {
 	if (SHV_OPT & SHV_USE_VMXOFF) {
 		vcpu->vmexit_handler_override = shv_guest_test_vmxoff_vmexit_handler;
-		asm volatile ("vmcall" : : "a"(22), "b"((u32)test_vmxoff));
+		asm volatile ("vmcall"::"a" (22), "b"((u32) test_vmxoff));
 		vcpu->vmexit_handler_override = NULL;
 	}
 }
 
 /* Test changing VPID and whether INVVPID returns the correct error code */
-static void shv_guest_test_vpid_vmexit_handler(VCPU *vcpu, struct regs *r,
-											   vmexit_info_t *info)
+static void shv_guest_test_vpid_vmexit_handler(VCPU * vcpu, struct regs *r,
+											   vmexit_info_t * info)
 {
 	if (info->vmexit_reason != VMX_VMEXIT_VMCALL) {
 		return;
@@ -477,23 +448,19 @@ static void shv_guest_test_vpid_vmexit_handler(VCPU *vcpu, struct regs *r,
 		 * Currently we cannot easily test the effect of INVVPID. So
 		 * just make sure that the return value is correct.
 		 */
-		ASSERT(__vmx_invvpid(VMX_INVVPID_INDIVIDUALADDRESS, vpid,
-										0x12345678U));
+		ASSERT(__vmx_invvpid(VMX_INVVPID_INDIVIDUALADDRESS, vpid, 0x12345678U));
 #ifdef __amd64__
 		ASSERT(!__vmx_invvpid(VMX_INVVPID_INDIVIDUALADDRESS, vpid,
-										 0xf0f0f0f0f0f0f0f0ULL));
+							  0xf0f0f0f0f0f0f0f0ULL));
 #elif !defined(__i386__)
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) */
-		ASSERT(!__vmx_invvpid(VMX_INVVPID_INDIVIDUALADDRESS, 0,
-										 0x12345678U));
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) */
+		ASSERT(!__vmx_invvpid(VMX_INVVPID_INDIVIDUALADDRESS, 0, 0x12345678U));
 		ASSERT(__vmx_invvpid(VMX_INVVPID_SINGLECONTEXT, vpid, 0));
 		ASSERT(!__vmx_invvpid(VMX_INVVPID_SINGLECONTEXT, 0, 0));
 		ASSERT(__vmx_invvpid(VMX_INVVPID_ALLCONTEXTS, vpid, 0));
-		ASSERT(__vmx_invvpid(VMX_INVVPID_SINGLECONTEXTGLOBAL, vpid,
-										0));
-		ASSERT(!__vmx_invvpid(VMX_INVVPID_SINGLECONTEXTGLOBAL, 0,
-										 0));
+		ASSERT(__vmx_invvpid(VMX_INVVPID_SINGLECONTEXTGLOBAL, vpid, 0));
+		ASSERT(!__vmx_invvpid(VMX_INVVPID_SINGLECONTEXTGLOBAL, 0, 0));
 		/* Update VPID */
 		vpid += 2;
 		__vmx_vmwrite16(VMCS_control_vpid, vpid);
@@ -502,11 +469,11 @@ static void shv_guest_test_vpid_vmexit_handler(VCPU *vcpu, struct regs *r,
 	vmresume_asm(r);
 }
 
-static void shv_guest_test_vpid(VCPU *vcpu)
+static void shv_guest_test_vpid(VCPU * vcpu)
 {
 	if (SHV_OPT & SHV_USE_VPID) {
 		vcpu->vmexit_handler_override = shv_guest_test_vpid_vmexit_handler;
-		asm volatile ("vmcall" : : "a"(19));
+		asm volatile ("vmcall"::"a" (19));
 		vcpu->vmexit_handler_override = NULL;
 	}
 }
@@ -515,8 +482,8 @@ static void shv_guest_test_vpid(VCPU *vcpu)
  * Wait for interrupt in hypervisor mode, nop when SHV_NO_EFLAGS_IF or
  * SHV_NO_INTERRUPT.
  */
-static void shv_guest_wait_int_vmexit_handler(VCPU *vcpu, struct regs *r,
-											  vmexit_info_t *info)
+static void shv_guest_wait_int_vmexit_handler(VCPU * vcpu, struct regs *r,
+											  vmexit_info_t * info)
 {
 	if (info->vmexit_reason != VMX_VMEXIT_VMCALL) {
 		return;
@@ -529,15 +496,15 @@ static void shv_guest_wait_int_vmexit_handler(VCPU *vcpu, struct regs *r,
 	vmresume_asm(r);
 }
 
-static void shv_guest_wait_int(VCPU *vcpu)
+static void shv_guest_wait_int(VCPU * vcpu)
 {
 	vcpu->vmexit_handler_override = shv_guest_wait_int_vmexit_handler;
-	asm volatile ("vmcall" : : "a"(25));
+	asm volatile ("vmcall"::"a" (25));
 	vcpu->vmexit_handler_override = NULL;
 }
 
 /* Test unrestricted guest by disabling paging */
-static void shv_guest_test_unrestricted_guest(VCPU *vcpu)
+static void shv_guest_test_unrestricted_guest(VCPU * vcpu)
 {
 	(void)vcpu;
 	if (SHV_OPT & SHV_USE_UNRESTRICTED_GUEST) {
@@ -559,14 +526,14 @@ static void shv_guest_test_unrestricted_guest(VCPU *vcpu)
 		if (!(SHV_OPT & SHV_NO_EFLAGS_IF)) {
 			asm volatile ("sti");
 		}
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
+#else							/* !defined(__i386__) && !defined(__amd64__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) && !defined(__amd64__) */
 	}
 }
 
 /* Test large page in EPT */
-static void shv_guest_test_large_page(VCPU *vcpu)
+static void shv_guest_test_large_page(VCPU * vcpu)
 {
 	(void)vcpu;
 	if (SHV_OPT & SHV_USE_LARGE_PAGE) {
@@ -577,8 +544,8 @@ static void shv_guest_test_large_page(VCPU *vcpu)
 }
 
 /* Test running TrustVisor */
-static void shv_guest_test_user_vmexit_handler(VCPU *vcpu, struct regs *r,
-											   vmexit_info_t *info)
+static void shv_guest_test_user_vmexit_handler(VCPU * vcpu, struct regs *r,
+											   vmexit_info_t * info)
 {
 	if (info->vmexit_reason != VMX_VMEXIT_VMCALL) {
 		return;
@@ -589,20 +556,20 @@ static void shv_guest_test_user_vmexit_handler(VCPU *vcpu, struct regs *r,
 	vmresume_asm(r);
 }
 
-static void shv_guest_test_user(VCPU *vcpu)
+static void shv_guest_test_user(VCPU * vcpu)
 {
 	if (SHV_OPT & SHV_USER_MODE) {
 		ASSERT(!(SHV_OPT & SHV_NO_EFLAGS_IF));
 		vcpu->vmexit_handler_override = shv_guest_test_user_vmexit_handler;
-		asm volatile ("vmcall" : : "a"(33));
+		asm volatile ("vmcall"::"a" (33));
 		vcpu->vmexit_handler_override = NULL;
 	}
 }
 
 /* Test running TrustVisor in L2 */
-static void shv_guest_test_nested_user_vmexit_handler(VCPU *vcpu,
+static void shv_guest_test_nested_user_vmexit_handler(VCPU * vcpu,
 													  struct regs *r,
-													  vmexit_info_t *info)
+													  vmexit_info_t * info)
 {
 	if (info->vmexit_reason != VMX_VMEXIT_VMCALL) {
 		return;
@@ -612,7 +579,7 @@ static void shv_guest_test_nested_user_vmexit_handler(VCPU *vcpu,
 	ASSERT(0 && "VMEXIT not allowed");
 }
 
-static void shv_guest_test_nested_user(VCPU *vcpu)
+static void shv_guest_test_nested_user(VCPU * vcpu)
 {
 	if (SHV_OPT & SHV_NESTED_USER_MODE) {
 		ASSERT(!(SHV_OPT & SHV_NO_EFLAGS_IF));
@@ -629,11 +596,10 @@ static void shv_guest_test_nested_user(VCPU *vcpu)
 #define MSR_TEST_VMEXIT	0xf6d7a004
 #define MSR_TEST_EXCEPT	0xc23a16e5
 
-static void shv_guest_msr_bitmap_vmexit_handler(VCPU *vcpu, struct regs *r,
-												vmexit_info_t *info)
+static void shv_guest_msr_bitmap_vmexit_handler(VCPU * vcpu, struct regs *r,
+												vmexit_info_t * info)
 {
-	static u8 msr_bitmap_allcpu[MAX_VCPU_ENTRIES][PAGE_SIZE_4K]
-		ALIGNED_PAGE;
+	static u8 msr_bitmap_allcpu[MAX_VCPU_ENTRIES][PAGE_SIZE_4K] ALIGNED_PAGE;
 	const u32 mask = (1U << 28);
 	u8 *msr_bitmap = msr_bitmap_allcpu[vcpu->idx];
 	switch (info->vmexit_reason) {
@@ -689,10 +655,8 @@ static void shv_guest_msr_bitmap_vmexit_handler(VCPU *vcpu, struct regs *r,
 			break;
 		case 42:
 			/* Check FS / GS */
-			ASSERT(__vmx_vmreadNW(VMCS_guest_FS_base) ==
-							  0xffff680eUL);
-			ASSERT(__vmx_vmreadNW(VMCS_guest_GS_base) ==
-							  0xffff6810UL);
+			ASSERT(__vmx_vmreadNW(VMCS_guest_FS_base) == 0xffff680eUL);
+			ASSERT(__vmx_vmreadNW(VMCS_guest_GS_base) == 0xffff6810UL);
 			ASSERT(rdmsr64(IA32_MSR_FS_BASE) == 0ULL);
 			ASSERT(rdmsr64(IA32_MSR_GS_BASE) == 0ULL);
 			__vmx_vmwriteNW(VMCS_guest_FS_base, 0UL);
@@ -705,7 +669,7 @@ static void shv_guest_msr_bitmap_vmexit_handler(VCPU *vcpu, struct regs *r,
 		break;
 	case VMX_VMEXIT_RDMSR:
 		switch (r->ecx) {
-		case MSR_APIC_BASE: /* fallthrough */
+		case MSR_APIC_BASE:	/* fallthrough */
 		case IA32_X2APIC_APICID:
 			return;
 		default:
@@ -730,24 +694,16 @@ static void _test_rdmsr(u32 ecx, u32 expected_ebx)
 				  "rdmsr\n"
 				  "jmp 3f\n"
 				  "2:\n"
-				  "movl %[e], %%ebx\n"
-				  "jmp 3f\n"
-				  ".section .xcph_table\n"
+				  "movl %[e], %%ebx\n" "jmp 3f\n" ".section .xcph_table\n"
 #ifdef __amd64__
-				  ".quad 0xd\r\n"
-				  ".quad 1b\r\n"
-				  ".quad 2b\r\n"
+				  ".quad 0xd\r\n" ".quad 1b\r\n" ".quad 2b\r\n"
 #elif defined(__i386__)
-				  ".long 0xd\r\n"
-				  ".long 1b\r\n"
-				  ".long 2b\r\n"
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
-				  ".previous\r\n"
-				  "3:\r\n"
-				  : "+b"(ebx), "=a"(eax), "=d"(edx)
-				  : "c" (ecx), [e]"g"(MSR_TEST_EXCEPT));
+				  ".long 0xd\r\n" ".long 1b\r\n" ".long 2b\r\n"
+#else							/* !defined(__i386__) && !defined(__amd64__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) && !defined(__amd64__) */
+				  ".previous\r\n" "3:\r\n":"+b" (ebx), "=a"(eax), "=d"(edx)
+				  :"c"(ecx),[e] "g"(MSR_TEST_EXCEPT));
 	ASSERT(ebx == expected_ebx);
 }
 
@@ -758,104 +714,96 @@ static void _test_wrmsr(u32 ecx, u32 expected_ebx, u64 val)
 				  "wrmsr\n"
 				  "jmp 3f\n"
 				  "2:\n"
-				  "movl %[e], %%ebx\n"
-				  "jmp 3f\n"
-				  ".section .xcph_table\n"
+				  "movl %[e], %%ebx\n" "jmp 3f\n" ".section .xcph_table\n"
 #ifdef __amd64__
-				  ".quad 0xd\r\n"
-				  ".quad 1b\r\n"
-				  ".quad 2b\r\n"
+				  ".quad 0xd\r\n" ".quad 1b\r\n" ".quad 2b\r\n"
 #elif defined(__i386__)
-				  ".long 0xd\r\n"
-				  ".long 1b\r\n"
-				  ".long 2b\r\n"
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
-				  ".previous\r\n"
-				  "3:\r\n"
-				  : "+b"(ebx)
-				  : "c" (ecx), "a"(eax), "d"(edx), [e]"g"(MSR_TEST_EXCEPT));
+				  ".long 0xd\r\n" ".long 1b\r\n" ".long 2b\r\n"
+#else							/* !defined(__i386__) && !defined(__amd64__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) && !defined(__amd64__) */
+				  ".previous\r\n" "3:\r\n":"+b" (ebx)
+				  :"c"(ecx), "a"(eax), "d"(edx),[e] "g"(MSR_TEST_EXCEPT));
 	ASSERT(ebx == expected_ebx);
 }
 
-static void shv_guest_msr_bitmap(VCPU *vcpu)
+static void shv_guest_msr_bitmap(VCPU * vcpu)
 {
 	if (SHV_OPT & SHV_USE_MSRBITMAP) {
 		vcpu->vmexit_handler_override = shv_guest_msr_bitmap_vmexit_handler;
 		/* Enable MSR bitmap */
-		asm volatile ("vmcall" : : "a"(34));
+		asm volatile ("vmcall"::"a" (34));
 		/* Initial: ignore everything */
 		_test_rdmsr(0xc0000082, MSR_TEST_NORMAL);
 		_test_wrmsr(0xc0000082, MSR_TEST_NORMAL, 0xffffffffffffffffULL);
-		asm volatile ("vmcall" : : "a"(38), "b"(0x2000 + 0x82));
+		asm volatile ("vmcall"::"a" (38), "b"(0x2000 + 0x82));
 		/* VMEXIT only read IA32_LSTAR */
 		_test_rdmsr(0xc0000082, MSR_TEST_VMEXIT);
 		_test_wrmsr(0xc0000082, MSR_TEST_NORMAL, 0xffffffffffffffffULL);
-		asm volatile ("vmcall" : : "a"(39), "b"(0x2000 + 0x82));
-		asm volatile ("vmcall" : : "a"(38), "b"(0x6000 + 0x82));
+		asm volatile ("vmcall"::"a" (39), "b"(0x2000 + 0x82));
+		asm volatile ("vmcall"::"a" (38), "b"(0x6000 + 0x82));
 		/* VMEXIT only write IA32_LSTAR */
 		_test_rdmsr(0xc0000082, MSR_TEST_NORMAL);
 		_test_wrmsr(0xc0000082, MSR_TEST_VMEXIT, 0xffffffffffffffffULL);
 		_test_rdmsr(0x0000003b, MSR_TEST_NORMAL);
 		_test_wrmsr(0x0000003b, MSR_TEST_NORMAL, 0x1234567890abcdefULL);
-		asm volatile ("vmcall" : : "a"(39), "b"(0x6000 + 0x82));
-		asm volatile ("vmcall" : : "a"(38), "b"(0x0000 + 0x3b));
+		asm volatile ("vmcall"::"a" (39), "b"(0x6000 + 0x82));
+		asm volatile ("vmcall"::"a" (38), "b"(0x0000 + 0x3b));
 		/* VMEXIT only read IA32_TSC_ADJUST */
 		_test_rdmsr(0x0000003b, MSR_TEST_VMEXIT);
 		_test_wrmsr(0x0000003b, MSR_TEST_NORMAL, 0xfedcba0987654321ULL);
-		asm volatile ("vmcall" : : "a"(39), "b"(0x0000 + 0x3b));
-		asm volatile ("vmcall" : : "a"(38), "b"(0x4000 + 0x3b));
+		asm volatile ("vmcall"::"a" (39), "b"(0x0000 + 0x3b));
+		asm volatile ("vmcall"::"a" (38), "b"(0x4000 + 0x3b));
 		/* VMEXIT only write IA32_TSC_ADJUST */
 		_test_rdmsr(0x0000003b, MSR_TEST_NORMAL);
 		_test_wrmsr(0x0000003b, MSR_TEST_VMEXIT, 0xdeadbeefbeefdeadULL);
-		asm volatile ("vmcall" : : "a"(39), "b"(0x4000 + 0x3b));
-		asm volatile ("vmcall" : : "a"(38), "b"(0x0000 + 0x1fff));
+		asm volatile ("vmcall"::"a" (39), "b"(0x4000 + 0x3b));
+		asm volatile ("vmcall"::"a" (38), "b"(0x0000 + 0x1fff));
 		/* VMEXIT only read 0x00001fff */
 		_test_rdmsr(0x00001fff, MSR_TEST_VMEXIT);
 		_test_rdmsr(0xc0001fff, MSR_TEST_EXCEPT);
 		_test_wrmsr(0x00001fff, MSR_TEST_EXCEPT, 0x1234567890abcdefULL);
 		_test_wrmsr(0xc0001fff, MSR_TEST_EXCEPT, 0x1234567890abcdefULL);
-		asm volatile ("vmcall" : : "a"(39), "b"(0x0000 + 0x1fff));
-		asm volatile ("vmcall" : : "a"(38), "b"(0x2000 + 0x1fff));
+		asm volatile ("vmcall"::"a" (39), "b"(0x0000 + 0x1fff));
+		asm volatile ("vmcall"::"a" (38), "b"(0x2000 + 0x1fff));
 		/* VMEXIT only read 0xc0001fff */
 		_test_rdmsr(0x00001fff, MSR_TEST_EXCEPT);
 		_test_rdmsr(0xc0001fff, MSR_TEST_VMEXIT);
 		_test_wrmsr(0x00001fff, MSR_TEST_EXCEPT, 0x1234567890abcdefULL);
 		_test_wrmsr(0xc0001fff, MSR_TEST_EXCEPT, 0x1234567890abcdefULL);
-		asm volatile ("vmcall" : : "a"(39), "b"(0x2000 + 0x1fff));
-		asm volatile ("vmcall" : : "a"(38), "b"(0x4000 + 0x1fff));
+		asm volatile ("vmcall"::"a" (39), "b"(0x2000 + 0x1fff));
+		asm volatile ("vmcall"::"a" (38), "b"(0x4000 + 0x1fff));
 		/* VMEXIT only write 0x00001fff */
 		_test_rdmsr(0x00001fff, MSR_TEST_EXCEPT);
 		_test_rdmsr(0xc0001fff, MSR_TEST_EXCEPT);
 		_test_wrmsr(0x00001fff, MSR_TEST_VMEXIT, 0x1234567890abcdefULL);
 		_test_wrmsr(0xc0001fff, MSR_TEST_EXCEPT, 0x1234567890abcdefULL);
-		asm volatile ("vmcall" : : "a"(39), "b"(0x4000 + 0x1fff));
-		asm volatile ("vmcall" : : "a"(38), "b"(0x6000 + 0x1fff));
+		asm volatile ("vmcall"::"a" (39), "b"(0x4000 + 0x1fff));
+		asm volatile ("vmcall"::"a" (38), "b"(0x6000 + 0x1fff));
 		/* VMEXIT only write 0xc0001fff */
 		_test_rdmsr(0x00001fff, MSR_TEST_EXCEPT);
 		_test_rdmsr(0xc0001fff, MSR_TEST_EXCEPT);
 		_test_wrmsr(0x00001fff, MSR_TEST_EXCEPT, 0x1234567890abcdefULL);
 		_test_wrmsr(0xc0001fff, MSR_TEST_VMEXIT, 0x1234567890abcdefULL);
-		asm volatile ("vmcall" : : "a"(39), "b"(0x6000 + 0x1fff));
+		asm volatile ("vmcall"::"a" (39), "b"(0x6000 + 0x1fff));
 		/*
 		 * Test read / write IA32_FS_BASE / IA32_GS_BASE (will not VMEXIT)
 		 * Interrupts need to be disabled, because xcph will move to FS and GS,
 		 * which clears the base to 0.
 		 */
 		asm volatile ("cli");
-		asm volatile ("vmcall" : : "a"(41));
+		asm volatile ("vmcall"::"a" (41));
 		_test_rdmsr(IA32_MSR_FS_BASE, MSR_TEST_NORMAL);
 		ASSERT(rdmsr64(IA32_MSR_FS_BASE) == 0x680effffULL);
 		ASSERT(rdmsr64(IA32_MSR_GS_BASE) == 0x6810ffffULL);
 		_test_wrmsr(IA32_MSR_FS_BASE, MSR_TEST_NORMAL, 0xffff680eULL);
 		_test_wrmsr(IA32_MSR_GS_BASE, MSR_TEST_NORMAL, 0xffff6810ULL);
-		asm volatile ("vmcall" : : "a"(42));
+		asm volatile ("vmcall"::"a" (42));
 		if (!(SHV_OPT & SHV_NO_EFLAGS_IF)) {
 			asm volatile ("sti");
 		}
 		/* Disable MSR bitmap */
-		asm volatile ("vmcall" : : "a"(37));
+		asm volatile ("vmcall"::"a" (37));
 		_test_rdmsr(0x00001fff, MSR_TEST_VMEXIT);
 		_test_rdmsr(0xc0001fff, MSR_TEST_VMEXIT);
 		_test_wrmsr(0x00001fff, MSR_TEST_VMEXIT, 0x1234567890abcdefULL);
@@ -888,7 +836,7 @@ void shv_guest_main(ulong_t cpu_id)
 			for (int j = 0; j < 2; j++) {
 #ifndef __DEBUG_VGA__
 				ASSERT(console_get_char(&vc, i, j) == ' ');
-#endif /* !__DEBUG_VGA__ */
+#endif							/* !__DEBUG_VGA__ */
 				console_put_char(&vc, i, j, '0' + vcpu->id);
 			}
 		}
@@ -1003,8 +951,8 @@ void shv_guest_xcphandler(VCPU * vcpu, struct regs *r, iret_info_t * info)
 			uintptr_t exception_ip = info->ip;
 			bool found = false;
 
-			for (uintptr_t *i = (uintptr_t *)_begin_xcph_table;
-				 i < (uintptr_t *)_end_xcph_table; i += 3) {
+			for (uintptr_t * i = (uintptr_t *) _begin_xcph_table;
+				 i < (uintptr_t *) _end_xcph_table; i += 3) {
 				if (i[0] == vector && i[1] == exception_ip) {
 					info->ip = i[2];
 					found = true;

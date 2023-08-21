@@ -37,7 +37,7 @@ void console_cursor_clear(void)
 	outb(CRTC_DATA_REG, 0);
 }
 
-static volatile char *console_get_mmio(console_vc_t *vc, int x, int y)
+static volatile char *console_get_mmio(console_vc_t * vc, int x, int y)
 {
 	if (!vc) {
 		ASSERT(0 <= x && x < CONSOLE_WIDTH);
@@ -49,7 +49,7 @@ static volatile char *console_get_mmio(console_vc_t *vc, int x, int y)
 	return console_get_mmio(NULL, x + vc->left, y + vc->top);
 }
 
-void console_clear(console_vc_t *vc)
+void console_clear(console_vc_t * vc)
 {
 	for (int i = 0; i < vc->width; i++) {
 		for (int j = 0; j < vc->height; j++) {
@@ -60,19 +60,19 @@ void console_clear(console_vc_t *vc)
 	}
 }
 
-char console_get_char(console_vc_t *vc, int x, int y)
+char console_get_char(console_vc_t * vc, int x, int y)
 {
 	volatile char *p = console_get_mmio(vc, x, y);
 	return p[0];
 }
 
-void console_put_char(console_vc_t *vc, int x, int y, char c)
+void console_put_char(console_vc_t * vc, int x, int y, char c)
 {
 	volatile char *p = console_get_mmio(vc, x, y);
 	p[0] = c;
 }
 
-void console_get_vc(console_vc_t *vc, int num, int guest)
+void console_get_vc(console_vc_t * vc, int num, int guest)
 {
 	ASSERT(0 <= num && num < CONSOLE_MAX_CPU);
 	ASSERT(0 <= guest && guest < 2);
@@ -81,6 +81,5 @@ void console_get_vc(console_vc_t *vc, int num, int guest)
 	vc->width = (CONSOLE_WIDTH / 2);
 	vc->height = (CONSOLE_HEIGHT / CONSOLE_MAX_CPU);
 	/* Use 9 - 15 */
-	vc->color = (char) ((1 + num * 2 + guest) % 7 + 9);
+	vc->color = (char)((1 + num * 2 + guest) % 7 + 9);
 }
-

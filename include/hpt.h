@@ -78,13 +78,13 @@
 #include <stddef.h>
 
 typedef enum {
-  HPT_TYPE_NORM=0, /* x86 'normal'\legacy */
-  HPT_TYPE_PAE=1, /* Physical address extension */
-  HPT_TYPE_LONG=2, /* AMD Long Mode */
-  HPT_TYPE_EPT=3, /* Intel Extended Page Tables */
+	HPT_TYPE_NORM = 0,			/* x86 'normal'\legacy */
+	HPT_TYPE_PAE = 1,			/* Physical address extension */
+	HPT_TYPE_LONG = 2,			/* AMD Long Mode */
+	HPT_TYPE_EPT = 3,			/* Intel Extended Page Tables */
 
-  HPT_TYPE_INVALID=4, /* same number as below intentionally; saves memory in static arrays */
-  HPT_TYPE_NUM=4 /* dummy entry. must be last */
+	HPT_TYPE_INVALID = 4,		/* same number as below intentionally; saves memory in static arrays */
+	HPT_TYPE_NUM = 4			/* dummy entry. must be last */
 } hpt_type_t;
 
 #define HPT_MAX_LEVEL 4
@@ -95,29 +95,29 @@ typedef enum {
 #define HPT_LVL_PDPT3 3
 #define HPT_LVL_PML4 4
 
-typedef u64 hpt_pme_t; /* page map entry (any level) */
-typedef hpt_pme_t* hpt_pm_t; /* page map (any level) */
+typedef u64 hpt_pme_t;			/* page map entry (any level) */
+typedef hpt_pme_t *hpt_pm_t;	/* page map (any level) */
 
 /* NOTE- do not dereference directly.
    Some page table types use 32-bit entries instead
    of 64-bit. */
 
-typedef u64 hpt_prot_t; /* pme protection flags type */
-typedef u64 hpt_va_t; /* virtual address type */
-typedef u64 hpt_pa_t; /* physical address type */
+typedef u64 hpt_prot_t;			/* pme protection flags type */
+typedef u64 hpt_va_t;			/* virtual address type */
+typedef u64 hpt_pa_t;			/* physical address type */
 
 /* Page map object (e.g. pointer to page table with metadata) */
 typedef struct {
-  hpt_pm_t pm;
-  hpt_type_t t;
-  int lvl;
+	hpt_pm_t pm;
+	hpt_type_t t;
+	int lvl;
 } hpt_pmo_t;
 
 /* Page map entry object (e.g. page table entry with metadata) */
 typedef struct {
-  hpt_pme_t pme;
-  hpt_type_t t;
-  int lvl;
+	hpt_pme_t pme;
+	hpt_type_t t;
+	int lvl;
 } hpt_pmeo_t;
 
 #define HPT_UNUSED_ARGUMENT(x) (void)x
@@ -126,24 +126,24 @@ typedef struct {
 #define HPT_PM_SIZE 4096
 
 /* page map sizes, in bytes. note that zero index is invalid. */
-extern const u16 hpt_pm_sizes[HPT_TYPE_NUM][HPT_MAX_LEVEL+1];
+extern const u16 hpt_pm_sizes[HPT_TYPE_NUM][HPT_MAX_LEVEL + 1];
 
 /* page map sizes, in bytes. note that zero index is invalid. */
-extern const u16 hpt_pm_alignments[HPT_TYPE_NUM][HPT_MAX_LEVEL+1];
+extern const u16 hpt_pm_alignments[HPT_TYPE_NUM][HPT_MAX_LEVEL + 1];
 
 /* high bit of va used to index into the page map of the given level.
  * we treat level '0' specially here, so that the low bit of the index
  * can consistently be found by looking up the entry for 'level-1'.
  */
-extern const u8 hpt_va_idx_hi[HPT_TYPE_NUM][HPT_MAX_LEVEL+1];
+extern const u8 hpt_va_idx_hi[HPT_TYPE_NUM][HPT_MAX_LEVEL + 1];
 
 /* Number of levels in the paging. */
 extern const u8 hpt_type_max_lvl[HPT_TYPE_NUM];
 
 size_t hpt_pm_size(hpt_type_t t, int lvl);
 
-#include <hpt_consts.h> /* XXX - remove this once fn bodies are moved
-                           into hpt.c */
+#include <hpt_consts.h>			/* XXX - remove this once fn bodies are moved
+								   into hpt.c */
 
 /* Abstract protection flags. */
 #define HPT_PROT_READ_BIT 0
@@ -157,9 +157,9 @@ size_t hpt_pm_size(hpt_type_t t, int lvl);
 #define HPT_PROTS_RW (HPT_PROT_READ_MASK|HPT_PROT_WRITE_MASK)
 #define HPT_PROTS_RX (HPT_PROT_READ_MASK|HPT_PROT_EXEC_MASK)
 #define HPT_PROTS_R (HPT_PROT_READ_MASK)
-#define HPT_PROTS_WX (HPT_PROT_WRITE_MASK|HPT_PROT_EXEC_MASK) /* never valid */
-#define HPT_PROTS_W (HPT_PROT_WRITE_MASK) /* never valid */
-#define HPT_PROTS_X (HPT_PROT_EXEC_MASK) /* never valid */
+#define HPT_PROTS_WX (HPT_PROT_WRITE_MASK|HPT_PROT_EXEC_MASK)	/* never valid */
+#define HPT_PROTS_W (HPT_PROT_WRITE_MASK)	/* never valid */
+#define HPT_PROTS_X (HPT_PROT_EXEC_MASK)	/* never valid */
 #define HPT_PROTS_NONE (0)
 
 u64 hpt_cr3_set_address(hpt_type_t t, u64 cr3, hpt_pa_t a);
@@ -178,7 +178,8 @@ hpt_pa_t hpt_eptp_get_address(hpt_type_t t, u64 eptp);
 
 /* Page memory types */
 typedef enum {
-  HPT_PMT_UC=0, HPT_PMT_WC=1, HPT_PMT_WT=4, HPT_PMT_WP=5, HPT_PMT_WB=6
+	HPT_PMT_UC = 0, HPT_PMT_WC = 1, HPT_PMT_WT = 4, HPT_PMT_WP = 5, HPT_PMT_WB =
+		6
 } hpt_pmt_t;
 
 /* assumes lvl is valid for the given type */
@@ -188,25 +189,27 @@ bool hpt_lvl_is_valid(hpt_type_t t, int lvl);
 bool hpt_type_is_valid(hpt_type_t t);
 int hpt_root_lvl(hpt_type_t t);
 
-hpt_pa_t hpt_pmeo_get_address(const hpt_pmeo_t *pmeo);
-void hpt_pmeo_set_address(hpt_pmeo_t *pmeo, hpt_pa_t addr);
-bool hpt_pmeo_is_present(const hpt_pmeo_t *pmeo);
-void hpt_pmeo_set_page(hpt_pmeo_t *pmeo, bool is_page);
-bool hpt_pmeo_is_page(const hpt_pmeo_t *pmeo);
-void hpt_pmeo_setprot(hpt_pmeo_t *pmeo, hpt_prot_t perms);
-hpt_prot_t hpt_pmeo_getprot(const hpt_pmeo_t *pmeo);
+hpt_pa_t hpt_pmeo_get_address(const hpt_pmeo_t * pmeo);
+void hpt_pmeo_set_address(hpt_pmeo_t * pmeo, hpt_pa_t addr);
+bool hpt_pmeo_is_present(const hpt_pmeo_t * pmeo);
+void hpt_pmeo_set_page(hpt_pmeo_t * pmeo, bool is_page);
+bool hpt_pmeo_is_page(const hpt_pmeo_t * pmeo);
+void hpt_pmeo_setprot(hpt_pmeo_t * pmeo, hpt_prot_t perms);
+hpt_prot_t hpt_pmeo_getprot(const hpt_pmeo_t * pmeo);
 
 // Get / Set Cachable
-hpt_pmt_t hpt_pmeo_getcache(const hpt_pmeo_t *pmeo);
-void hpt_pmeo_setcache(hpt_pmeo_t *pmeo, hpt_pmt_t pmt);
+hpt_pmt_t hpt_pmeo_getcache(const hpt_pmeo_t * pmeo);
+void hpt_pmeo_setcache(hpt_pmeo_t * pmeo, hpt_pmt_t pmt);
 
-bool hpt_pmeo_getuser(const hpt_pmeo_t *pmeo);
-void hpt_pmeo_setuser(hpt_pmeo_t *pmeo, bool user);
-void hpt_pm_get_pmeo_by_va(hpt_pmeo_t *pmeo, const hpt_pmo_t *pmo, hpt_va_t va);
-void hpt_pmo_set_pme_by_va(hpt_pmo_t *pmo, const hpt_pmeo_t *pmeo, hpt_va_t va);
-hpt_pa_t hpt_pmeo_va_to_pa(hpt_pmeo_t* pmeo, hpt_va_t va);
-size_t hpt_pmeo_page_size_log_2(const hpt_pmeo_t *pmeo);
-size_t hpt_pmeo_page_size(const hpt_pmeo_t *pmeo);
-size_t hpt_remaining_on_page(const hpt_pmeo_t *pmeo, hpt_va_t va);
+bool hpt_pmeo_getuser(const hpt_pmeo_t * pmeo);
+void hpt_pmeo_setuser(hpt_pmeo_t * pmeo, bool user);
+void hpt_pm_get_pmeo_by_va(hpt_pmeo_t * pmeo, const hpt_pmo_t * pmo,
+						   hpt_va_t va);
+void hpt_pmo_set_pme_by_va(hpt_pmo_t * pmo, const hpt_pmeo_t * pmeo,
+						   hpt_va_t va);
+hpt_pa_t hpt_pmeo_va_to_pa(hpt_pmeo_t * pmeo, hpt_va_t va);
+size_t hpt_pmeo_page_size_log_2(const hpt_pmeo_t * pmeo);
+size_t hpt_pmeo_page_size(const hpt_pmeo_t * pmeo);
+size_t hpt_remaining_on_page(const hpt_pmeo_t * pmeo, hpt_va_t va);
 
 #endif

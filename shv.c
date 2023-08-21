@@ -19,7 +19,7 @@
 #include <xmhf.h>
 #include <shv.h>
 
-void shv_main(VCPU *vcpu)
+void shv_main(VCPU * vcpu)
 {
 	console_vc_t vc;
 	console_get_vc(&vc, vcpu->idx, 0);
@@ -29,7 +29,7 @@ void shv_main(VCPU *vcpu)
 		pic_init();
 		// asm volatile ("int $0xf8");
 		if (0) {
-			int *a = (int *) 0xf0f0f0f0f0f0f0f0;
+			int *a = (int *)0xf0f0f0f0f0f0f0f0;
 			printf("%d", *a);
 		}
 	}
@@ -39,7 +39,7 @@ void shv_main(VCPU *vcpu)
 		for (int j = 0; j < 2; j++) {
 #ifndef __DEBUG_VGA__
 			ASSERT(console_get_char(&vc, i, j) == ' ');
-#endif /* !__DEBUG_VGA__ */
+#endif							/* !__DEBUG_VGA__ */
 			console_put_char(&vc, i, j, '0' + vcpu->id);
 		}
 	}
@@ -53,9 +53,9 @@ void shv_main(VCPU *vcpu)
 		write_cr0(cr0 & 0x7fffffffUL);
 		printf("SHV hypervisor can disable paging\n");
 		write_cr0(cr0);
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
+#else							/* !defined(__i386__) && !defined(__amd64__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) && !defined(__amd64__) */
 	}
 
 	if (!(SHV_OPT & SHV_NO_EFLAGS_IF)) {
@@ -74,4 +74,3 @@ void shv_main(VCPU *vcpu)
 
 	ASSERT(0 && "Should not reach here");
 }
-

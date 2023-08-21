@@ -72,27 +72,28 @@
 #define UART_PORT 0x3f8
 
 //low-level UART character output
-static void dbg_x86_uart_putc_bare(char ch){
+static void dbg_x86_uart_putc_bare(char ch)
+{
 	//wait for xmit hold register to be empty
-	while ( ! (inb(UART_PORT+0x5) & 0x20) ) {
+	while (!(inb(UART_PORT + 0x5) & 0x20)) {
 		cpu_relax();
 	}
 
 	//write the character
-	outb(UART_PORT, (u8)ch);
+	outb(UART_PORT, (u8) ch);
 
 	return;
 }
 
 // write character to serial port
-void dbg_x86_uart_putc(char ch){
+void dbg_x86_uart_putc(char ch)
+{
 	dbg_x86_uart_putc_bare(ch);
 }
 
-
 // write string to serial port
-void dbg_x86_uart_putstr(const char *s){
+void dbg_x86_uart_putstr(const char *s)
+{
 	while (*s)
 		dbg_x86_uart_putc(*s++);
 }
-

@@ -68,29 +68,31 @@
 #define ROWS	25
 #define ATTR	7
 
-static char *vidmem=(char *)0xB8000;
+static char *vidmem = (char *)0xB8000;
 static unsigned int vid_x, vid_y;
 
-static void vgamem_newln(void){
+static void vgamem_newln(void)
+{
 	vid_x = 0;
 	vid_y++;
 
-	if (vid_y >= ROWS){
-		vid_y = ROWS-1;
-		memmove((char*)vidmem,(char*)vidmem + 2*COLS, (ROWS-1)*2*COLS);
-		memset((char*)vidmem + (ROWS-1)*2*COLS, 0, 2*COLS);
+	if (vid_y >= ROWS) {
+		vid_y = ROWS - 1;
+		memmove((char *)vidmem, (char *)vidmem + 2 * COLS,
+				(ROWS - 1) * 2 * COLS);
+		memset((char *)vidmem + (ROWS - 1) * 2 * COLS, 0, 2 * COLS);
 	}
 }
 
 void dbg_x86_vgamem_putc(char c)
 {
-	if ( c == '\n' )
+	if (c == '\n')
 		vgamem_newln();
-	else
-	{
-		vidmem[(vid_x + vid_y * COLS) * 2]  = c & 0xFF;
+	else {
+		vidmem[(vid_x + vid_y * COLS) * 2] = c & 0xFF;
 		vidmem[(vid_x + vid_y * COLS) * 2 + 1] = ATTR;
-		if ( ++vid_x >= COLS ) vgamem_newln();
+		if (++vid_x >= COLS)
+			vgamem_newln();
 	}
 }
 
@@ -98,13 +100,13 @@ void dbg_x86_vgamem_putstr(const char *str)
 {
 	char c;
 
-	while ( (c = *str++) != '\0' )
+	while ((c = *str++) != '\0')
 		dbg_x86_vgamem_putc(c);
 }
 
-
-void dbg_x86_vgamem_init(char *params){
-	(void)params;	//we don't use params for the VGA backend currently
+void dbg_x86_vgamem_init(char *params)
+{
+	(void)params;				//we don't use params for the VGA backend currently
 	memset((char *)vidmem, 0, COLS * ROWS * 2);
 	vid_x = vid_y = 0;
 }

@@ -63,98 +63,98 @@
 /* Machine type dependent parameters. */
 #include <stdint.h>
 
-typedef unsigned char   u_char;
-typedef unsigned short  u_short;
-typedef unsigned int    u_int;
-typedef unsigned long   u_long;
-typedef unsigned short  ushort;         /* Sys V compatibility */
-typedef unsigned int    uint;           /* Sys V compatibility */
+typedef unsigned char u_char;
+typedef unsigned short u_short;
+typedef unsigned int u_int;
+typedef unsigned long u_long;
+typedef unsigned short ushort;	/* Sys V compatibility */
+typedef unsigned int uint;		/* Sys V compatibility */
 
 /*
  * XXX POSIX sized integrals that should appear only in <sys/stdint.h>.
  */
 #ifndef _INT8_T_DECLARED
-typedef __int8_t        int8_t;
+typedef __int8_t int8_t;
 #define _INT8_T_DECLARED
 #endif
 
 #ifndef _INT16_T_DECLARED
-typedef __int16_t       int16_t;
+typedef __int16_t int16_t;
 #define _INT16_T_DECLARED
 #endif
 
 #ifndef _INT32_T_DECLARED
-typedef __int32_t       int32_t;
+typedef __int32_t int32_t;
 #define _INT32_T_DECLARED
 #endif
 
 #ifndef _INT64_T_DECLARED
-typedef __int64_t       int64_t;
+typedef __int64_t int64_t;
 #define _INT64_T_DECLARED
 #endif
 
 #ifndef _UINT8_T_DECLARED
-typedef __uint8_t       uint8_t;
+typedef __uint8_t uint8_t;
 #define _UINT8_T_DECLARED
 #endif
 
 #ifndef _UINT16_T_DECLARED
-typedef __uint16_t      uint16_t;
+typedef __uint16_t uint16_t;
 #define _UINT16_T_DECLARED
 #endif
 
 #ifndef _UINT32_T_DECLARED
-typedef __uint32_t      uint32_t;
+typedef __uint32_t uint32_t;
 #define _UINT32_T_DECLARED
 #endif
 
 #ifndef _UINT64_T_DECLARED
-typedef __uint64_t      uint64_t;
+typedef __uint64_t uint64_t;
 #define _UINT64_T_DECLARED
 #endif
 
 #ifndef _INTPTR_T_DECLARED
-typedef __intptr_t      intptr_t;
+typedef __intptr_t intptr_t;
 //typedef __uintptr_t     uintptr_t;
 #define _INTPTR_T_DECLARED
 #endif
 
 #ifndef _SIZE_T_DECLARED
-typedef __size_t        size_t;
+typedef __size_t size_t;
 #define _SIZE_T_DECLARED
 #endif
 
 #ifndef _ULONG_T_DECLARED
-typedef size_t          ulong_t;
+typedef size_t ulong_t;
 #define _ULONG_T_DECLARED
 #endif
 
 #ifndef _SSIZE_T_DECLARED
-typedef __ssize_t        ssize_t;
+typedef __ssize_t ssize_t;
 #define _SSIZE_T_DECLARED
 #endif
 
-typedef uint8_t         u8;
-typedef uint16_t        u16;
-typedef uint32_t        u32;
-typedef uint64_t        u64;
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
 
-typedef int64_t         s64;
-typedef int32_t         s32;
-typedef int16_t         s16;
-typedef int8_t          s8;
+typedef int64_t s64;
+typedef int32_t s32;
+typedef int16_t s16;
+typedef int8_t s8;
 
-typedef __uint8_t       u_int8_t;       /* unsigned integrals (deprecated) */
-typedef __uint16_t      u_int16_t;
-typedef __uint32_t      u_int32_t;
-typedef __uint64_t      u_int64_t;
+typedef __uint8_t u_int8_t;		/* unsigned integrals (deprecated) */
+typedef __uint16_t u_int16_t;
+typedef __uint32_t u_int32_t;
+typedef __uint64_t u_int64_t;
 
-typedef __uint64_t      u_quad_t;       /* quads (deprecated) */
-typedef __int64_t       quad_t;
-typedef quad_t *        qaddr_t;
+typedef __uint64_t u_quad_t;	/* quads (deprecated) */
+typedef __int64_t quad_t;
+typedef quad_t *qaddr_t;
 
-typedef char *          caddr_t;        /* core address */
-typedef __const char *  c_caddr_t;      /* core address, pointer to const */
-typedef __volatile char *v_caddr_t;     /* core address, pointer to volatile */
+typedef char *caddr_t;			/* core address */
+typedef __const char *c_caddr_t;	/* core address, pointer to const */
+typedef __volatile char *v_caddr_t;	/* core address, pointer to volatile */
 
-#endif /* !_SYS_TYPES_H_ */
+#endif							/* !_SYS_TYPES_H_ */

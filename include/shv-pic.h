@@ -199,11 +199,10 @@ WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define PICS_ICW4       (SNF_MODE_DIS | NONBUFD_MODE | NRML_EOI_MOD \
                          | I8086_EMM_MOD)
 
-    /** @brief Default location of the master PIC's interrupts in the IDT */
+	/** @brief Default location of the master PIC's interrupts in the IDT */
 #define X86_PIC_MASTER_IRQ_BASE     0x20
-    /** @brief Default location of the slave  PIC's interrupts in the IDT */
+	/** @brief Default location of the slave  PIC's interrupts in the IDT */
 #define X86_PIC_SLAVE_IRQ_BASE      0x28
 
 #define INT_CTL_PORT     (MASTER_ICW)
 #define INT_ACK_CURRENT  (NON_SPEC_EOI)
-

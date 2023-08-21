@@ -39,14 +39,16 @@
 
 #define LAPIC_PERIOD (TIMER_PERIOD * 1000000)
 
-static int getrtcfield(int field) {
+static int getrtcfield(int field)
+{
 	int bcd;
 	outb(RTC_PORT_OUT, field);
 	bcd = inb(RTC_PORT_IN);
 	return (bcd & 0xF) + (bcd >> 4) * 10;
 }
 
-static int rtc_get_sec_of_day(void) {
+static int rtc_get_sec_of_day(void)
+{
 	int h, h_new, m, m_new, s;
 	h = getrtcfield(RTC_HOURS);
 	while (1) {
@@ -70,21 +72,21 @@ static int rtc_get_sec_of_day(void) {
 	return h * 3600 + m * 60 + s;
 }
 
-void timer_init(VCPU *vcpu)
+void timer_init(VCPU * vcpu)
 {
 	/* PIT */
 	if (vcpu->isbsp) {
 		u64 ncycles = TIMER_RATE * TIMER_PERIOD / 1000;
-		ASSERT(ncycles == (u64)(u16)ncycles);
+		ASSERT(ncycles == (u64) (u16) ncycles);
 		if (SHV_OPT & SHV_NO_INTERRUPT) {
 			outb(TIMER_MODE_IO_PORT, TIMER_ONE_SHOT);
-			outb(TIMER_PERIOD_IO_PORT, (u8)(1));
-			outb(TIMER_PERIOD_IO_PORT, (u8)(0));
+			outb(TIMER_PERIOD_IO_PORT, (u8) (1));
+			outb(TIMER_PERIOD_IO_PORT, (u8) (0));
 			asm volatile ("sti; hlt; cli");
 		} else {
 			outb(TIMER_MODE_IO_PORT, TIMER_SQUARE_WAVE);
-			outb(TIMER_PERIOD_IO_PORT, (u8)(ncycles));
-			outb(TIMER_PERIOD_IO_PORT, (u8)(ncycles >> 8));
+			outb(TIMER_PERIOD_IO_PORT, (u8) (ncycles));
+			outb(TIMER_PERIOD_IO_PORT, (u8) (ncycles >> 8));
 		}
 	}
 
@@ -101,7 +103,7 @@ void timer_init(VCPU *vcpu)
 	}
 }
 
-static void update_screen(VCPU *vcpu, int *x, int y, int guest)
+static void update_screen(VCPU * vcpu, int *x, int y, int guest)
 {
 	console_vc_t vc;
 	console_get_vc(&vc, vcpu->idx, guest);
@@ -123,7 +125,8 @@ static void update_screen(VCPU *vcpu, int *x, int y, int guest)
 	*x %= vc.width;
 }
 
-static void calibrate_timer(VCPU *vcpu) {
+static void calibrate_timer(VCPU * vcpu)
+{
 	u64 p_t = vcpu->pit_time;
 	u64 l_t = vcpu->lapic_time;
 	u64 l_quo = read_lapic(LAPIC_TIMER_CUR);
@@ -137,10 +140,10 @@ static void calibrate_timer(VCPU *vcpu) {
 	u64 cal_2 = l_tot / p_t;
 	//printf("%lld %lld 0x%08llx 0x%08llx 0x%08llx - 0x%08llx %d\n",
 	printf("%lld\t%lld\t%lld\t%lld\t%lld\t%lld\t%d\n",
-			p_t, l_t, l_quo, l_tot, cal_1, cal_2, rtc_get_sec_of_day());
+		   p_t, l_t, l_quo, l_tot, cal_1, cal_2, rtc_get_sec_of_day());
 }
 
-void handle_timer_interrupt(VCPU *vcpu, int vector, int guest)
+void handle_timer_interrupt(VCPU * vcpu, int vector, int guest)
 {
 	if (SHV_OPT & SHV_NO_INTERRUPT) {
 		/* Only one interrupt should arrive, ever */
@@ -168,4 +171,3 @@ void handle_timer_interrupt(VCPU *vcpu, int vector, int guest)
 		ASSERT(0);
 	}
 }
-

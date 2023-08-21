@@ -79,20 +79,19 @@ void emhfc_putchar(int c, void *arg)
 
 #if DEBUG_SERIAL
 	dbg_x86_uart_putc(ch);
-#endif /* DEBUG_SERIAL */
+#endif							/* DEBUG_SERIAL */
 
 #if DEBUG_VGA
 	dbg_x86_vgamem_putc(ch);
-#endif /* DEBUG_VGA */
+#endif							/* DEBUG_VGA */
 }
 
-void emhfc_putchar_linelock(spin_lock_t *arg)
+void emhfc_putchar_linelock(spin_lock_t * arg)
 {
 	spin_lock(arg);
 }
 
-void emhfc_putchar_lineunlock(spin_lock_t *arg)
+void emhfc_putchar_lineunlock(spin_lock_t * arg)
 {
 	spin_unlock(arg);
 }
-

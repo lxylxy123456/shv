@@ -24,7 +24,7 @@
 
 volatile u32 drop_keyboard_interrupts = 0;
 
-void handle_keyboard_interrupt(VCPU *vcpu, int vector, int guest)
+void handle_keyboard_interrupt(VCPU * vcpu, int vector, int guest)
 {
 	ASSERT(vcpu->isbsp);
 	ASSERT(vector == 0x21);
@@ -38,4 +38,3 @@ void handle_keyboard_interrupt(VCPU *vcpu, int vector, int guest)
 	}
 	outb(INT_CTL_PORT, INT_ACK_CURRENT);
 }
-

@@ -24,19 +24,19 @@ volatile u64 shv_pdpt[P4L_NPDPT * P4L_NEPT] ALIGNED_PAGE;
 volatile u64 shv_pdt[P4L_NPDT * P4L_NEPT] ALIGNED_PAGE;
 #elif defined(__i386__)
 #if I386_PAE
-volatile u64 shv_pdpt[PAE_NPDPTE] __attribute__ ((aligned (32)));
+volatile u64 shv_pdpt[PAE_NPDPTE] __attribute__((aligned(32)));
 volatile u64 shv_pdt[PAE_NPDT * PAE_NEPT] ALIGNED_PAGE;
-#else /* !I386_PAE */
+#else							/* !I386_PAE */
 volatile u32 shv_pdt[P32_NPDT * P32_NEPT] ALIGNED_PAGE;
-#endif /* I386_PAE */
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
+#endif							/* I386_PAE */
+#else							/* !defined(__i386__) && !defined(__amd64__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) && !defined(__amd64__) */
 
 uintptr_t shv_page_table_init(void)
 {
 #ifdef __amd64__
-	for (u64 i = 0, paddr = (uintptr_t)shv_pdpt; i < P4L_NPDPT; i++) {
+	for (u64 i = 0, paddr = (uintptr_t) shv_pdpt; i < P4L_NPDPT; i++) {
 		if (i < 1) {
 			ASSERT((0x60ULL | shv_pml4t[i]) == (0x63ULL | paddr));
 		} else {
@@ -44,7 +44,7 @@ uintptr_t shv_page_table_init(void)
 		}
 		paddr += PAGE_SIZE_4K;
 	}
-	for (u64 i = 0, paddr = (uintptr_t)shv_pdt; i < P4L_NPDT; i++) {
+	for (u64 i = 0, paddr = (uintptr_t) shv_pdt; i < P4L_NPDT; i++) {
 		if (i < 4) {
 			ASSERT((0x60ULL | shv_pdpt[i]) == (0x63ULL | paddr));
 		} else {
@@ -59,10 +59,10 @@ uintptr_t shv_page_table_init(void)
 			shv_pdt[i] = 0x83ULL | paddr;
 		}
 	}
-	return (uintptr_t)shv_pml4t;
+	return (uintptr_t) shv_pml4t;
 #elif defined(__i386__)
 #if I386_PAE
-	for (u64 i = 0, paddr = (uintptr_t)shv_pdt; i < PAE_NPDPTE; i++) {
+	for (u64 i = 0, paddr = (uintptr_t) shv_pdt; i < PAE_NPDPTE; i++) {
 		shv_pdpt[i] = 0x1U | paddr;
 		paddr += PAGE_SIZE_4K;
 	}
@@ -70,16 +70,15 @@ uintptr_t shv_page_table_init(void)
 		 i++, paddr += PA_PAGE_SIZE_2M) {
 		shv_pdt[i] = 0x83U | paddr;
 	}
-	return (uintptr_t)shv_pdpt;
-#else /* !I386_PAE */
+	return (uintptr_t) shv_pdpt;
+#else							/* !I386_PAE */
 	for (u32 i = 0, paddr = 0; i < P32_NPDT * P32_NEPT;
 		 i++, paddr += PA_PAGE_SIZE_4M) {
 		shv_pdt[i] = 0x83U | paddr;
 	}
-	return (uintptr_t)shv_pdt;
-#endif /* I386_PAE */
-#else /* !defined(__i386__) && !defined(__amd64__) */
-	#error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
+	return (uintptr_t) shv_pdt;
+#endif							/* I386_PAE */
+#else							/* !defined(__i386__) && !defined(__amd64__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) && !defined(__amd64__) */
 }
-

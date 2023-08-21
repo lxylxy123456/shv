@@ -32,27 +32,27 @@ void init_gdt(VCPU * vcpu)
 	g_gdt[vcpu->idx][5] = 0x0000000000000000ULL;	// TSS (only used in 64-bit)
 #ifdef __amd64__
 	g_gdt[vcpu->idx][6] = 0x00affa000000ffffULL;	// CS Ring 3, 64-bit
-#else /* !__amd64__ */
+#else							/* !__amd64__ */
 	g_gdt[vcpu->idx][6] = 0x00cffa000000ffffULL;	// CS Ring 3, 32-bit
-#endif /* __amd64__ */
+#endif							/* __amd64__ */
 	g_gdt[vcpu->idx][7] = 0x00cff2000000ffffULL;	// DS Ring 3
 	g_gdt[vcpu->idx][8] = 0x0000000000000000ULL;
 	g_gdt[vcpu->idx][9] = 0x0000000000000000ULL;
 
 	/* Modify GDT entries for TSS. */
 	{
-		TSSENTRY * t = (void *)&g_gdt[vcpu->idx][4];
-		uintptr_t tss_addr = (uintptr_t)&g_tss[vcpu->idx][0];
+		TSSENTRY *t = (void *)&g_gdt[vcpu->idx][4];
+		uintptr_t tss_addr = (uintptr_t) & g_tss[vcpu->idx][0];
 		t->attributes1 = 0x89;
 		t->limit16_19attributes2 = 0x00;
-		t->baseAddr0_15 = (u16)(tss_addr & 0x0000FFFF);
-		t->baseAddr16_23 = (u8)((tss_addr & 0x00FF0000) >> 16);
-		t->baseAddr24_31 = (u8)((tss_addr & 0xFF000000) >> 24);
+		t->baseAddr0_15 = (u16) (tss_addr & 0x0000FFFF);
+		t->baseAddr16_23 = (u8) ((tss_addr & 0x00FF0000) >> 16);
+		t->baseAddr24_31 = (u8) ((tss_addr & 0xFF000000) >> 24);
 #ifdef __amd64__
-		t->baseAddr32_63 = (u32)((tss_addr & 0xFFFFFFFF00000000) >> 32);
+		t->baseAddr32_63 = (u32) ((tss_addr & 0xFFFFFFFF00000000) >> 32);
 		t->reserved_zero = 0;
-#endif /* __amd64__ */
-		t->limit0_15=0x67;
+#endif							/* __amd64__ */
+		t->limit0_15 = 0x67;
 	}
 
 	/* Load GDT. */
@@ -61,15 +61,15 @@ void init_gdt(VCPU * vcpu)
 			u16 limit;
 			uintptr_t base;
 		} __attribute__((packed)) gdtr = {
-			.limit=GDT_NELEMS * 8 - 1,
-			.base=(uintptr_t)&(g_gdt[vcpu->idx][0]),
+			.limit = GDT_NELEMS * 8 - 1,
+			.base = (uintptr_t) & (g_gdt[vcpu->idx][0]),
 		};
-		asm volatile("lgdt %0" : : "m"(gdtr));
+		asm volatile ("lgdt %0"::"m" (gdtr));
 	}
 
 	/* Load TR. */
 	{
 		u16 trsel = __TRSEL;
-		asm volatile("ltr %0" : : "m"(trsel));
+		asm volatile ("ltr %0"::"m" (trsel));
 	}
 }

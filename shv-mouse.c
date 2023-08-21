@@ -72,7 +72,7 @@ static void ps2_write_conf(u8 data)
 	ps2_send_data(data);
 }
 
-void mouse_init(VCPU *vcpu)
+void mouse_init(VCPU * vcpu)
 {
 	ASSERT(vcpu->isbsp);
 	printf("Initializing mouse\n");
@@ -126,8 +126,8 @@ void mouse_init(VCPU *vcpu)
 
 #if 0
 	/* Step 10: Reset Devices */
-	drop_mouse_interrupts = ???;
-	drop_keyboard_interrupts = ???;
+	drop_mouse_interrupts = ? ? ?;
+	drop_keyboard_interrupts = ? ? ?;
 	ps2_send_data(0xff);
 	ASSERT(ps2_recv_data() == 0xfa);
 	ASSERT(ps2_recv_data() == 0xaa);
@@ -149,7 +149,7 @@ void mouse_init(VCPU *vcpu)
 	printf("Initialized mouse\n");
 }
 
-void handle_mouse_interrupt(VCPU *vcpu, int vector, int guest)
+void handle_mouse_interrupt(VCPU * vcpu, int vector, int guest)
 {
 	ASSERT(vcpu->isbsp);
 	ASSERT(vector == 0x2c);
@@ -164,4 +164,3 @@ void handle_mouse_interrupt(VCPU *vcpu, int vector, int guest)
 	outb(SLAVE_ICW, INT_ACK_CURRENT);
 	outb(INT_CTL_PORT, INT_ACK_CURRENT);
 }
-

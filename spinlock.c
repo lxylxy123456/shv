@@ -18,12 +18,12 @@
 
 #include <xmhf.h>
 
-void spin_lock(spin_lock_t *lock)
+void spin_lock(spin_lock_t * lock)
 {
 	while (1) {
 		if (*lock == 0) {
 			spin_lock_t val = 1;
-			asm volatile("lock xchg %0, %1" : "+r"(val), "+m"(*lock));
+			asm volatile ("lock xchg %0, %1":"+r" (val), "+m"(*lock));
 			if (val == 0) {
 				break;
 			}
@@ -32,9 +32,8 @@ void spin_lock(spin_lock_t *lock)
 	}
 }
 
-void spin_unlock(spin_lock_t *lock)
+void spin_unlock(spin_lock_t * lock)
 {
 	spin_lock_t val = 0;
-	asm volatile("lock xchg %0, %1" : "+r"(val), "+m"(*lock));
+	asm volatile ("lock xchg %0, %1":"+r" (val), "+m"(*lock));
 }
-

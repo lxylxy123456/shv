@@ -68,9 +68,9 @@
 #ifndef __ACPI_H__
 #define __ACPI_H__
 
-#define ACPI_RSDP_SIGNATURE  (0x2052545020445352ULL) //"RSD PTR "
-#define ACPI_FADT_SIGNATURE  (0x50434146)  //"FACP"
-#define ACPI_MADT_SIGNATURE	 (0x43495041)			//"APIC"
+#define ACPI_RSDP_SIGNATURE  (0x2052545020445352ULL)	//"RSD PTR "
+#define ACPI_FADT_SIGNATURE  (0x50434146)	//"FACP"
+#define ACPI_MADT_SIGNATURE	 (0x43495041)	//"APIC"
 
 #define ACPI_GAS_ASID_SYSMEMORY		0x0
 #define ACPI_GAS_ASID_SYSIO				0x1
@@ -94,21 +94,20 @@ typedef struct {
 	u8 register_bit_offset;
 	u8 access_size;
 	u64 address;
-} __attribute__ ((packed)) ACPI_GAS;
-
+} __attribute__((packed)) ACPI_GAS;
 
 //ACPI RSDP structure
 typedef struct {
-  u64 signature;
-  u8 checksum;
-  u8 oemid[6];
-  u8 revision;
-  u32 rsdtaddress;
-  u32 length;
-  u64 xsdtaddress;
-  u8 xchecksum;
-  u8 rsvd0[3];
-} __attribute__ ((packed)) ACPI_RSDP;
+	u64 signature;
+	u8 checksum;
+	u8 oemid[6];
+	u8 revision;
+	u32 rsdtaddress;
+	u32 length;
+	u64 xsdtaddress;
+	u8 xchecksum;
+	u8 rsvd0[3];
+} __attribute__((packed)) ACPI_RSDP;
 
 //ACPI XSDT structure
 typedef struct {
@@ -121,8 +120,7 @@ typedef struct {
 	u32 oemrevision;
 	u32 creatorid;
 	u32 creatorrevision;
-} __attribute__ ((packed)) ACPI_XSDT;
-
+} __attribute__((packed)) ACPI_XSDT;
 
 //ACPI RSDT structure
 typedef struct {
@@ -135,23 +133,22 @@ typedef struct {
 	u32 oemrevision;
 	u32 creatorid;
 	u32 creatorrevision;
-} __attribute__ ((packed)) ACPI_RSDT;
-
+} __attribute__((packed)) ACPI_RSDT;
 
 //ACPI MADT structure
 typedef struct {
-  u32 signature;
-  u32 length;
-  u8 revision;
-  u8 checksum;
-  u8 oemid[6];
-  u64 oemtableid;
+	u32 signature;
+	u32 length;
+	u8 revision;
+	u8 checksum;
+	u8 oemid[6];
+	u64 oemtableid;
 	u32 oemrevision;
 	u32 creatorid;
 	u32 creatorrevision;
 	u32 lapicaddress;
 	u32 mapicflags;
-} __attribute__ ((packed)) ACPI_MADT;
+} __attribute__((packed)) ACPI_MADT;
 
 //ACPI MADT APIC structure
 typedef struct {
@@ -160,16 +157,16 @@ typedef struct {
 	u8 procid;
 	u8 lapicid;
 	u32 flags;
-} __attribute__ ((packed)) ACPI_MADT_APIC;
+} __attribute__((packed)) ACPI_MADT_APIC;
 
 //FADT structure
-typedef struct{
-  u32 signature;
-  u32 length;
-  u8 revision;
-  u8 checksum;
-  u8 oemid[6];
-  u64 oemtableid;
+typedef struct {
+	u32 signature;
+	u32 length;
+	u8 revision;
+	u8 checksum;
+	u8 oemid[6];
+	u64 oemtableid;
 	u32 oemrevision;
 	u32 creatorid;
 	u32 creatorrevision;
@@ -224,9 +221,8 @@ typedef struct{
 	u8 x_pm_tmr_blk[12];
 	u8 x_gpe0_blk[12];
 	u8 x_gpe1_blk[12];
-}__attribute__ ((packed)) ACPI_FADT;
+} __attribute__((packed)) ACPI_FADT;
 
+#endif							//__ASSEMBLY__
 
-#endif	//__ASSEMBLY__
-
-#endif //__ACPI_H__
+#endif							//__ACPI_H__

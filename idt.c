@@ -41,13 +41,13 @@ static void construct_idt(void)
 	/* From XMHF64 xmhf_xcphandler_arch_initialize(). */
 	for (u32 i = 0; i < IDT_NELEMS; i++) {
 		uintptr_t stub = g_idt_stubs[i];
-		idtentry_t *entry = (idtentry_t *)&(g_idt[i][0]);
-		entry->isrLow16 = (u16)stub;
-		entry->isrHigh16 = (u16)(stub >> 16);
+		idtentry_t *entry = (idtentry_t *) & (g_idt[i][0]);
+		entry->isrLow16 = (u16) stub;
+		entry->isrHigh16 = (u16) (stub >> 16);
 #ifdef __amd64__
-		entry->isrHigh32 = (u32)(stub >> 32);
+		entry->isrHigh32 = (u32) (stub >> 32);
 		entry->reserved_zero = 0;
-#endif /* defined(__amd64__) */
+#endif							/* defined(__amd64__) */
 		entry->isrSelector = __CS;
 		/* Set IST to 0. */
 		entry->count = 0x0;
@@ -58,7 +58,7 @@ static void construct_idt(void)
 		entry->type = 0x8E;
 		/* For 0x23, set DPL to 11b because it is used for syscall. */
 		if (i == 0x23) {
-		    entry->type |= 0x60;
+			entry->type |= 0x60;
 		}
 	}
 }
@@ -67,7 +67,7 @@ void init_idt(void)
 {
 	construct_idt();
 
-	ASSERT (cpuid_ecx(1, 0) & (1U << 5));
+	ASSERT(cpuid_ecx(1, 0) & (1U << 5));
 
 	/* Load IDT */
 	{
@@ -75,10 +75,10 @@ void init_idt(void)
 			u16 limit;
 			uintptr_t base;
 		} __attribute__((packed)) idtr = {
-			.limit=(uintptr_t)g_idt[IDT_NELEMS] - (uintptr_t)g_idt[0] - 1,
-			.base=(uintptr_t)&g_idt,
+			.limit = (uintptr_t) g_idt[IDT_NELEMS] - (uintptr_t) g_idt[0] - 1,
+			.base = (uintptr_t) & g_idt,
 		};
-		asm volatile("lidt %0" : : "m"(idtr));
+		asm volatile ("lidt %0"::"m" (idtr));
 	}
 }
 
@@ -90,15 +90,15 @@ VCPU *get_vcpu(void)
 	msr_val = rdmsr64(MSR_APIC_BASE);
 	if (msr_val & (1ULL << 10)) {
 		/* x2APIC is enabled, use it */
-		lapic_id = (u32)(rdmsr64(IA32_X2APIC_APICID));
+		lapic_id = (u32) (rdmsr64(IA32_X2APIC_APICID));
 	} else {
-		lapic_id = *(u32 *)((uintptr_t)(msr_val & ~0xFFFUL) + 0x20);
+		lapic_id = *(u32 *) ((uintptr_t) (msr_val & ~0xFFFUL) + 0x20);
 		lapic_id = lapic_id >> 24;
 	}
 
 	for (u32 i = 0; i < g_midtable_numentries; i++) {
 		if (g_midtable[i].cpu_lapic_id == lapic_id) {
-			return (VCPU *)g_midtable[i].vcpu_vaddr_ptr;
+			return (VCPU *) g_midtable[i].vcpu_vaddr_ptr;
 		}
 	}
 
@@ -116,7 +116,7 @@ void dump_exception(VCPU * vcpu, struct regs *r, iret_info_t * info)
 	_P("FLAGS:          0x%08lx", info->flags);
 #ifdef __amd64__
 	_P("SS: 0x%04lx  SP: 0x%08lx", info->ss, info->sp);
-#endif /* __amd64__ */
+#endif							/* __amd64__ */
 	_P("CS: 0x%04lx  IP: 0x%08lx", info->cs, info->ip);
 	_P("DS: 0x%04lx  ES: 0x%04lx", info->ds, info->es);
 	_P("FS: 0x%04lx  GS: 0x%04lx", info->fs, info->gs);
@@ -129,7 +129,7 @@ void dump_exception(VCPU * vcpu, struct regs *r, iret_info_t * info)
 	_P("R10:0x%0*lx  R11:0x%0*lx", _B, r->r10, _B, r->r11);
 	_P("R12:0x%0*lx  R13:0x%0*lx", _B, r->r12, _B, r->r13);
 	_P("R14:0x%0*lx  R15:0x%0*lx", _B, r->r14, _B, r->r15);
-#endif /* __amd64__ */
+#endif							/* __amd64__ */
 
 #undef _P
 #undef _B
@@ -188,8 +188,8 @@ static void handle_idt_host(VCPU * vcpu, struct regs *r, iret_info_t * info)
 			uintptr_t exception_ip = info->ip;
 			bool found = false;
 
-			for (uintptr_t *i = (uintptr_t *)_begin_xcph_table;
-				 i < (uintptr_t *)_end_xcph_table; i += 3) {
+			for (uintptr_t * i = (uintptr_t *) _begin_xcph_table;
+				 i < (uintptr_t *) _end_xcph_table; i += 3) {
 				if (i[0] == vector && i[1] == exception_ip) {
 					info->ip = i[2];
 					found = true;
@@ -213,7 +213,7 @@ static void handle_idt_host(VCPU * vcpu, struct regs *r, iret_info_t * info)
 
 void handle_idt(iret_info_t * info)
 {
-	VCPU * vcpu = get_vcpu();
+	VCPU *vcpu = get_vcpu();
 	struct regs *r = &info->r;
 
 	if (cpuid_ecx(1, 0) & (1U << 5)) {

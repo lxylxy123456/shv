@@ -67,7 +67,6 @@
 #ifndef __PAGING_H__
 #define __PAGING_H__
 
-
 //physical memory limit
 #ifndef __ASSEMBLY__
 #define ADDR_4GB 0x100000000ULL
@@ -76,13 +75,13 @@
 #endif
 
 #ifdef __i386__
-    #define PAGE_MASK_4K        0xFFFFF000
-    #define PAGE_MASK_1G        0xC0000000
+#define PAGE_MASK_4K        0xFFFFF000
+#define PAGE_MASK_1G        0xC0000000
 #elif defined(__amd64__)
-    #define PAGE_MASK_4K        0xFFFFFFFFFFFFF000
-    #define PAGE_MASK_1G        0xFFFFFFFFC0000000
+#define PAGE_MASK_4K        0xFFFFFFFFFFFFF000
+#define PAGE_MASK_1G        0xFFFFFFFFC0000000
 #else
-    #error "Unsupported Arch"
+#error "Unsupported Arch"
 #endif
 
 #define ADDR64_PAGE_MASK_4K     0xFFFFFFFFFFFFF000ULL
@@ -145,8 +144,8 @@
 #define PAGE_SIZE_512G  (1UL << PAGE_SHIFT_512G)
 #define PAGE_SIZE_256T  (1UL << PAGE_SHIFT_256T)
 #elif !defined(__i386__)
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) */
 
 /* For physical address: definitions in u64 for both i386 and amd64 */
 #define PA_PAGE_SIZE_4K     (1ULL << PAGE_SHIFT_4K)
@@ -199,8 +198,8 @@
 #define PAGE_ALIGN_UP_512G(x)       _PAGE_ALIGN_UP((x), , 512G)
 #define PAGE_ALIGN_UP_256T(x)       _PAGE_ALIGN_UP((x), , 256T)
 #elif !defined(__i386__)
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) */
 
 #define PA_PAGE_ALIGN_UP_4K(x)      _PAGE_ALIGN_UP((x), PA_, 4K)
 #define PA_PAGE_ALIGN_UP_2M(x)      _PAGE_ALIGN_UP((x), PA_, 2M)
@@ -223,8 +222,8 @@
 #define PAGE_ALIGN_512G(x)      _PAGE_ALIGN((x), , 512G)
 #define PAGE_ALIGN_256T(x)      _PAGE_ALIGN((x), , 256T)
 #elif !defined(__i386__)
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) */
 
 #define PA_PAGE_ALIGN_4K(x)     _PAGE_ALIGN((x), PA_, 4K)
 #define PA_PAGE_ALIGN_2M(x)     _PAGE_ALIGN((x), PA_, 2M)
@@ -247,8 +246,8 @@
 #define PAGE_ALIGNED_512G(x)    _PAGE_ALIGNED((x), , 512G)
 #define PAGE_ALIGNED_256T(x)    _PAGE_ALIGNED((x), , 256T)
 #elif !defined(__i386__)
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) */
 
 #define PA_PAGE_ALIGNED_4K(x)   _PAGE_ALIGNED((x), PA_, 4K)
 #define PA_PAGE_ALIGNED_2M(x)   _PAGE_ALIGNED((x), PA_, 2M)
@@ -259,9 +258,9 @@
 
 #ifdef __amd64__
 #define MAX_PHYS_ADDR ((u64)(AMD64_MAX_ADDR))
-#else /* !__amd64__ */
+#else							/* !__amd64__ */
 #define MAX_PHYS_ADDR ADDR_4GB
-#endif /* __amd64__ */
+#endif							/* __amd64__ */
 
 // 32-bit paging specific definitions
 #define P32_NEPT    (PA_PAGE_SIZE_4K / sizeof(u32))
@@ -284,5 +283,4 @@
 
 #define ALIGNED_PAGE __attribute__((aligned(PAGE_SIZE_4K)))
 
-#endif /* __PAGING_H__ */
-
+#endif							/* __PAGING_H__ */

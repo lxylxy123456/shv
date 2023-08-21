@@ -86,64 +86,64 @@
 
 static inline u64 ZERO_HI64(u64 x, int bits)
 {
-  return ((x) << (bits) >> (bits));
+	return ((x) << (bits) >> (bits));
 }
+
 static inline u64 ZERO_LO64(u64 x, int bits)
 {
-  return ((x) >> (bits) << (bits));
+	return ((x) >> (bits) << (bits));
 }
+
 static inline u32 ZERO_HI32(u32 x, int bits)
 {
-  return ((x) << (bits) >> (bits));
+	return ((x) << (bits) >> (bits));
 }
+
 static inline u32 ZERO_LO32(u32 x, int bits)
 {
-  return ((x) >> (bits) << (bits));
+	return ((x) >> (bits) << (bits));
 }
 
 static inline u64 MASKRANGE64(int hi, int lo)
 {
-  return ZERO_LO64(ZERO_HI64(0xffffffffffffffffull,
-                         64-(hi)-1),
-                 (lo));
+	return ZERO_LO64(ZERO_HI64(0xffffffffffffffffull, 64 - (hi) - 1), (lo));
 }
 
 static inline u32 MASKRANGE32(int hi, int lo)
 {
-  return ZERO_LO32(ZERO_HI32(0xfffffffful,
-                             32-(hi)-1),
-                   (lo));
+	return ZERO_LO32(ZERO_HI32(0xfffffffful, 32 - (hi) - 1), (lo));
 }
 
 static inline u64 MASKBIT64(int bit)
 {
-  return 1ull<<bit;
+	return 1ull << bit;
 }
+
 static inline u32 MASKBIT32(int bit)
 {
-  return 1ul<<bit;
+	return 1ul << bit;
 }
-
-
 
 static inline u64 BR64_GET_HL(u64 x64, int hi, int lo)
 {
-  return ZERO_HI64(x64, 63-(hi)) >> (lo);
+	return ZERO_HI64(x64, 63 - (hi)) >> (lo);
 }
+
 static inline u64 BR32_GET_HL(u32 x32, int hi, int lo)
 {
-  return ZERO_HI64(x32, 31-(hi)) >> (lo);
+	return ZERO_HI64(x32, 31 - (hi)) >> (lo);
 }
 
 static inline u64 BR64_SET_HL(u64 x64, int hi, int lo, u64 val)
 {
-  assert(ZERO_HI64(val, 63-(hi-lo)) == val);
-  return ((x64 & ~MASKRANGE64((hi), (lo))) | ((val) << (lo)));
+	assert(ZERO_HI64(val, 63 - (hi - lo)) == val);
+	return ((x64 & ~MASKRANGE64((hi), (lo))) | ((val) << (lo)));
 }
+
 static inline u32 BR32_SET_HL(u32 x32, int hi, int lo, u32 val)
 {
-  assert(ZERO_HI64(val, 31-(hi-lo)) == val);
-  return ((x32 & ~MASKRANGE32((hi), (lo))) | ((val) << (lo)));
+	assert(ZERO_HI64(val, 31 - (hi - lo)) == val);
+	return ((x32 & ~MASKRANGE32((hi), (lo))) | ((val) << (lo)));
 }
 
 #define BR64_GET_BR(x64, name) BR64_GET_HL(x64, name##_HI, name##_LO)
@@ -151,40 +151,42 @@ static inline u32 BR32_SET_HL(u32 x32, int hi, int lo, u32 val)
 
 static inline unsigned int BR64_GET_BIT(u64 x64, int pos)
 {
-  return ((x64 & MASKRANGE64(pos, pos)) >> pos);
+	return ((x64 & MASKRANGE64(pos, pos)) >> pos);
 }
+
 static inline u64 BR64_SET_BIT(u64 x64, int pos, bool val)
 {
-  u64 bit = val ? 1ull : 0ull;
-  return ((x64 & ~(0x1ull<<pos)) | (bit<<pos));
+	u64 bit = val ? 1ull : 0ull;
+	return ((x64 & ~(0x1ull << pos)) | (bit << pos));
 }
 
 static inline unsigned int BR32_GET_BIT(u32 x32, int pos)
 {
-  return ((x32 & MASKRANGE32(pos, pos)) >> pos);
+	return ((x32 & MASKRANGE32(pos, pos)) >> pos);
 }
+
 static inline u32 BR32_SET_BIT(u32 x32, int pos, bool val)
 {
-  u32 bit = val ? 1ul : 0ul;
-  return ((x32 & ~(0x1ul<<pos)) | (bit<<pos));
+	u32 bit = val ? 1ul : 0ul;
+	return ((x32 & ~(0x1ul << pos)) | (bit << pos));
 }
 
 /* offset == (dst_hi-src_hi) == (dst_lo-src_lo) */
-static inline u64 BR64_COPY_BITS_HL(u64 dst, u64 src, int src_hi, int src_lo, int offset)
+static inline u64 BR64_COPY_BITS_HL(u64 dst, u64 src, int src_hi, int src_lo,
+									int offset)
 {
-  return BR64_SET_HL(dst,
-                     (src_hi)+(offset),
-                     (src_lo)+(offset),
-                     BR64_GET_HL(src, src_hi, src_lo));
+	return BR64_SET_HL(dst,
+					   (src_hi) + (offset),
+					   (src_lo) + (offset), BR64_GET_HL(src, src_hi, src_lo));
 }
 
 /* offset == (dst_hi-src_hi) == (dst_lo-src_lo) */
-static inline u32 BR32_COPY_BITS_HL(u32 dst, u32 src, int src_hi, int src_lo, int offset)
+static inline u32 BR32_COPY_BITS_HL(u32 dst, u32 src, int src_hi, int src_lo,
+									int offset)
 {
-  return BR32_SET_HL(dst,
-                     (src_hi)+(offset),
-                     (src_lo)+(offset),
-                     BR32_GET_HL(src, src_hi, src_lo));
+	return BR32_SET_HL(dst,
+					   (src_hi) + (offset),
+					   (src_lo) + (offset), BR32_GET_HL(src, src_hi, src_lo));
 }
 
 #endif

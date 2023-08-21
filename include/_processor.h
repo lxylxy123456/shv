@@ -75,35 +75,35 @@
 #define INTEL_STRING_DWORD2	0x49656E69
 #define INTEL_STRING_DWORD3	0x6C65746E
 
-#define EFLAGS_CF	0x00000001 /* Carry Flag */
-#define EFLAGS_PF	0x00000004 /* Parity Flag */
-#define EFLAGS_AF	0x00000010 /* Auxillary carry Flag */
-#define EFLAGS_ZF	0x00000040 /* Zero Flag */
-#define EFLAGS_SF	0x00000080 /* Sign Flag */
-#define EFLAGS_TF	0x00000100 /* Trap Flag */
-#define EFLAGS_IF	0x00000200 /* Interrupt Flag */
-#define EFLAGS_DF	0x00000400 /* Direction Flag */
-#define EFLAGS_OF	0x00000800 /* Overflow Flag */
-#define EFLAGS_IOPL	0x00003000 /* IOPL mask */
-#define EFLAGS_NT	0x00004000 /* Nested Task */
-#define EFLAGS_RF	0x00010000 /* Resume Flag */
-#define EFLAGS_VM	0x00020000 /* Virtual Mode */
-#define EFLAGS_AC	0x00040000 /* Alignment Check */
-#define EFLAGS_VIF	0x00080000 /* Virtual Interrupt Flag */
-#define EFLAGS_VIP	0x00100000 /* Virtual Interrupt Pending */
-#define EFLAGS_ID	0x00200000 /* CPUID detection flag */
+#define EFLAGS_CF	0x00000001	/* Carry Flag */
+#define EFLAGS_PF	0x00000004	/* Parity Flag */
+#define EFLAGS_AF	0x00000010	/* Auxillary carry Flag */
+#define EFLAGS_ZF	0x00000040	/* Zero Flag */
+#define EFLAGS_SF	0x00000080	/* Sign Flag */
+#define EFLAGS_TF	0x00000100	/* Trap Flag */
+#define EFLAGS_IF	0x00000200	/* Interrupt Flag */
+#define EFLAGS_DF	0x00000400	/* Direction Flag */
+#define EFLAGS_OF	0x00000800	/* Overflow Flag */
+#define EFLAGS_IOPL	0x00003000	/* IOPL mask */
+#define EFLAGS_NT	0x00004000	/* Nested Task */
+#define EFLAGS_RF	0x00010000	/* Resume Flag */
+#define EFLAGS_VM	0x00020000	/* Virtual Mode */
+#define EFLAGS_AC	0x00040000	/* Alignment Check */
+#define EFLAGS_VIF	0x00080000	/* Virtual Interrupt Flag */
+#define EFLAGS_VIP	0x00100000	/* Virtual Interrupt Pending */
+#define EFLAGS_ID	0x00200000	/* CPUID detection flag */
 
-#define CR0_PE		0x00000001 /* Enable Protected Mode    (RW) */
-#define CR0_MP		0x00000002 /* Monitor Coprocessor      (RW) */
-#define CR0_EM		0x00000004 /* Require FPU Emulation    (RO) */
-#define CR0_TS		0x00000008 /* Task Switched            (RW) */
-#define CR0_ET		0x00000010 /* Extension type           (RO) */
-#define CR0_NE		0x00000020 /* Numeric Error Reporting  (RW) */
-#define CR0_WP		0x00010000 /* Supervisor Write Protect (RW) */
-#define CR0_AM		0x00040000 /* Alignment Checking       (RW) */
-#define CR0_NW		0x20000000 /* Not Write-Through        (RW) */
-#define CR0_CD		0x40000000 /* Cache Disable            (RW) */
-#define CR0_PG		0x80000000 /* Paging                   (RW) */
+#define CR0_PE		0x00000001	/* Enable Protected Mode    (RW) */
+#define CR0_MP		0x00000002	/* Monitor Coprocessor      (RW) */
+#define CR0_EM		0x00000004	/* Require FPU Emulation    (RO) */
+#define CR0_TS		0x00000008	/* Task Switched            (RW) */
+#define CR0_ET		0x00000010	/* Extension type           (RO) */
+#define CR0_NE		0x00000020	/* Numeric Error Reporting  (RW) */
+#define CR0_WP		0x00010000	/* Supervisor Write Protect (RW) */
+#define CR0_AM		0x00040000	/* Alignment Checking       (RW) */
+#define CR0_NW		0x20000000	/* Not Write-Through        (RW) */
+#define CR0_CD		0x40000000	/* Cache Disable            (RW) */
+#define CR0_PG		0x80000000	/* Paging                   (RW) */
 
 #define CR4_VME			0x00000001	/* enable vm86 extensions */
 #define CR4_PVI			0x00000002	/* virtual interrupts flag enable */
@@ -130,7 +130,6 @@
 #define CR4_CET			0x00800000	/* Control-flow Enforcement Technology */
 #define CR4_PKS			0x01000000	/* Enable protection keys for supervisor-mode pages */
 
-
 //CPUID related
 #define EDX_PAE 6
 #define EDX_NX 20
@@ -144,27 +143,26 @@
 
 //CPU exception numbers
 //(intel SDM vol 3a 6-27)
-#define	CPU_EXCEPTION_DE				0			//divide error exception
-#define CPU_EXCEPTION_DB				1			//debug exception
-#define	CPU_EXCEPTION_NMI				2			//non-maskable interrupt
-#define	CPU_EXCEPTION_BP				3			//breakpoint exception
-#define	CPU_EXCEPTION_OF				4			//overflow exception
-#define	CPU_EXCEPTION_BR				5			//bound-range exceeded
-#define	CPU_EXCEPTION_UD				6			//invalid opcode
-#define	CPU_EXCEPTION_NM				7			//device not available
-#define	CPU_EXCEPTION_DF				8			//double fault exception (code)
-#define	CPU_EXCEPTION_RESV9				9			//reserved
-#define	CPU_EXCEPTION_TS				10			//invalid TSS (code)
-#define	CPU_EXCEPTION_NP				11			//segment not present (code)
-#define	CPU_EXCEPTION_SS				12			//stack fault (code)
-#define	CPU_EXCEPTION_GP				13			//general protection (code)
-#define CPU_EXCEPTION_PF				14			//page fault (code)
-#define	CPU_EXCEPTION_RESV15			15			//reserved
-#define CPU_EXCEPTION_MF				16			//floating-point exception
-#define CPU_EXCEPTION_AC				17			//alignment check (code)
-#define CPU_EXCEPTION_MC				18			//machine check
-#define CPU_EXCEPTION_XM				19			//SIMD floating point exception
-
+#define	CPU_EXCEPTION_DE				0	//divide error exception
+#define CPU_EXCEPTION_DB				1	//debug exception
+#define	CPU_EXCEPTION_NMI				2	//non-maskable interrupt
+#define	CPU_EXCEPTION_BP				3	//breakpoint exception
+#define	CPU_EXCEPTION_OF				4	//overflow exception
+#define	CPU_EXCEPTION_BR				5	//bound-range exceeded
+#define	CPU_EXCEPTION_UD				6	//invalid opcode
+#define	CPU_EXCEPTION_NM				7	//device not available
+#define	CPU_EXCEPTION_DF				8	//double fault exception (code)
+#define	CPU_EXCEPTION_RESV9				9	//reserved
+#define	CPU_EXCEPTION_TS				10	//invalid TSS (code)
+#define	CPU_EXCEPTION_NP				11	//segment not present (code)
+#define	CPU_EXCEPTION_SS				12	//stack fault (code)
+#define	CPU_EXCEPTION_GP				13	//general protection (code)
+#define CPU_EXCEPTION_PF				14	//page fault (code)
+#define	CPU_EXCEPTION_RESV15			15	//reserved
+#define CPU_EXCEPTION_MF				16	//floating-point exception
+#define CPU_EXCEPTION_AC				17	//alignment check (code)
+#define CPU_EXCEPTION_MC				18	//machine check
+#define CPU_EXCEPTION_XM				19	//SIMD floating point exception
 
 //extended control registers
 #define XCR_XFEATURE_ENABLED_MASK       0x00000000
@@ -221,14 +219,13 @@
         popq    %rcx; \
         popq    %rax;
 
-#endif /* defined(__ASSEMBLY__) && defined(__amd64__) */
+#endif							/* defined(__ASSEMBLY__) && defined(__amd64__) */
 
 #ifndef __ASSEMBLY__
 
 // i386: follow the order enforced by PUSHAD/POPAD
 // amd64: manually follow this order in assembly code
-struct regs
-{
+struct regs {
 #ifdef __amd64__
 	u64 r15;
 	u64 r14;
@@ -238,95 +235,94 @@ struct regs
 	u64 r10;
 	u64 r9;
 	u64 r8;
-#endif /* __amd64__ */
+#endif							/* __amd64__ */
 	union {
 #ifdef __amd64__
 		u64 rdi;
-#endif /* __amd64__ */
+#endif							/* __amd64__ */
 		uintptr_t di;
 		u32 edi;
-	} __attribute__ ((packed));
+	} __attribute__((packed));
 	union {
 #ifdef __amd64__
 		u64 rsi;
-#endif /* __amd64__ */
+#endif							/* __amd64__ */
 		uintptr_t si;
 		u32 esi;
-	} __attribute__ ((packed));
+	} __attribute__((packed));
 	union {
 #ifdef __amd64__
 		u64 rbp;
-#endif /* __amd64__ */
+#endif							/* __amd64__ */
 		uintptr_t bp;
 		u32 ebp;
-	} __attribute__ ((packed));
+	} __attribute__((packed));
 	union {
 #ifdef __amd64__
 		u64 rsp;
-#endif /* __amd64__ */
+#endif							/* __amd64__ */
 		uintptr_t sp;
 		u32 esp;
-	} __attribute__ ((packed));
+	} __attribute__((packed));
 	union {
 #ifdef __amd64__
 		u64 rbx;
-#endif /* __amd64__ */
+#endif							/* __amd64__ */
 		uintptr_t bx;
 		u32 ebx;
-	} __attribute__ ((packed));
+	} __attribute__((packed));
 	union {
 #ifdef __amd64__
 		u64 rdx;
-#endif /* __amd64__ */
+#endif							/* __amd64__ */
 		uintptr_t dx;
 		u32 edx;
-	} __attribute__ ((packed));
+	} __attribute__((packed));
 	union {
 #ifdef __amd64__
 		u64 rcx;
-#endif /* __amd64__ */
+#endif							/* __amd64__ */
 		uintptr_t cx;
 		u32 ecx;
-	} __attribute__ ((packed));
+	} __attribute__((packed));
 	union {
 #ifdef __amd64__
 		u64 rax;
-#endif /* __amd64__ */
+#endif							/* __amd64__ */
 		uintptr_t ax;
 		u32 eax;
-	} __attribute__ ((packed));
-} __attribute__ ((packed));
-
-
-typedef struct {
-  u16 isrLow16;
-  u16 isrSelector;
-  u8  count;
-  u8  type;
-  u16 isrHigh16;
-#ifdef __amd64__
-  u32 isrHigh32;
-  u32 reserved_zero;
-#elif !defined(__i386__)
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) */
-} __attribute__ ((packed)) idtentry_t;
+	} __attribute__((packed));
+} __attribute__((packed));
 
 typedef struct {
-  u16 limit0_15;
-  u16 baseAddr0_15;
-  u8  baseAddr16_23;
-  u8  attributes1;
-  u8  limit16_19attributes2;
-  u8  baseAddr24_31;
+	u16 isrLow16;
+	u16 isrSelector;
+	u8 count;
+	u8 type;
+	u16 isrHigh16;
 #ifdef __amd64__
-  u32 baseAddr32_63;
-  u32 reserved_zero;
+	u32 isrHigh32;
+	u32 reserved_zero;
 #elif !defined(__i386__)
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) */
-} __attribute__ ((packed)) TSSENTRY;
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) */
+} __attribute__((packed)) idtentry_t;
 
-#endif //__ASSEMBLY__
+typedef struct {
+	u16 limit0_15;
+	u16 baseAddr0_15;
+	u8 baseAddr16_23;
+	u8 attributes1;
+	u8 limit16_19attributes2;
+	u8 baseAddr24_31;
+#ifdef __amd64__
+	u32 baseAddr32_63;
+	u32 reserved_zero;
+#elif !defined(__i386__)
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) */
+} __attribute__((packed)) TSSENTRY;
 
-#endif /* __PROCESSOR_H */
+#endif							//__ASSEMBLY__
+
+#endif							/* __PROCESSOR_H */
