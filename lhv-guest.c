@@ -157,13 +157,13 @@ static void lhv_guest_test_msr_ls_vmexit_handler(VCPU *vcpu, struct regs *r,
 		}
 		/* Set experiment */
 		if (!data->skip_mc_msrs) {
-			vmcs_vmwrite(vcpu, VMCS_control_VM_exit_MSR_store_count, 3);
-			vmcs_vmwrite(vcpu, VMCS_control_VM_exit_MSR_load_count, 3);
-			vmcs_vmwrite(vcpu, VMCS_control_VM_entry_MSR_load_count, 3);
+			__vmx_vmwrite32(VMCS_control_VM_exit_MSR_store_count, 3);
+			__vmx_vmwrite32(VMCS_control_VM_exit_MSR_load_count, 3);
+			__vmx_vmwrite32(VMCS_control_VM_entry_MSR_load_count, 3);
 		} else {
-			vmcs_vmwrite(vcpu, VMCS_control_VM_exit_MSR_store_count, 2);
-			vmcs_vmwrite(vcpu, VMCS_control_VM_exit_MSR_load_count, 2);
-			vmcs_vmwrite(vcpu, VMCS_control_VM_entry_MSR_load_count, 2);
+			__vmx_vmwrite32(VMCS_control_VM_exit_MSR_store_count, 2);
+			__vmx_vmwrite32(VMCS_control_VM_exit_MSR_load_count, 2);
+			__vmx_vmwrite32(VMCS_control_VM_entry_MSR_load_count, 2);
 		}
 		ASSERT((rdmsr64(0xfeU) & 0xff) > 6);
 		wrmsr64(0x20aU, 0x00000000aaaaa000ULL);
@@ -219,9 +219,9 @@ static void lhv_guest_test_msr_ls_vmexit_handler(VCPU *vcpu, struct regs *r,
 							  0x6666666666666666ULL);
 		}
 		/* Reset state */
-		vmcs_vmwrite(vcpu, VMCS_control_VM_exit_MSR_store_count, 0);
-		vmcs_vmwrite(vcpu, VMCS_control_VM_exit_MSR_load_count, 0);
-		vmcs_vmwrite(vcpu, VMCS_control_VM_entry_MSR_load_count, 0);
+		__vmx_vmwrite32(VMCS_control_VM_exit_MSR_store_count, 0);
+		__vmx_vmwrite32(VMCS_control_VM_exit_MSR_load_count, 0);
+		__vmx_vmwrite32(VMCS_control_VM_entry_MSR_load_count, 0);
 		wrmsr64(MSR_IA32_PAT, 0x0007040600070406ULL);
 		wrmsr64(0x20aU, data->old_vals[0][0]);
 		wrmsr64(0x20bU, data->old_vals[0][1]);
@@ -239,7 +239,7 @@ static void lhv_guest_test_msr_ls_vmexit_handler(VCPU *vcpu, struct regs *r,
 		ASSERT(0 && "Unknown argument");
 		break;
 	}
-	vmcs_vmwrite(vcpu, VMCS_guest_RIP, info->guest_rip + info->inst_len);
+	__vmx_vmwriteNW(VMCS_guest_RIP, info->guest_rip + info->inst_len);
 	vmresume_asm(r);
 }
 
@@ -262,9 +262,9 @@ static void lhv_guest_test_ept_vmexit_handler(VCPU *vcpu, struct regs *r,
 		return;
 	}
 	{
-		ulong_t q = vmcs_vmread(vcpu, VMCS_info_exit_qualification);
+		ulong_t q = __vmx_vmreadNW(VMCS_info_exit_qualification);
 		u64 paddr = __vmx_vmread64(VMCS_guest_paddr);
-		ulong_t vaddr = vmcs_vmread(vcpu, VMCS_info_guest_linear_address);
+		ulong_t vaddr = __vmx_vmreadNW(VMCS_info_guest_linear_address);
 		if (paddr != 0x12340000 || vaddr != 0x12340000) {
 			/* Let the default handler report the error */
 			return;
@@ -276,7 +276,7 @@ static void lhv_guest_test_ept_vmexit_handler(VCPU *vcpu, struct regs *r,
 		r->eax = 0xfee1c0de;
 		vcpu->ept_exit_count++;
 	}
-	vmcs_vmwrite(vcpu, VMCS_guest_RIP, info->guest_rip + info->inst_len);
+	__vmx_vmwriteNW(VMCS_guest_RIP, info->guest_rip + info->inst_len);
 	vmresume_asm(r);
 }
 
@@ -332,7 +332,7 @@ static void lhv_guest_switch_ept_vmexit_handler(VCPU *vcpu, struct regs *r,
 		eptp = lhv_build_ept(vcpu, vcpu->ept_num);
 		__vmx_vmwrite64(VMCS_control_EPT_pointer, eptp | 0x1eULL);
 	}
-	vmcs_vmwrite(vcpu, VMCS_guest_RIP, info->guest_rip + info->inst_len);
+	__vmx_vmwriteNW(VMCS_guest_RIP, info->guest_rip + info->inst_len);
 	vmresume_asm(r);
 }
 
@@ -364,8 +364,8 @@ static void lhv_guest_test_vmxoff_vmexit_handler(VCPU *vcpu, struct regs *r,
 		vmcs_dump(vcpu, 0);
 		/* Set ES access right */
 		if (test_modify_vmcs) {
-			old_es_limit = vmcs_vmread(vcpu, VMCS_guest_ES_limit);
-			vmcs_vmwrite(vcpu, VMCS_guest_ES_limit, new_es_limit);
+			old_es_limit = __vmx_vmread32(VMCS_guest_ES_limit);
+			__vmx_vmwrite32(VMCS_guest_ES_limit, new_es_limit);
 		}
 		/* Test VMPTRST */
 		ASSERT(__vmx_vmptrst(&vmptr));
@@ -447,7 +447,7 @@ static void lhv_guest_test_vmxoff_vmexit_handler(VCPU *vcpu, struct regs *r,
 			ASSERT(memcmp(&a, &vcpu->vmcs, sizeof(a)) == 0);
 		}
 	}
-	vmcs_vmwrite(vcpu, VMCS_guest_RIP, info->guest_rip + info->inst_len);
+	__vmx_vmwriteNW(VMCS_guest_RIP, info->guest_rip + info->inst_len);
 	/* Hardware thinks VMCS is not launched, so VMLAUNCH instead of VMRESUME */
 	vmlaunch_asm(r);
 }
@@ -471,7 +471,7 @@ static void lhv_guest_test_vpid_vmexit_handler(VCPU *vcpu, struct regs *r,
 	ASSERT(r->eax == 19);
 	{
 		/* VPID will always be odd */
-		u16 vpid = vmcs_vmread(vcpu, VMCS_control_vpid);
+		u16 vpid = __vmx_vmread16(VMCS_control_vpid);
 		ASSERT(vpid % 2 == 1);
 		/*
 		 * Currently we cannot easily test the effect of INVVPID. So
@@ -496,9 +496,9 @@ static void lhv_guest_test_vpid_vmexit_handler(VCPU *vcpu, struct regs *r,
 										 0));
 		/* Update VPID */
 		vpid += 2;
-		vmcs_vmwrite(vcpu, VMCS_control_vpid, vpid);
+		__vmx_vmwrite16(VMCS_control_vpid, vpid);
 	}
-	vmcs_vmwrite(vcpu, VMCS_guest_RIP, info->guest_rip + info->inst_len);
+	__vmx_vmwriteNW(VMCS_guest_RIP, info->guest_rip + info->inst_len);
 	vmresume_asm(r);
 }
 
@@ -525,7 +525,7 @@ static void lhv_guest_wait_int_vmexit_handler(VCPU *vcpu, struct regs *r,
 	if (!(SHV_OPT & (LHV_NO_EFLAGS_IF | LHV_NO_INTERRUPT))) {
 		asm volatile ("sti; hlt; cli;");
 	}
-	vmcs_vmwrite(vcpu, VMCS_guest_RIP, info->guest_rip + info->inst_len);
+	__vmx_vmwriteNW(VMCS_guest_RIP, info->guest_rip + info->inst_len);
 	vmresume_asm(r);
 }
 
@@ -584,7 +584,7 @@ static void lhv_guest_test_user_vmexit_handler(VCPU *vcpu, struct regs *r,
 		return;
 	}
 	ASSERT(r->eax == 33);
-	vmcs_vmwrite(vcpu, VMCS_guest_RIP, info->guest_rip + info->inst_len);
+	__vmx_vmwriteNW(VMCS_guest_RIP, info->guest_rip + info->inst_len);
 	enter_user_mode(vcpu, 0);
 	vmresume_asm(r);
 }
@@ -642,27 +642,27 @@ static void lhv_guest_msr_bitmap_vmexit_handler(VCPU *vcpu, struct regs *r,
 		case 34:
 			/* Enable MSR bitmap */
 			{
-				u32 val = vmcs_vmread(vcpu, VMCS_control_VMX_cpu_based);
+				u32 val = __vmx_vmread32(VMCS_control_VMX_cpu_based);
 				ASSERT((val & mask) == 0);
 				val |= mask;
-				vmcs_vmwrite(vcpu, VMCS_control_VMX_cpu_based, val);
+				__vmx_vmwrite32(VMCS_control_VMX_cpu_based, val);
 			}
 			for (u32 i = 0; i < PAGE_SIZE_4K; i++) {
 				ASSERT(msr_bitmap[i] == 0);
 			}
 			{
 				u64 addr = (u64) (ulong_t) msr_bitmap;
-				vmcs_vmwrite(vcpu, VMCS_control_MSR_Bitmaps_address, addr);
+				__vmx_vmwrite64(VMCS_control_MSR_Bitmaps_address, addr);
 			}
 			ASSERT(rdmsr64(0x3b) == 0ULL);
 			break;
 		case 37:
 			/* Disable MSR bitmap */
 			{
-				u32 val = vmcs_vmread(vcpu, VMCS_control_VMX_cpu_based);
+				u32 val = __vmx_vmread32(VMCS_control_VMX_cpu_based);
 				ASSERT((val & mask) == mask);
 				val &= ~mask;
-				vmcs_vmwrite(vcpu, VMCS_control_VMX_cpu_based, val);
+				__vmx_vmwrite32(VMCS_control_VMX_cpu_based, val);
 			}
 			wrmsr64(0x3b, 0ULL);
 			break;
@@ -682,21 +682,21 @@ static void lhv_guest_msr_bitmap_vmexit_handler(VCPU *vcpu, struct regs *r,
 			/* Prepare for FS / GS check */
 			ASSERT(rdmsr64(IA32_MSR_FS_BASE) == 0ULL);
 			ASSERT(rdmsr64(IA32_MSR_GS_BASE) == 0ULL);
-			ASSERT(vmcs_vmread(vcpu, VMCS_guest_FS_base) == 0UL);
-			ASSERT(vmcs_vmread(vcpu, VMCS_guest_GS_base) == 0UL);
-			vmcs_vmwrite(vcpu, VMCS_guest_FS_base, 0x680effffUL);
-			vmcs_vmwrite(vcpu, VMCS_guest_GS_base, 0x6810ffffUL);
+			ASSERT(__vmx_vmreadNW(VMCS_guest_FS_base) == 0UL);
+			ASSERT(__vmx_vmreadNW(VMCS_guest_GS_base) == 0UL);
+			__vmx_vmwriteNW(VMCS_guest_FS_base, 0x680effffUL);
+			__vmx_vmwriteNW(VMCS_guest_GS_base, 0x6810ffffUL);
 			break;
 		case 42:
 			/* Check FS / GS */
-			ASSERT(vmcs_vmread(vcpu, VMCS_guest_FS_base) ==
+			ASSERT(__vmx_vmreadNW(VMCS_guest_FS_base) ==
 							  0xffff680eUL);
-			ASSERT(vmcs_vmread(vcpu, VMCS_guest_GS_base) ==
+			ASSERT(__vmx_vmreadNW(VMCS_guest_GS_base) ==
 							  0xffff6810UL);
 			ASSERT(rdmsr64(IA32_MSR_FS_BASE) == 0ULL);
 			ASSERT(rdmsr64(IA32_MSR_GS_BASE) == 0ULL);
-			vmcs_vmwrite(vcpu, VMCS_guest_FS_base, 0UL);
-			vmcs_vmwrite(vcpu, VMCS_guest_GS_base, 0UL);
+			__vmx_vmwriteNW(VMCS_guest_FS_base, 0UL);
+			__vmx_vmwriteNW(VMCS_guest_GS_base, 0UL);
 			break;
 		}
 		break;
@@ -719,7 +719,7 @@ static void lhv_guest_msr_bitmap_vmexit_handler(VCPU *vcpu, struct regs *r,
 	default:
 		ASSERT(0 && "Unknown exit reason");
 	}
-	vmcs_vmwrite(vcpu, VMCS_guest_RIP, info->guest_rip + info->inst_len);
+	__vmx_vmwriteNW(VMCS_guest_RIP, info->guest_rip + info->inst_len);
 	vmresume_asm(r);
 }
 

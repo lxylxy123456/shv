@@ -154,22 +154,6 @@ ulong_t __vmx_vmreadNW(u16 encoding)
 	return value;
 }
 
-void vmcs_vmwrite(VCPU *vcpu, ulong_t encoding, ulong_t value)
-{
-	(void) vcpu;
-	// printf("CPU(0x%02x): vmwrite(0x%04lx, 0x%08lx)\n", vcpu->id, encoding, value);
-	ASSERT(__vmx_vmwrite(encoding, value));
-}
-
-ulong_t vmcs_vmread(VCPU *vcpu, ulong_t encoding)
-{
-	unsigned long value;
-	(void) vcpu;
-	ASSERT(__vmx_vmread(encoding, &value));
-	// printf("CPU(0x%02x): 0x%08lx = vmread(0x%04lx)\n", vcpu->id, value, encoding);
-	return value;
-}
-
 /* Read all VMCS fields defined in SDM from CPU and print. */
 void vmcs_print_all(VCPU *vcpu)
 {

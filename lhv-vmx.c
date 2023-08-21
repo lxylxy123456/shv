@@ -44,34 +44,34 @@ extern u64 x_gdt_start[MAX_VCPU_ENTRIES][GDT_NELEMS];
 static void lhv_vmx_vmcs_init(VCPU *vcpu)
 {
 	// From vmx_initunrestrictedguestVMCS
-	vmcs_vmwrite(vcpu, VMCS_host_CR0, read_cr0());
-	vmcs_vmwrite(vcpu, VMCS_host_CR4, read_cr4());
-	vmcs_vmwrite(vcpu, VMCS_host_CR3, read_cr3());
-	vmcs_vmwrite(vcpu, VMCS_host_CS_selector, read_cs());
-	vmcs_vmwrite(vcpu, VMCS_host_DS_selector, read_ds());
-	vmcs_vmwrite(vcpu, VMCS_host_ES_selector, read_es());
-	vmcs_vmwrite(vcpu, VMCS_host_FS_selector, read_fs());
-	vmcs_vmwrite(vcpu, VMCS_host_GS_selector, read_gs());
-	vmcs_vmwrite(vcpu, VMCS_host_SS_selector, read_ss());
-	vmcs_vmwrite(vcpu, VMCS_host_TR_selector, read_tr());
-	vmcs_vmwrite(vcpu, VMCS_host_GDTR_base, (uintptr_t)g_gdt[vcpu->idx]);
-	vmcs_vmwrite(vcpu, VMCS_host_IDTR_base, (uintptr_t)g_idt);
-	vmcs_vmwrite(vcpu, VMCS_host_TR_base, (u64)(hva_t)g_tss[vcpu->idx]);
-	vmcs_vmwrite(vcpu, VMCS_host_RIP, (u64)(hva_t)vmexit_asm);
+	__vmx_vmwriteNW(VMCS_host_CR0, read_cr0());
+	__vmx_vmwriteNW(VMCS_host_CR4, read_cr4());
+	__vmx_vmwriteNW(VMCS_host_CR3, read_cr3());
+	__vmx_vmwrite16(VMCS_host_CS_selector, read_cs());
+	__vmx_vmwrite16(VMCS_host_DS_selector, read_ds());
+	__vmx_vmwrite16(VMCS_host_ES_selector, read_es());
+	__vmx_vmwrite16(VMCS_host_FS_selector, read_fs());
+	__vmx_vmwrite16(VMCS_host_GS_selector, read_gs());
+	__vmx_vmwrite16(VMCS_host_SS_selector, read_ss());
+	__vmx_vmwrite16(VMCS_host_TR_selector, read_tr());
+	__vmx_vmwriteNW(VMCS_host_GDTR_base, (uintptr_t)g_gdt[vcpu->idx]);
+	__vmx_vmwriteNW(VMCS_host_IDTR_base, (uintptr_t)g_idt);
+	__vmx_vmwriteNW(VMCS_host_TR_base, (u64)(hva_t)g_tss[vcpu->idx]);
+	__vmx_vmwriteNW(VMCS_host_RIP, (u64)(hva_t)vmexit_asm);
 
 	//store vcpu at TOS
 	vcpu->sp = vcpu->sp - sizeof(hva_t);
 	*(hva_t *)vcpu->sp = (hva_t)vcpu;
-	vmcs_vmwrite(vcpu, VMCS_host_RSP, (u64)vcpu->sp);
+	__vmx_vmwriteNW(VMCS_host_RSP, (u64)vcpu->sp);
 
-	vmcs_vmwrite(vcpu, VMCS_host_SYSENTER_CS, rdmsr64(IA32_SYSENTER_CS_MSR));
-	vmcs_vmwrite(vcpu, VMCS_host_SYSENTER_ESP, rdmsr64(IA32_SYSENTER_ESP_MSR));
-	vmcs_vmwrite(vcpu, VMCS_host_SYSENTER_EIP, rdmsr64(IA32_SYSENTER_EIP_MSR));
-	vmcs_vmwrite(vcpu, VMCS_host_FS_base, rdmsr64(IA32_MSR_FS_BASE));
-	vmcs_vmwrite(vcpu, VMCS_host_GS_base, rdmsr64(IA32_MSR_GS_BASE));
+	__vmx_vmwrite32(VMCS_host_SYSENTER_CS, rdmsr64(IA32_SYSENTER_CS_MSR));
+	__vmx_vmwriteNW(VMCS_host_SYSENTER_ESP, rdmsr64(IA32_SYSENTER_ESP_MSR));
+	__vmx_vmwriteNW(VMCS_host_SYSENTER_EIP, rdmsr64(IA32_SYSENTER_EIP_MSR));
+	__vmx_vmwriteNW(VMCS_host_FS_base, rdmsr64(IA32_MSR_FS_BASE));
+	__vmx_vmwriteNW(VMCS_host_GS_base, rdmsr64(IA32_MSR_GS_BASE));
 
 	//setup default VMX controls
-	vmcs_vmwrite(vcpu, VMCS_control_VMX_pin_based,
+	__vmx_vmwrite32(VMCS_control_VMX_pin_based,
 				vcpu->vmx_msrs[INDEX_IA32_VMX_PINBASED_CTLS_MSR]);
 	//activate secondary processor controls
 	{
@@ -79,7 +79,7 @@ static void lhv_vmx_vmcs_init(VCPU *vcpu)
 		proc_ctls |= (1U << VMX_PROCBASED_ACTIVATE_SECONDARY_CONTROLS);
 		proc_ctls &= ~(1U << VMX_PROCBASED_CR3_LOAD_EXITING);
 		proc_ctls &= ~(1U << VMX_PROCBASED_CR3_STORE_EXITING);
-		vmcs_vmwrite(vcpu, VMCS_control_VMX_cpu_based, proc_ctls);
+		__vmx_vmwrite32(VMCS_control_VMX_cpu_based, proc_ctls);
 	}
 	{
 		u32 vmexit_ctls = vcpu->vmx_msrs[INDEX_IA32_VMX_EXIT_CTLS_MSR];
@@ -88,7 +88,7 @@ static void lhv_vmx_vmcs_init(VCPU *vcpu)
 #elif !defined(__i386__)
     #error "Unsupported Arch"
 #endif /* !defined(__i386__) */
-		vmcs_vmwrite(vcpu, VMCS_control_VM_exit_controls, vmexit_ctls);
+		__vmx_vmwrite32(VMCS_control_VM_exit_controls, vmexit_ctls);
 	}
 	{
 		u32 vmentry_ctls = vcpu->vmx_msrs[INDEX_IA32_VMX_ENTRY_CTLS_MSR];
@@ -97,9 +97,9 @@ static void lhv_vmx_vmcs_init(VCPU *vcpu)
 #elif !defined(__i386__)
     #error "Unsupported Arch"
 #endif /* !defined(__i386__) */
-		vmcs_vmwrite(vcpu, VMCS_control_VM_entry_controls, vmentry_ctls);
+		__vmx_vmwrite32(VMCS_control_VM_entry_controls, vmentry_ctls);
 	}
-	vmcs_vmwrite(vcpu, VMCS_control_VMX_seccpu_based,
+	__vmx_vmwrite32(VMCS_control_VMX_seccpu_based,
 				vcpu->vmx_msrs[INDEX_IA32_VMX_PROCBASED_CTLS2_MSR]);
 
 	//Critical MSR load/store
@@ -115,18 +115,18 @@ static void lhv_vmx_vmcs_init(VCPU *vcpu)
 					   hva2spa(vcpu->my_vmentry_msrload));
 		printf("CPU(0x%02x): configured load/store MSR\n", vcpu->id);
 	}
-	vmcs_vmwrite(vcpu, VMCS_control_VM_exit_MSR_load_count, 0);
-	vmcs_vmwrite(vcpu, VMCS_control_VM_entry_MSR_load_count, 0);
-	vmcs_vmwrite(vcpu, VMCS_control_VM_exit_MSR_store_count, 0);
+	__vmx_vmwrite32(VMCS_control_VM_exit_MSR_load_count, 0);
+	__vmx_vmwrite32(VMCS_control_VM_entry_MSR_load_count, 0);
+	__vmx_vmwrite32(VMCS_control_VM_exit_MSR_store_count, 0);
 
 	if (SHV_OPT & LHV_USE_EPT) {
 		u64 eptp;
 		u32 seccpu;
 		lhv_ept_init(vcpu);
 		eptp = lhv_build_ept(vcpu, 0);
-		seccpu = vmcs_vmread(vcpu, VMCS_control_VMX_seccpu_based);
+		seccpu = __vmx_vmread32(VMCS_control_VMX_seccpu_based);
 		seccpu |= (1U << VMX_SECPROCBASED_ENABLE_EPT);
-		vmcs_vmwrite(vcpu, VMCS_control_VMX_seccpu_based, seccpu);
+		__vmx_vmwrite32(VMCS_control_VMX_seccpu_based, seccpu);
 		__vmx_vmwrite64(VMCS_control_EPT_pointer, eptp | 0x1eULL);
 #ifdef __i386__
 #if I386_PAE
@@ -143,31 +143,31 @@ static void lhv_vmx_vmcs_init(VCPU *vcpu)
 	}
 
 	if (SHV_OPT & LHV_USE_VPID) {
-		u32 seccpu = vmcs_vmread(vcpu, VMCS_control_VMX_seccpu_based);
+		u32 seccpu = __vmx_vmread32(VMCS_control_VMX_seccpu_based);
 		seccpu |= (1U << VMX_SECPROCBASED_ENABLE_VPID);
-		vmcs_vmwrite(vcpu, VMCS_control_VMX_seccpu_based, seccpu);
-		vmcs_vmwrite(vcpu, VMCS_control_vpid, 1);
+		__vmx_vmwrite32(VMCS_control_VMX_seccpu_based, seccpu);
+		__vmx_vmwrite16(VMCS_control_vpid, 1);
 	}
 
 	if (SHV_OPT & LHV_USE_UNRESTRICTED_GUEST) {
 		u32 seccpu;
 		ASSERT(SHV_OPT & LHV_USE_EPT);
-		seccpu = vmcs_vmread(vcpu, VMCS_control_VMX_seccpu_based);
+		seccpu = __vmx_vmread32(VMCS_control_VMX_seccpu_based);
 		seccpu |= (1U << VMX_SECPROCBASED_UNRESTRICTED_GUEST);
-		vmcs_vmwrite(vcpu, VMCS_control_VMX_seccpu_based, seccpu);
+		__vmx_vmwrite32(VMCS_control_VMX_seccpu_based, seccpu);
 	}
 
-	vmcs_vmwrite(vcpu, VMCS_control_pagefault_errorcode_mask, 0);
-	vmcs_vmwrite(vcpu, VMCS_control_pagefault_errorcode_match, 0);
-	vmcs_vmwrite(vcpu, VMCS_control_exception_bitmap, 0);
-	vmcs_vmwrite(vcpu, VMCS_control_CR3_target_count, 0);
+	__vmx_vmwrite32(VMCS_control_pagefault_errorcode_mask, 0);
+	__vmx_vmwrite32(VMCS_control_pagefault_errorcode_match, 0);
+	__vmx_vmwrite32(VMCS_control_exception_bitmap, 0);
+	__vmx_vmwrite32(VMCS_control_CR3_target_count, 0);
 
 	//setup guest state
 	//CR0, real-mode, PE and PG bits cleared, set ET bit
 	{
 		ulong_t cr0 = vcpu->vmx_msrs[INDEX_IA32_VMX_CR0_FIXED0_MSR];
 		cr0 |= CR0_ET;
-		vmcs_vmwrite(vcpu, VMCS_guest_CR0, cr0);
+		__vmx_vmwriteNW(VMCS_guest_CR0, cr0);
 	}
 	//CR4, required bits set (usually VMX enabled bit)
 	{
@@ -181,69 +181,69 @@ static void lhv_vmx_vmcs_init(VCPU *vcpu)
 		cr4 |= CR4_PSE;
 #endif /* I386_PAE */
 #endif /* __amd64__ */
-		vmcs_vmwrite(vcpu, VMCS_guest_CR4, cr4);
+		__vmx_vmwriteNW(VMCS_guest_CR4, cr4);
 	}
 	//CR3 set to 0, does not matter
-	vmcs_vmwrite(vcpu, VMCS_guest_CR3, read_cr3());
+	__vmx_vmwriteNW(VMCS_guest_CR3, read_cr3());
 	//IDTR
-	vmcs_vmwrite(vcpu, VMCS_guest_IDTR_base,
-				vmcs_vmread(vcpu, VMCS_host_IDTR_base));
-	vmcs_vmwrite(vcpu, VMCS_guest_IDTR_limit, 0xffff);
+	__vmx_vmwriteNW(VMCS_guest_IDTR_base,
+				__vmx_vmreadNW(VMCS_host_IDTR_base));
+	__vmx_vmwrite32(VMCS_guest_IDTR_limit, 0xffff);
 	//GDTR
-	vmcs_vmwrite(vcpu, VMCS_guest_GDTR_base,
-				vmcs_vmread(vcpu, VMCS_host_GDTR_base));
-	vmcs_vmwrite(vcpu, VMCS_guest_GDTR_limit, 0xffff);
+	__vmx_vmwriteNW(VMCS_guest_GDTR_base,
+				__vmx_vmreadNW(VMCS_host_GDTR_base));
+	__vmx_vmwrite32(VMCS_guest_GDTR_limit, 0xffff);
 	//LDTR, unusable
-	vmcs_vmwrite(vcpu, VMCS_guest_LDTR_base, 0);
-	vmcs_vmwrite(vcpu, VMCS_guest_LDTR_limit, 0x0);
-	vmcs_vmwrite(vcpu, VMCS_guest_LDTR_selector, 0);
-	vmcs_vmwrite(vcpu, VMCS_guest_LDTR_access_rights, 0x10000);
+	__vmx_vmwriteNW(VMCS_guest_LDTR_base, 0);
+	__vmx_vmwrite32(VMCS_guest_LDTR_limit, 0x0);
+	__vmx_vmwrite16(VMCS_guest_LDTR_selector, 0);
+	__vmx_vmwrite32(VMCS_guest_LDTR_access_rights, 0x10000);
 	// TR, should be usable for VMX to work, but not used by guest
-	vmcs_vmwrite(vcpu, VMCS_guest_TR_base, (u64)(hva_t)g_tss[vcpu->idx]);
-	vmcs_vmwrite(vcpu, VMCS_guest_TR_limit, 0x67);
-	vmcs_vmwrite(vcpu, VMCS_guest_TR_selector, __TRSEL);
-	vmcs_vmwrite(vcpu, VMCS_guest_TR_access_rights, 0x8b);
+	__vmx_vmwriteNW(VMCS_guest_TR_base, (u64)(hva_t)g_tss[vcpu->idx]);
+	__vmx_vmwrite32(VMCS_guest_TR_limit, 0x67);
+	__vmx_vmwrite16(VMCS_guest_TR_selector, __TRSEL);
+	__vmx_vmwrite32(VMCS_guest_TR_access_rights, 0x8b);
 	//DR7
-	vmcs_vmwrite(vcpu, VMCS_guest_DR7, 0x400);
+	__vmx_vmwriteNW(VMCS_guest_DR7, 0x400);
 	//RSP
 	{
 		vcpu->my_stack = &all_guest_stack[vcpu->idx][0][PAGE_SIZE_4K];
-		vmcs_vmwrite(vcpu, VMCS_guest_RSP, (u64)(ulong_t)vcpu->my_stack);
+		__vmx_vmwriteNW(VMCS_guest_RSP, (u64)(ulong_t)vcpu->my_stack);
 	}
 	//RIP
-	vmcs_vmwrite(vcpu, VMCS_guest_CS_selector, __CS);
-	vmcs_vmwrite(vcpu, VMCS_guest_CS_base, 0);
-	vmcs_vmwrite(vcpu, VMCS_guest_RIP, (u64)(ulong_t)lhv_guest_entry);
-	vmcs_vmwrite(vcpu, VMCS_guest_RFLAGS, (1 << 1));
+	__vmx_vmwrite16(VMCS_guest_CS_selector, __CS);
+	__vmx_vmwriteNW(VMCS_guest_CS_base, 0);
+	__vmx_vmwriteNW(VMCS_guest_RIP, (u64)(ulong_t)lhv_guest_entry);
+	__vmx_vmwriteNW(VMCS_guest_RFLAGS, (1 << 1));
 	//CS, DS, ES, FS, GS and SS segments
-	vmcs_vmwrite(vcpu, VMCS_guest_CS_limit, 0xffffffff);
+	__vmx_vmwrite32(VMCS_guest_CS_limit, 0xffffffff);
 #ifdef __amd64__
-	vmcs_vmwrite(vcpu, VMCS_guest_CS_access_rights, 0xa09b);
+	__vmx_vmwrite32(VMCS_guest_CS_access_rights, 0xa09b);
 #elif defined(__i386__)
-	vmcs_vmwrite(vcpu, VMCS_guest_CS_access_rights, 0xc09b);
+	__vmx_vmwrite32(VMCS_guest_CS_access_rights, 0xc09b);
 #else /* !defined(__i386__) && !defined(__amd64__) */
     #error "Unsupported Arch"
 #endif /* !defined(__i386__) && !defined(__amd64__) */
-	vmcs_vmwrite(vcpu, VMCS_guest_DS_selector, __DS);
-	vmcs_vmwrite(vcpu, VMCS_guest_DS_base, 0);
-	vmcs_vmwrite(vcpu, VMCS_guest_DS_limit, 0xffffffff);
-	vmcs_vmwrite(vcpu, VMCS_guest_DS_access_rights, 0xc093);
-	vmcs_vmwrite(vcpu, VMCS_guest_ES_selector, __DS);
-	vmcs_vmwrite(vcpu, VMCS_guest_ES_base, 0);
-	vmcs_vmwrite(vcpu, VMCS_guest_ES_limit, 0xffffffff);
-	vmcs_vmwrite(vcpu, VMCS_guest_ES_access_rights, 0xc093);
-	vmcs_vmwrite(vcpu, VMCS_guest_FS_selector, __DS);
-	vmcs_vmwrite(vcpu, VMCS_guest_FS_base, 0);
-	vmcs_vmwrite(vcpu, VMCS_guest_FS_limit, 0xffffffff);
-	vmcs_vmwrite(vcpu, VMCS_guest_FS_access_rights, 0xc093);
-	vmcs_vmwrite(vcpu, VMCS_guest_GS_selector, __DS);
-	vmcs_vmwrite(vcpu, VMCS_guest_GS_base, 0);
-	vmcs_vmwrite(vcpu, VMCS_guest_GS_limit, 0xffffffff);
-	vmcs_vmwrite(vcpu, VMCS_guest_GS_access_rights, 0xc093);
-	vmcs_vmwrite(vcpu, VMCS_guest_SS_selector, __DS);
-	vmcs_vmwrite(vcpu, VMCS_guest_SS_base, 0);
-	vmcs_vmwrite(vcpu, VMCS_guest_SS_limit, 0xffffffff);
-	vmcs_vmwrite(vcpu, VMCS_guest_SS_access_rights, 0xc093);
+	__vmx_vmwrite16(VMCS_guest_DS_selector, __DS);
+	__vmx_vmwriteNW(VMCS_guest_DS_base, 0);
+	__vmx_vmwrite32(VMCS_guest_DS_limit, 0xffffffff);
+	__vmx_vmwrite32(VMCS_guest_DS_access_rights, 0xc093);
+	__vmx_vmwrite16(VMCS_guest_ES_selector, __DS);
+	__vmx_vmwriteNW(VMCS_guest_ES_base, 0);
+	__vmx_vmwrite32(VMCS_guest_ES_limit, 0xffffffff);
+	__vmx_vmwrite32(VMCS_guest_ES_access_rights, 0xc093);
+	__vmx_vmwrite16(VMCS_guest_FS_selector, __DS);
+	__vmx_vmwriteNW(VMCS_guest_FS_base, 0);
+	__vmx_vmwrite32(VMCS_guest_FS_limit, 0xffffffff);
+	__vmx_vmwrite32(VMCS_guest_FS_access_rights, 0xc093);
+	__vmx_vmwrite16(VMCS_guest_GS_selector, __DS);
+	__vmx_vmwriteNW(VMCS_guest_GS_base, 0);
+	__vmx_vmwrite32(VMCS_guest_GS_limit, 0xffffffff);
+	__vmx_vmwrite32(VMCS_guest_GS_access_rights, 0xc093);
+	__vmx_vmwrite16(VMCS_guest_SS_selector, __DS);
+	__vmx_vmwriteNW(VMCS_guest_SS_base, 0);
+	__vmx_vmwrite32(VMCS_guest_SS_limit, 0xffffffff);
+	__vmx_vmwrite32(VMCS_guest_SS_access_rights, 0xc093);
 
 	//setup VMCS link pointer
 	__vmx_vmwrite64(VMCS_guest_VMCS_link_pointer, (u64)0xFFFFFFFFFFFFFFFFULL);
@@ -255,14 +255,14 @@ static void lhv_vmx_vmcs_init(VCPU *vcpu)
 		cr0_mask &= ~(CR0_PG);
 		cr0_mask |= CR0_CD;
 		cr0_mask |= CR0_NW;
-		vmcs_vmwrite(vcpu, VMCS_control_CR0_mask, cr0_mask);
+		__vmx_vmwriteNW(VMCS_control_CR0_mask, cr0_mask);
 	}
-	vmcs_vmwrite(vcpu, VMCS_control_CR0_shadow, CR0_ET);
+	__vmx_vmwriteNW(VMCS_control_CR0_shadow, CR0_ET);
 
 	//trap access to CR4 fixed bits (this includes the VMXE bit)
-	vmcs_vmwrite(vcpu, VMCS_control_CR4_mask,
+	__vmx_vmwriteNW(VMCS_control_CR4_mask,
 				vcpu->vmx_msrs[INDEX_IA32_VMX_CR4_FIXED0_MSR]);
-	vmcs_vmwrite(vcpu, VMCS_control_CR0_shadow, 0);
+	__vmx_vmwriteNW(VMCS_control_CR0_shadow, 0);
 }
 
 void lhv_vmx_main(VCPU *vcpu)
@@ -374,9 +374,9 @@ void lhv_vmx_main(VCPU *vcpu)
 
 void vmexit_handler(VCPU *vcpu, struct regs *r)
 {
-	u32 vmexit_reason = vmcs_vmread(vcpu, VMCS_info_vmexit_reason);
-	ulong_t guest_rip = vmcs_vmread(vcpu, VMCS_guest_RIP);
-	u32 inst_len = vmcs_vmread(vcpu, VMCS_info_vmexit_instruction_length);
+	u32 vmexit_reason = __vmx_vmread32(VMCS_info_vmexit_reason);
+	ulong_t guest_rip = __vmx_vmreadNW(VMCS_guest_RIP);
+	u32 inst_len = __vmx_vmread32(VMCS_info_vmexit_instruction_length);
 
 	if (vcpu->vmexit_handler_override) {
 		vmexit_info_t vmexit_info = {
@@ -399,7 +399,7 @@ void vmexit_handler(VCPU *vcpu, struct regs *r)
 				/* Clear VMX capability */
 				r->ecx &= ~(1U << 5);
 			}
-			vmcs_vmwrite(vcpu, VMCS_guest_RIP, guest_rip + inst_len);
+			__vmx_vmwriteNW(VMCS_guest_RIP, guest_rip + inst_len);
 			break;
 		}
 	case VMX_VMEXIT_RDMSR:
@@ -407,15 +407,15 @@ void vmexit_handler(VCPU *vcpu, struct regs *r)
 			asm volatile ("rdmsr\r\n"
 				  :"=a"(r->eax), "=d"(r->edx)
 				  :"c" (r->ecx));
-			vmcs_vmwrite(vcpu, VMCS_guest_RIP, guest_rip + inst_len);
+			__vmx_vmwriteNW(VMCS_guest_RIP, guest_rip + inst_len);
 			break;
 		}
 	case VMX_VMEXIT_EPT_VIOLATION:
 		ASSERT(SHV_OPT & LHV_USE_EPT);
 		{
-			ulong_t q = vmcs_vmread(vcpu, VMCS_info_exit_qualification);
+			ulong_t q = __vmx_vmreadNW(VMCS_info_exit_qualification);
 			u64 paddr = __vmx_vmread64(VMCS_guest_paddr);
-			ulong_t vaddr = vmcs_vmread(vcpu, VMCS_info_guest_linear_address);
+			ulong_t vaddr = __vmx_vmreadNW(VMCS_info_guest_linear_address);
 			/* Unknown EPT violation */
 			printf("CPU(0x%02x): ept: 0x%08lx\n", vcpu->id, q);
 			printf("CPU(0x%02x): paddr: 0x%016llx\n", vcpu->id, paddr);
@@ -443,7 +443,7 @@ void vmentry_error(ulong_t is_resume, ulong_t valid)
 {
 	VCPU *vcpu = get_vcpu();
 	/* 29.4 VM INSTRUCTION ERROR NUMBERS */
-	ulong_t vminstr_error = vmcs_vmread(vcpu, VMCS_info_vminstr_error);
+	ulong_t vminstr_error = __vmx_vmread32(VMCS_info_vminstr_error);
 	printf("CPU(0x%02x): is_resume = %ld, valid = %ld, err = %ld\n",
 			vcpu->id, is_resume, valid, vminstr_error);
 	ASSERT(is_resume && valid && 0);
