@@ -23,9 +23,9 @@ shv_bin_SOURCES = boot.S gdt.c idt.c idt-asm.S kernel.c paging.c \
 	smp.c smp-asm.S spinlock.c \
 	debug.c debug-uart.c debug-vga.c \
 	libc_string.c libc_stdio.c hpt.c hpto.c hptw.c \
-	lhv-asm.S lhv.c lhv-console.c lhv-ept.c lhv-guest-asm.S lhv-guest.c \
-	lhv-keyboard.c lhv-mouse.c lhv-pic.c lhv-timer.c lhv-user-asm.S lhv-user.c \
-	lhv-vmcs.c lhv-vmx.c lhv-global.c
+	shv-asm.S shv.c shv-console.c shv-ept.c shv-guest-asm.S shv-guest.c \
+	shv-keyboard.c shv-mouse.c shv-pic.c shv-timer.c shv-user-asm.S shv-user.c \
+	shv-vmcs.c shv-vmx.c shv-global.c
 
 shv_bin_CPPFLAGS = -I$(top_srcdir)/include/
 shv_bin_CCASFLAGS = -D__ASSEMBLY__ \
