@@ -101,7 +101,7 @@ void vmcs_vmwrite64(VCPU *vcpu, ulong_t encoding, u64 value);
 ulong_t vmcs_vmread(VCPU *vcpu, ulong_t encoding);
 u64 vmcs_vmread64(VCPU *vcpu, ulong_t encoding);
 
-void vmcs_print(VCPU *vcpu);
+void vmcs_print_all(VCPU *vcpu);
 void vmcs_dump(VCPU *vcpu, int verbose);
 void vmcs_load(VCPU *vcpu);
 

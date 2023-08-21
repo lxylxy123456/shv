@@ -283,6 +283,24 @@ void lhv_vmx_main(VCPU *vcpu)
 		vcpu->vmx_msrs[i] = rdmsr64(IA32_VMX_BASIC_MSR + i);
 	}
 
+	/* Initialize vcpu->vmx_caps */
+	if (vcpu->vmx_msrs[INDEX_IA32_VMX_BASIC_MSR] & (1ULL << 55)) {
+		vcpu->vmx_pinbased_ctls = vcpu->vmx_msrs[INDEX_IA32_VMX_TRUE_PINBASED_CTLS_MSR];
+		vcpu->vmx_procbased_ctls = vcpu->vmx_msrs[INDEX_IA32_VMX_TRUE_PROCBASED_CTLS_MSR];
+		vcpu->vmx_exit_ctls = vcpu->vmx_msrs[INDEX_IA32_VMX_TRUE_EXIT_CTLS_MSR];
+		vcpu->vmx_entry_ctls = vcpu->vmx_msrs[INDEX_IA32_VMX_TRUE_ENTRY_CTLS_MSR];
+	} else {
+		vcpu->vmx_pinbased_ctls = vcpu->vmx_msrs[INDEX_IA32_VMX_PINBASED_CTLS_MSR];
+		vcpu->vmx_procbased_ctls = vcpu->vmx_msrs[INDEX_IA32_VMX_PROCBASED_CTLS_MSR];
+		vcpu->vmx_exit_ctls = vcpu->vmx_msrs[INDEX_IA32_VMX_EXIT_CTLS_MSR];
+		vcpu->vmx_entry_ctls = vcpu->vmx_msrs[INDEX_IA32_VMX_ENTRY_CTLS_MSR];
+	}
+	vcpu->vmx_caps.pinbased_ctls = (vcpu->vmx_pinbased_ctls >> 32);
+	vcpu->vmx_caps.procbased_ctls = (vcpu->vmx_procbased_ctls >> 32);
+	vcpu->vmx_caps.procbased_ctls2 = (vcpu->vmx_msrs[INDEX_IA32_VMX_PROCBASED_CTLS2_MSR] >> 32);
+	vcpu->vmx_caps.exit_ctls = (vcpu->vmx_exit_ctls >> 32);
+	vcpu->vmx_caps.entry_ctls = (vcpu->vmx_entry_ctls >> 32);
+
 	/* Discover support for VMX (22.6 DISCOVERING SUPPORT FOR VMX) */
 	{
 		u32 eax, ebx, ecx, edx;
@@ -335,7 +353,7 @@ void lhv_vmx_main(VCPU *vcpu)
 			for (u32 i = 0; i < 0x1000 / sizeof(u32); i++) {
 				printf("vmcs[0x%03x] = 0x%08x\n", i, ((u32 *)vcpu->my_vmcs)[i]);
 			}
-			vmcs_print(vcpu);
+			vmcs_print_all(vcpu);
 		}
 	}
 

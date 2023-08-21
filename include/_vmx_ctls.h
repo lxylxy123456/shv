@@ -80,6 +80,8 @@ typedef struct vmx_ctls {
 
 /* Begin program-generated content */
 
+// TODO: reduce this file using macros
+
 /* External-interrupt exiting */
 #define VMX_PINBASED_EXTERNAL_INTERRUPT_EXITING 0
 static inline bool _vmx_hasctl_external_interrupt_exiting(vmx_ctls_t *ctls)

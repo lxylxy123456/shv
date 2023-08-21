@@ -184,50 +184,60 @@ u64 vmcs_vmread64(VCPU *vcpu, ulong_t encoding)
 	return __vmx_vmread64(encoding);
 }
 
-void vmcs_print(VCPU *vcpu)
+/* Read all VMCS fields defined in SDM from CPU and print. */
+void vmcs_print_all(VCPU *vcpu)
 {
-#define DECLARE_FIELD_16(encoding, name, ...) \
+#define FIELD_CTLS_ARG (&vcpu->vmx_caps)
+#define DECLARE_FIELD_16(encoding, name, exist, ...) \
 	{ \
 		u16 value; \
 		if (__vmx_vmread16_safe(encoding, &value)) { \
 			printf("CPU(0x%02x): vmread(0x%04x) = %04hx\n", vcpu->id, \
 				   encoding, value); \
+			ASSERT(exist); \
 		} else { \
 			printf("CPU(0x%02x): vmread(0x%04x) = unavailable\n", vcpu->id, \
 				   encoding); \
+			ASSERT(!exist); \
 		} \
 	}
-#define DECLARE_FIELD_64(encoding, name, ...) \
+#define DECLARE_FIELD_64(encoding, name, exist, ...) \
 	{ \
 		u64 value; \
 		if (__vmx_vmread64_safe(encoding, &value)) { \
 			printf("CPU(0x%02x): vmread(0x%04x) = %016llx\n", vcpu->id, \
 				   encoding, value); \
+			ASSERT(exist); \
 		} else { \
 			printf("CPU(0x%02x): vmread(0x%04x) = unavailable\n", vcpu->id, \
 				   encoding); \
+			ASSERT(!exist); \
 		} \
 	}
-#define DECLARE_FIELD_32(encoding, name, ...) \
+#define DECLARE_FIELD_32(encoding, name, exist, ...) \
 	{ \
 		u32 value; \
 		if (__vmx_vmread32_safe(encoding, &value)) { \
 			printf("CPU(0x%02x): vmread(0x%04x) = %08x\n", vcpu->id, \
 				   encoding, value); \
+			ASSERT(exist); \
 		} else { \
 			printf("CPU(0x%02x): vmread(0x%04x) = unavailable\n", vcpu->id, \
 				   encoding); \
+			ASSERT(!exist); \
 		} \
 	}
-#define DECLARE_FIELD_NW(encoding, name, ...) \
+#define DECLARE_FIELD_NW(encoding, name, exist, ...) \
 	{ \
 		ulong_t value; \
 		if (__vmx_vmreadNW_safe(encoding, &value)) { \
 			printf("CPU(0x%02x): vmread(0x%04x) = %08lx\n", vcpu->id, \
 				   encoding, value); \
+			ASSERT(exist); \
 		} else { \
 			printf("CPU(0x%02x): vmread(0x%04x) = unavailable\n", vcpu->id, \
 				   encoding); \
+			ASSERT(!exist); \
 		} \
 	}
 #include <_vmx_vmcs_fields.h>
@@ -237,8 +247,10 @@ void vmcs_print(VCPU *vcpu)
 #undef DECLARE_FIELD_NW
 }
 
+/* Read all existing VMCS fields from CPU to vcpu->vmcs, print if verbose. */
 void vmcs_dump(VCPU *vcpu, int verbose)
 {
+	// TODO
 	#define DECLARE_FIELD(encoding, name)								\
 		do {															\
 			if ((encoding & 0x6000) == 0x0000) {						\
@@ -271,8 +283,10 @@ void vmcs_dump(VCPU *vcpu, int verbose)
 	#undef DECLARE_FIELD
 }
 
+/* Write all existing VMCS fields from vcpu->vmcs to CPU. */
 void vmcs_load(VCPU *vcpu)
 {
+	// TODO
 	#define DECLARE_FIELD(encoding, name)								\
 		do {															\
 			if ((encoding & 0x6000) == 0x0000) {						\
