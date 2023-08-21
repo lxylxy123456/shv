@@ -19,7 +19,15 @@
 
 set -xe
 
-indent -linux -ts4 -i4 *.c include/*.h
+FILES=()
+
+for i in *.c include/*.h; do
+	if [ "$i" != "include/_vmx_vmcs_fields.h" ]; then
+		FILES+=("$i")
+	fi
+done
+
+indent -linux -ts4 -i4 "${FILES[@]}"
 
 # rm *.c~ include/*.h~
 
