@@ -3,13 +3,13 @@ name: Check indent (any in last 10 commits)
 on: ["push", "pull_request"]
 
 jobs:
-  vmcs:
+  indent:
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
-    - name: Check VMCS macros
+    - name: Check indent
       run: |
-        python3 tools/ci/check_indent.sh
+        tools/ci/check_indent.sh
 
