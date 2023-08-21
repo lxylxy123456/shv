@@ -250,37 +250,44 @@ void vmcs_print_all(VCPU *vcpu)
 /* Read all existing VMCS fields from CPU to vcpu->vmcs, print if verbose. */
 void vmcs_dump(VCPU *vcpu, int verbose)
 {
-	// TODO
-	#define DECLARE_FIELD(encoding, name)								\
-		do {															\
-			if ((encoding & 0x6000) == 0x0000) {						\
-				vcpu->vmcs.name = __vmx_vmread16(encoding);				\
-			} else if ((encoding & 0x6000) == 0x2000) {					\
-				vcpu->vmcs.name = __vmx_vmread64(encoding);				\
-			} else if ((encoding & 0x6000) == 0x4000) {					\
-				vcpu->vmcs.name = __vmx_vmread32(encoding);				\
-			} else {													\
-				ASSERT((encoding & 0x6000) == 0x6000);		\
-				vcpu->vmcs.name = __vmx_vmreadNW(encoding);				\
-			}															\
-			if (!verbose) {												\
-				break;													\
-			}															\
-			if (sizeof(vcpu->vmcs.name) == 4) {							\
-				printf("CPU(0x%02x): vcpu->vmcs." #name "=0x%08x\n",	\
-						vcpu->id, vcpu->vmcs.name);						\
-			} else if (sizeof(vcpu->vmcs.name) == 8) {					\
-				printf("CPU(0x%02x): vcpu->vmcs." #name "=0x%016llx\n",	\
-						vcpu->id, vcpu->vmcs.name);						\
-			} else if (sizeof(vcpu->vmcs.name) == 2) {					\
-				printf("CPU(0x%02x): vcpu->vmcs." #name "=0x%04x\n",	\
-						vcpu->id, (u32) vcpu->vmcs.name);				\
-			} else {													\
-				ASSERT(0);									\
-			}															\
-		} while (0);
-	#include <_vmx_vmcs_fields.h>
-	#undef DECLARE_FIELD
+#define FIELD_CTLS_ARG (&vcpu->vmx_caps)
+#define DECLARE_FIELD_16(encoding, name, exist, ...) \
+	if (exist) { \
+		vcpu->vmcs.name = __vmx_vmread16(encoding); \
+		if (verbose) { \
+			printf("CPU(0x%02x): vcpu->vmcs." #name " = %04hx\n", vcpu->id, \
+				   vcpu->vmcs.name); \
+		} \
+	}
+#define DECLARE_FIELD_64(encoding, name, exist, ...) \
+	if (exist) { \
+		vcpu->vmcs.name = __vmx_vmread64(encoding); \
+		if (verbose) { \
+			printf("CPU(0x%02x): vcpu->vmcs." #name " = %016llx\n", vcpu->id, \
+				   vcpu->vmcs.name); \
+		} \
+	}
+#define DECLARE_FIELD_32(encoding, name, exist, ...) \
+	if (exist) { \
+		vcpu->vmcs.name = __vmx_vmread32(encoding); \
+		if (verbose) { \
+			printf("CPU(0x%02x): vcpu->vmcs." #name " = %08x\n", vcpu->id, \
+				   vcpu->vmcs.name); \
+		} \
+	}
+#define DECLARE_FIELD_NW(encoding, name, exist, ...) \
+	if (exist) { \
+		vcpu->vmcs.name = __vmx_vmreadNW(encoding); \
+		if (verbose) { \
+			printf("CPU(0x%02x): vcpu->vmcs." #name " = %08lx\n", vcpu->id, \
+				   vcpu->vmcs.name); \
+		} \
+	}
+#include <_vmx_vmcs_fields.h>
+#undef DECLARE_FIELD_16
+#undef DECLARE_FIELD_64
+#undef DECLARE_FIELD_32
+#undef DECLARE_FIELD_NW
 }
 
 /* Write all existing VMCS fields from vcpu->vmcs to CPU. */
