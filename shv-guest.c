@@ -17,7 +17,7 @@
  */
 
 #include <xmhf.h>
-#include <lhv.h>
+#include <shv.h>
 
 /*
  * From peh-x86-safemsr.c

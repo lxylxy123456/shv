@@ -17,8 +17,8 @@
  */
 
 #include <xmhf.h>
-#include <lhv.h>
-#include <lhv-pic.h>
+#include <shv.h>
+#include <shv-pic.h>
 
 #define PS2_DATA_PORT	0x60
 #define PS2_CTRL_PORT	0x64

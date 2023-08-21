@@ -17,8 +17,8 @@
  */
 
 #include <xmhf.h>
-#include <lhv.h>
-#include <lhv-pic.h>
+#include <shv.h>
+#include <shv-pic.h>
 
 void pic_init(void)
 {

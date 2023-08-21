@@ -217,7 +217,7 @@ typedef struct _vcpu {
 
 #define SHV_STACK_SIZE (65536)
 
-/* lhv-global.c */
+/* shv-global.c */
 extern u32 g_midtable_numentries;
 extern PCPU g_cpumap[MAX_PCPU_ENTRIES];
 extern MIDTAB g_midtable[MAX_VCPU_ENTRIES];

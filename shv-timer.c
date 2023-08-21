@@ -17,8 +17,8 @@
  */
 
 #include <xmhf.h>
-#include <lhv.h>
-#include <lhv-pic.h>
+#include <shv.h>
+#include <shv-pic.h>
 
 #define RTC_SECS  0
 #define RTC_MINS  2

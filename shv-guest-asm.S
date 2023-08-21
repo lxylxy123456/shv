@@ -17,7 +17,7 @@
  */
 
 #include <xmhf.h>
-#include <lhv.h>
+#include <shv.h>
 
 .global lhv_guest_entry
 

@@ -47,42 +47,42 @@ typedef struct {
 #define SHV_USE_PS2_MOUSE			0x0000000000001000ULL
 /* End of bit definitions for SHV_OPT */
 
-/* lhv.c */
+/* shv.c */
 void lhv_main(VCPU *vcpu);
 void handle_lhv_syscall(VCPU *vcpu, int vector, struct regs *r);
 
-/* lhv-console.c */
+/* shv-console.c */
 void console_cursor_clear(void);
 void console_clear(console_vc_t *vc);
 char console_get_char(console_vc_t *vc, int x, int y);
 void console_put_char(console_vc_t *vc, int x, int y, char c);
 void console_get_vc(console_vc_t *vc, int num, int guest);
 
-/* lhv-timer.c */
+/* shv-timer.c */
 void timer_init(VCPU *vcpu);
 void handle_timer_interrupt(VCPU *vcpu, int vector, int guest);
 
-/* lhv-pic.c */
+/* shv-pic.c */
 void pic_init(void);
 int pic_spurious(unsigned char irq);
 
-/* lhv-keyboard.c */
+/* shv-keyboard.c */
 void handle_keyboard_interrupt(VCPU *vcpu, int vector, int guest);
 
-/* lhv-mouse.c */
+/* shv-mouse.c */
 void mouse_init(VCPU *vcpu);
 void handle_mouse_interrupt(VCPU *vcpu, int vector, int guest);
 
-/* lhv-vmx.c */
+/* shv-vmx.c */
 void lhv_vmx_main(VCPU *vcpu);
 void vmentry_error(ulong_t is_resume, ulong_t valid);
 
-/* lhv-asm.S */
+/* shv-asm.S */
 void vmexit_asm(void);				/* Called by hardware only */
 void vmlaunch_asm(struct regs *r);	/* Never returns */
 void vmresume_asm(struct regs *r);	/* Never returns */
 
-/* lhv-ept.c */
+/* shv-ept.c */
 extern u8 large_pages[2][PAGE_SIZE_2M] __attribute__((aligned(PAGE_SIZE_2M)));
 
 /*
@@ -94,7 +94,7 @@ extern u8 large_pages[2][PAGE_SIZE_2M] __attribute__((aligned(PAGE_SIZE_2M)));
 void lhv_ept_init(VCPU *vcpu);
 u64 lhv_build_ept(VCPU *vcpu, u8 ept_num);
 
-/* lhv-vmcs.c */
+/* shv-vmcs.c */
 void __vmx_vmwrite16(u16 encoding, u16 value);
 void __vmx_vmwrite64(u16 encoding, u64 value);
 void __vmx_vmwrite32(u16 encoding, u32 value);
@@ -111,11 +111,11 @@ void vmcs_print_all(VCPU *vcpu);
 void vmcs_dump(VCPU *vcpu, int verbose);
 void vmcs_load(VCPU *vcpu);
 
-/* lhv-guest-asm.S */
+/* shv-guest-asm.S */
 void lhv_guest_entry(void);
 void lhv_guest_xcphandler(VCPU * vcpu, struct regs *r, iret_info_t * info);
 
-/* lhv-user.c */
+/* shv-user.c */
 typedef struct ureg_t {
 	struct regs r;
 	uintptr_t eip;
@@ -127,7 +127,7 @@ typedef struct ureg_t {
 void enter_user_mode(VCPU *vcpu, ulong_t arg);
 void user_main(VCPU *vcpu, ulong_t arg);
 
-/* lhv-user-asm.S */
+/* shv-user-asm.S */
 void enter_user_mode_asm(ureg_t *ureg, uintptr_t *esp0);
 void exit_user_mode_asm(uintptr_t esp0);
 

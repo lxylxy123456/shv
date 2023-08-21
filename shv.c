@@ -17,7 +17,7 @@
  */
 
 #include <xmhf.h>
-#include <lhv.h>
+#include <shv.h>
 
 void lhv_main(VCPU *vcpu)
 {

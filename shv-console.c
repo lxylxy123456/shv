@@ -17,7 +17,7 @@
  */
 
 #include <xmhf.h>
-#include <lhv.h>
+#include <shv.h>
 
 #define CRTC_IDX_REG 0x3d4
 #define CRTC_DATA_REG 0x3d5

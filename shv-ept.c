@@ -17,7 +17,7 @@
  */
 
 #include <xmhf.h>
-#include <lhv.h>
+#include <shv.h>
 
 #define EPT_POOL_SIZE 128
 

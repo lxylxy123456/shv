@@ -17,7 +17,7 @@
  */
 
 #include <xmhf.h>
-#include <lhv.h>
+#include <shv.h>
 
 #define IDT_NELEMS 256
 uintptr_t g_idt[IDT_NELEMS][2];

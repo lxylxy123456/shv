@@ -17,7 +17,7 @@
  */
 
 #include <xmhf.h>
-#include <lhv.h>
+#include <shv.h>
 #include "trustvisor.h"
 
 /* Stack for user program */

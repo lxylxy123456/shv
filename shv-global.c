@@ -17,7 +17,7 @@
  */
 
 #include <xmhf.h>
-#include <lhv.h>
+#include <shv.h>
 
 u32 g_midtable_numentries;
 PCPU g_cpumap[MAX_PCPU_ENTRIES];

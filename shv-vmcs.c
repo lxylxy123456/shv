@@ -17,7 +17,7 @@
  */
 
 #include <xmhf.h>
-#include <lhv.h>
+#include <shv.h>
 
 /* Write 16-bit VMCS field, never fails */
 void __vmx_vmwrite16(u16 encoding, u16 value) {
