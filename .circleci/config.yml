@@ -41,7 +41,7 @@ jobs:
       - run:
           name: "Build"
           command: |
-            tools/ci/build.sh --<< parameters.subarch >> -O0 --shv-opt 0xdfd
+            tools/build.sh --<< parameters.subarch >> -O0 --shv-opt 0xdfd
       - run:
           name: "Versions"
           command: |

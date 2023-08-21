@@ -18,13 +18,13 @@
 
 void build_shv(String subarch, String build_opts) {
     sh "git clean -Xdf"
-    sh "./tools/ci/build.sh --${subarch} ${build_opts}"
+    sh "./tools/build.sh --${subarch} ${build_opts}"
 }
 
 void build_xmhf(String subarch, String workdir, String build_opts) {
     PWD = sh(returnStdout: true, script: 'pwd').trim()
     sh "git clean -Xdf"
-    sh "./tools/ci/build.sh ${subarch} ${build_opts}"
+    sh "./tools/build.sh ${subarch} ${build_opts}"
     sh "rm -rf ${workdir}"
     sh "mkdir ${workdir}"
     sh """

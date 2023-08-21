@@ -63,7 +63,7 @@ def spawn_qemu(args, serial_file):
 		img = ['-d', args.xmhf_img, args.qcow2_suffix,
 			   '-d', args.shv_img, args.qcow2_suffix]
 	qemu_args = [
-		os.path.join(SCRIPT_DIR, 'qemu.sh'), '-m', args.memory, *img,
+		os.path.join(SCRIPT_DIR, '../qemu.sh'), '-m', args.memory, *img,
 		'-smp', str(args.smp), '-serial', 'file:%s' % serial_file,
 	]
 	if args.no_display:

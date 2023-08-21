@@ -79,17 +79,17 @@ pipeline {
                 sh "mkdir i386 pae amd64"
                 dir ("i386") {
                     script {
-                        sh "../tools/ci/build.sh -s .. --i386 ${build_opts}"
+                        sh "../tools/build.sh -s .. --i386 ${build_opts}"
                     }
                 }
                 dir ("pae") {
                     script {
-                        sh "../tools/ci/build.sh -s .. --pae ${build_opts}"
+                        sh "../tools/build.sh -s .. --pae ${build_opts}"
                     }
                 }
                 dir ("amd64") {
                     script {
-                        sh "../tools/ci/build.sh -s .. --amd64 ${build_opts}"
+                        sh "../tools/build.sh -s .. --amd64 ${build_opts}"
                     }
                 }
             }

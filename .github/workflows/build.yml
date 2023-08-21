@@ -46,9 +46,9 @@ jobs:
                      autoconf libtool xorriso mtools grub-pc
     - name: Build
       run: |
-        tools/ci/build.sh --${{ matrix.target_arch }} \
-                          -${{ matrix.optimize_mode }} \
-                          --shv-opt 0xdfd
+        tools/build.sh --${{ matrix.target_arch }} \
+                       -${{ matrix.optimize_mode }} \
+                       --shv-opt 0xdfd
         make -j $(nproc)
     - name: Release
       uses: actions/upload-artifact@v3
