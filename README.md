@@ -12,20 +12,20 @@ SHV is open source and is released under GPLv3.
 
 ## History and acknowledgements
 
-SHV is ported from LHV. The boot process of LHV based on XMHF64 and is
+**SHV** is ported from LHV. The boot process of LHV based on XMHF64 and is
 complicated. SHV rewrites the booting process to make it easy to debug.
 
-[LHV](https://github.com/lxylxy123456/uberxmhf/tree/lhv) is used during the
+[**LHV**](https://github.com/lxylxy123456/uberxmhf/tree/lhv) is used during the
 development of XMHF64 to test XMHF64's nested virtualization functionality.
 LHV is written by [lxylxy123456](https://github.com/lxylxy123456), based on
 XMHF64.
 
-[XMHF64](https://github.com/lxylxy123456/uberxmhf) is a research project by
+[**XMHF64**](https://github.com/lxylxy123456/uberxmhf) is a research project by
 [lxylxy123456](https://github.com/lxylxy123456). XMHF64 is based on XMHF. XMHF
 only supports 32-bit OSes, but XMHF64 also supports 64-bit OSes. XMHF does not
 support nested virtualizatoin, but XMHF64 supports nested virtualization.
 
-[XMHF](https://github.com/uberspark/uberxmhf/tree/master/xmhf) (eXtensible
+[**XMHF**](https://github.com/uberspark/uberxmhf/tree/master/xmhf) (eXtensible
 Micro-Hypervisor Framework) is a micro-hypervisor research project by Vasudevan
 et al. XMHF uses multiple pieces of open source software. Please see
 <https://github.com/uberspark/uberxmhf/blob/master/xmhf/COPYING.md>.
@@ -38,7 +38,7 @@ are:
 
 ## Building SHV
 
-Hint: looking at [#CI](#CI) may be helpful when something does not work.
+Hint: looking at [CI](#ci) section may be helpful when something does not work.
 
 Install dependencies (`qemu-system-x86` is only needed for testing), in this
 example we demonstrate installing on Debian-based Linux:
@@ -59,6 +59,11 @@ mkdir build
 cd build
 ../tools/build.sh
 ```
+
+To specify the platform to build for:
+* i386, 32-bit paging: `--i386` or `-i`
+* i386, PAE paging: `--pae` or `-p`
+* amd64, 4-level paging: `--amd64` or `-a`
 
 To view the command `build.sh` passes to `configure`:
 ```sh
@@ -105,7 +110,7 @@ To view other configuration options:
 
 ### Running SHV on QEMU
 
-There are two options to load SHV to QEMU / KVM.
+There are two ways to load SHV to QEMU / KVM.
 * To load SHV image directly, use `-kernel shv.bin`.
 * To boot SHV using GRUB, use `-cdrom grub.iso`.
 
@@ -126,7 +131,7 @@ To view arguments to `qemu.sh`:
 ../tools/qemu.sh -h
 ```
 
-#### Debugging SHV
+#### Debugging SHV using QEMU and GDB
 
 Pass `-s` to QEMU to enable GDB server. Optionally pass `-S` to let QEMU wait
 for the GDB server after initializing.
