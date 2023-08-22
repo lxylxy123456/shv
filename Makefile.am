@@ -19,13 +19,42 @@
 # Template from http://www.idryman.org/blog/2016/03/10/autoconf-tutorial-1/
 
 bin_PROGRAMS = shv.bin
-shv_bin_SOURCES = boot.S gdt.c idt.c idt-asm.S kernel.c paging.c \
-	smp.c smp-asm.S spinlock.c \
-	debug.c debug-uart.c debug-vga.c \
-	libc_string.c libc_stdio.c hpt.c hpto.c hptw.c \
-	shv-asm.S shv.c shv-console.c shv-ept.c shv-guest-asm.S shv-guest.c \
-	shv-keyboard.c shv-mouse.c shv-pic.c shv-timer.c shv-user-asm.S shv-user.c \
-	shv-vmcs.c shv-vmx.c shv-global.c
+
+# List all source files in src.
+# "subdir-objects" in configure.ac allows source file in sub-directories.
+shv_bin_SOURCES = \
+	src/boot.S \
+	src/debug-uart.c \
+	src/debug-vga.c \
+	src/debug.c \
+	src/gdt.c \
+	src/hpt.c \
+	src/hpto.c \
+	src/hptw.c \
+	src/idt-asm.S \
+	src/idt.c \
+	src/kernel.c \
+	src/libc_stdio.c \
+	src/libc_string.c \
+	src/paging.c \
+	src/shv-asm.S \
+	src/shv-console.c \
+	src/shv-ept.c \
+	src/shv-global.c \
+	src/shv-guest-asm.S \
+	src/shv-guest.c \
+	src/shv-keyboard.c \
+	src/shv-mouse.c \
+	src/shv-pic.c \
+	src/shv-timer.c \
+	src/shv-user-asm.S \
+	src/shv-user.c \
+	src/shv-vmcs.c \
+	src/shv-vmx.c \
+	src/shv.c \
+	src/smp-asm.S \
+	src/smp.c \
+	src/spinlock.c
 
 shv_bin_CPPFLAGS = -I$(top_srcdir)/include/
 shv_bin_CCASFLAGS = -D__ASSEMBLY__ \

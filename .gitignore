@@ -35,6 +35,7 @@ config.status
 stamp-h1
 include/config.h
 include/config.h.in
+src/.dirstamp
 
 build/
 tmp/

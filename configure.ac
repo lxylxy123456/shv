@@ -25,7 +25,7 @@
 AC_INIT([shv], [1.0])
 
 # Safety checks in case user overwritten --srcdir
-AC_CONFIG_SRCDIR([kernel.c])
+AC_CONFIG_SRCDIR([src/kernel.c])
 
 # Store the auxiliary build tools (e.g., install-sh, config.sub, config.guess)
 # in this dir (build-aux)
@@ -37,7 +37,7 @@ AC_CONFIG_HEADERS([include/config.h])
 # Init automake, and specify this program use relaxed structures.
 # i.e. this program doesn't follow the gnu coding standards, and doesn't have
 # ChangeLog, COPYING, AUTHORS, INSTALL, README etc. files.
-AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 
 # Check for C compiler
 AC_PROG_CC
