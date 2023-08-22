@@ -31,7 +31,7 @@ usage () {
 	echo '	-m, --mem <MEM>     Set amd64 max physical mem.'
 	echo '	-O <level>          Set GCC optimization level.'
 	echo '	-s, --shv-opt <OPT> Set SHV_OPT.'
-	echo '	-v, --vga           Also output to VGA (default is serial).'
+	echo '	-v, --vga           Also output to VGA, consider SHV_NO_VGA_ART.'
 	exit 1
 }
 

@@ -21,9 +21,6 @@
 
 void shv_main(VCPU * vcpu)
 {
-	console_vc_t vc;
-	console_get_vc(&vc, vcpu->idx, 0);
-	console_clear(&vc);
 	if (vcpu->isbsp) {
 		console_cursor_clear();
 		pic_init();
@@ -34,13 +31,18 @@ void shv_main(VCPU * vcpu)
 		}
 	}
 	timer_init(vcpu);
-	ASSERT(vc.height >= 2);
-	for (int i = 0; i < vc.width; i++) {
-		for (int j = 0; j < 2; j++) {
+	if (!(SHV_OPT & SHV_NO_VGA_ART)) {
+		console_vc_t vc;
+		console_get_vc(&vc, vcpu->idx, 0);
+		console_clear(&vc);
+		ASSERT(vc.height >= 2);
+		for (int i = 0; i < vc.width; i++) {
+			for (int j = 0; j < 2; j++) {
 #ifndef __DEBUG_VGA__
-			ASSERT(console_get_char(&vc, i, j) == ' ');
+				ASSERT(console_get_char(&vc, i, j) == ' ');
 #endif							/* !__DEBUG_VGA__ */
-			console_put_char(&vc, i, j, '0' + vcpu->id);
+				console_put_char(&vc, i, j, '0' + vcpu->id);
+			}
 		}
 	}
 	/* Demonstrate disabling paging in hypervisor */

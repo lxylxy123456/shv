@@ -828,7 +828,7 @@ void shv_guest_main(ulong_t cpu_id)
 		cpuid(0x46484d58U, &eax, &ebx, &ecx, &edx);
 		in_xmhf = (eax == 0x46484d58U);
 	}
-	{
+	if (!(SHV_OPT & SHV_NO_VGA_ART)) {
 		console_vc_t vc;
 		console_get_vc(&vc, vcpu->idx, 1);
 		console_clear(&vc);

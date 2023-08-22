@@ -155,14 +155,18 @@ void handle_timer_interrupt(VCPU * vcpu, int vector, int guest)
 	}
 	if (vector == 0x20) {
 		vcpu->pit_time++;
-		update_screen(vcpu, &vcpu->shv_pit_x[guest], 0, guest);
+		if (!(SHV_OPT & SHV_NO_VGA_ART)) {
+			update_screen(vcpu, &vcpu->shv_pit_x[guest], 0, guest);
+		}
 		outb(INT_CTL_PORT, INT_ACK_CURRENT);
 		if (!"Calibrate timer" && vcpu->pit_time % 50 == 0) {
 			calibrate_timer(vcpu);
 		}
 	} else if (vector == 0x22) {
 		vcpu->lapic_time++;
-		update_screen(vcpu, &vcpu->shv_lapic_x[guest], 1, guest);
+		if (!(SHV_OPT & SHV_NO_VGA_ART)) {
+			update_screen(vcpu, &vcpu->shv_lapic_x[guest], 1, guest);
+		}
 		write_lapic(LAPIC_EOI, 0);
 		if (!"Calibrate timer" && vcpu->isbsp && vcpu->lapic_time % 50 == 0) {
 			calibrate_timer(vcpu);

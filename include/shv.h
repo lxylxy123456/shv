@@ -45,6 +45,7 @@ typedef struct {
 #define SHV_USE_MSRBITMAP			0x0000000000000400ULL
 #define SHV_NESTED_USER_MODE		0x0000000000000800ULL	/* Need !0x2 */
 #define SHV_USE_PS2_MOUSE			0x0000000000001000ULL
+#define SHV_NO_VGA_ART              0x0000000000002000ULL
 /* End of bit definitions for SHV_OPT */
 
 /* shv.c */
