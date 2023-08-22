@@ -24,26 +24,31 @@ usage () {
 	echo "$0: automatically configure and build SHV."
 	echo '	-h                  Print this help message.'
 	echo '	-n                  Dry run, only print configuration command.'
-	echo '	-s, --srcdir <DIR>  Configure source directory, instead of ".".'
 	echo '	-A, --ac            Force performing autoreconf --install.'
 	echo '	-i, --i386          Use 32-bit paging.'
 	echo '	-p, --pae           Use 32-bit PAE paging.'
 	echo '	-a, --amd64         Use 64-bit 4-level paging.'
 	echo '	-m, --mem <MEM>     Set amd64 max physical mem.'
 	echo '	-O <level>          Set GCC optimization level.'
-	echo '	-S, --shv-opt <OPT> Set SHV_OPT.'
+	echo '	-s, --shv-opt <OPT> Set SHV_OPT.'
 	exit 1
 }
+
+# Compute directory.
+SCRIPT_DIR="$(dirname $BASH_SOURCE)"
+SRCDIR="$SCRIPT_DIR/.."
+if [ ! -f "$SRCDIR/configure.ac" ]; then
+	usage 'please check project structure and configure.ac.'
+fi
 
 # Initialize variables.
 conf=()
 DRY_RUN='n'
-SRCDIR='.'
 AC='n'
 
 # Parse arguments.
-opt=$(getopt -o 'hns:Aipam:O:S:' \
-			--long 'srcdir:,ac,i386,pae,amd64,mem:,shv-opt:' -- "$@")
+opt=$(getopt -o 'hnAipam:O:s:' \
+			--long 'ac,i386,pae,amd64,mem:,shv-opt:' -- "$@")
 [ "$?" == "0" ] || usage 'getopt failed'
 eval set -- "$opt"
 while true; do
@@ -54,10 +59,6 @@ while true; do
 		;;
 	-n)
 		DRY_RUN='y'
-		;;
-	-s|--srcdir)
-		SRCDIR="$2"
-		shift
 		;;
 	-A|--ac)
 		AC='y'
@@ -82,7 +83,7 @@ while true; do
 		conf+=("CFLAGS=-g -O$2")
 		shift
 		;;
-	-S|--shv-opt)
+	-s|--shv-opt)
 		conf+=("--with-shv-opt=$2")
 		shift
 		;;
