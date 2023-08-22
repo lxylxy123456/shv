@@ -31,6 +31,7 @@ usage () {
 	echo '	-m, --mem <MEM>     Set amd64 max physical mem.'
 	echo '	-O <level>          Set GCC optimization level.'
 	echo '	-s, --shv-opt <OPT> Set SHV_OPT.'
+	echo '	-v, --vga           Also output to VGA (default is serial).'
 	exit 1
 }
 
@@ -47,8 +48,8 @@ DRY_RUN='n'
 AC='n'
 
 # Parse arguments.
-opt=$(getopt -o 'hnAipam:O:s:' \
-			--long 'ac,i386,pae,amd64,mem:,shv-opt:' -- "$@")
+opt=$(getopt -o 'hnAipam:O:s:v' \
+			--long 'ac,i386,pae,amd64,mem:,shv-opt:,vga' -- "$@")
 [ "$?" == "0" ] || usage 'getopt failed'
 eval set -- "$opt"
 while true; do
@@ -86,6 +87,9 @@ while true; do
 	-s|--shv-opt)
 		conf+=("--with-shv-opt=$2")
 		shift
+		;;
+	-v|--vga)
+		conf+=("--enable-debug-vga")
 		;;
 	--)
 		break
