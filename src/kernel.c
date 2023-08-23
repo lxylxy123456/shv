@@ -25,8 +25,8 @@ void kernel_main(void)
 {
 	/* Initialize terminal interface. */
 	{
-		extern void dbg_x86_vgamem_init(void);
-		dbg_x86_vgamem_init();
+		extern void emhfc_debug_init(void);
+		emhfc_debug_init();
 	}
 
 	/* Print banner. */

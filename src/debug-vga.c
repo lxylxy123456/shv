@@ -104,9 +104,8 @@ void dbg_x86_vgamem_putstr(const char *str)
 		dbg_x86_vgamem_putc(c);
 }
 
-void dbg_x86_vgamem_init(char *params)
+void dbg_x86_vgamem_init(void)
 {
-	(void)params;				//we don't use params for the VGA backend currently
 	memset((char *)vidmem, 0, COLS * ROWS * 2);
 	vid_x = vid_y = 0;
 }

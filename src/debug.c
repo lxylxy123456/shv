@@ -69,8 +69,21 @@
 static spin_lock_t emhfc_putchar_linelock_spinlock;
 spin_lock_t *emhfc_putchar_linelock_arg = &emhfc_putchar_linelock_spinlock;
 
+extern void dbg_x86_uart_init(void);
 extern void dbg_x86_uart_putc(char c);
+extern void dbg_x86_vgamem_init(void);
 extern void dbg_x86_vgamem_putc(char c);
+
+void emhfc_debug_init(void)
+{
+#if DEBUG_SERIAL
+	dbg_x86_uart_init();
+#endif							/* DEBUG_SERIAL */
+
+#if DEBUG_VGA
+	dbg_x86_vgamem_init();
+#endif							/* DEBUG_VGA */
+}
 
 void emhfc_putchar(int c, void *arg)
 {

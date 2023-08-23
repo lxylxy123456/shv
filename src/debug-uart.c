@@ -97,3 +97,12 @@ void dbg_x86_uart_putstr(const char *s)
 	while (*s)
 		dbg_x86_uart_putc(*s++);
 }
+
+//initialize UART comms.
+void dbg_x86_uart_init(void)
+{
+	// disable UART interrupts
+	outb(UART_PORT + 0x1, (u8) 0);
+
+	// Note: some code removed. See XMHF64 dbg-x86-uart.c for full version.
+}
