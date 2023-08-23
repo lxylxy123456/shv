@@ -247,6 +247,5 @@ TODO
 
 * Complete README
 * Port lhv-nmi (add new configuration option, use bit map)
-* VirtualBox has serial port interrupt at 0x24
 * VirtualBox cannot boot SMP, `vcpu->id = vcpu->idx = 0`
 

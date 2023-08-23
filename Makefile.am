@@ -60,7 +60,7 @@ shv_bin_CPPFLAGS = -I$(top_srcdir)/include/
 shv_bin_CCASFLAGS = -D__ASSEMBLY__ \
 	-Wall -Werror
 shv_bin_CFLAGS = \
-	-Wall -Werror -Wno-format -Wno-array-bounds \
+	-Wall -Werror -Wno-format -Wno-array-bounds -Wno-address-of-packed-member \
 	-fno-stack-protector -fno-mudflap -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
 	-mno-mmx -mno-sse -mno-sse2 -mno-sse3 -mno-ssse3 \
 	-mno-sse4.1 -mno-sse4.2 -mno-sse4 -mno-avx -mno-aes \

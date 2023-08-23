@@ -400,9 +400,7 @@ void vmexit_handler(VCPU * vcpu, struct regs *r)
 	case VMX_VMEXIT_CPUID:
 		{
 			u32 old_eax = r->eax;
-			asm volatile ("cpuid\r\n":"=a" (r->eax), "=b"(r->ebx), "=c"(r->ecx),
-						  "=d"(r->edx)
-						  :"a"(r->eax), "c"(r->ecx));
+			cpuid_raw(&r->eax, &r->ebx, &r->ecx, &r->edx);
 			if (old_eax == 0x1) {
 				/* Clear VMX capability */
 				r->ecx &= ~(1U << 5);
@@ -412,8 +410,7 @@ void vmexit_handler(VCPU * vcpu, struct regs *r)
 		}
 	case VMX_VMEXIT_RDMSR:
 		{
-			asm volatile ("rdmsr\r\n":"=a" (r->eax), "=d"(r->edx)
-						  :"c"(r->ecx));
+			rdmsr(r->ecx, &r->eax, &r->edx);
 			__vmx_vmwriteNW(VMCS_guest_RIP, guest_rip + inst_len);
 			break;
 		}

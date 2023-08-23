@@ -126,6 +126,11 @@ static inline u16 read_tr(void)
 	return ans;
 }
 
+static inline void rdmsr(u32 msr, u32 * eax, u32 * edx)
+{
+	asm volatile ("rdmsr":"=a" (*eax), "=d"(*edx):"c"(msr));
+}
+
 static inline u64 rdmsr64(u32 msr)
 {
 	union {
@@ -137,6 +142,11 @@ static inline u64 rdmsr64(u32 msr)
 	} ans;
 	asm volatile ("rdmsr":"=a" (ans.eax), "=d"(ans.edx):"c"(msr));
 	return ans.eaxedx;
+}
+
+static inline void wrmsr(u32 msr, u32 eax, u32 edx)
+{
+	asm volatile ("wrmsr"::"a" (eax), "d"(edx), "c"(msr));
 }
 
 static inline void wrmsr64(u32 msr, u64 val)
