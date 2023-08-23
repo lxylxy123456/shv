@@ -195,7 +195,7 @@ static u8 pal_demo_param[MAX_VCPU_ENTRIES][PAGE_SIZE_4K] ALIGNED_PAGE;
 static inline uintptr_t vmcall(uintptr_t eax, uintptr_t ecx, uintptr_t edx,
 							   uintptr_t esi, uintptr_t edi)
 {
-	asm volatile ("vmcall\n\t":"=a" (eax):"a"(eax), "c"(ecx), "d"(edx),
+	asm volatile ("vmcall":"=a" (eax):"a"(eax), "c"(ecx), "d"(edx),
 				  "S"(esi), "D"(edi));
 	return eax;
 }
@@ -205,7 +205,7 @@ static inline uintptr_t vmcall(uintptr_t eax, uintptr_t ecx, uintptr_t edx,
 __attribute__((__noreturn__))
 void leave_user_mode(void)
 {
-	asm volatile ("movl $0xdeaddead, %eax; int $0x23;");
+	asm volatile ("int $0x23"::"a" (0xdeaddeadU));
 	ASSERT(0 && "system call returned");
 }
 
