@@ -142,13 +142,58 @@ gdb --ex 'target remote localhost:1234' --ex 'symbol-file shv.bin'
 ```
 
 ### Running SHV on real hardware
-TODO
+
+Running SHV on real hardware requires a machine with Intel CPU that supports
+BIOS booting. Note that computers manufactures after around 2020 no longer
+supports BIOS booting (i.e. only supports UEFI). See
+[technical advisory](https://www.intel.com/content/dam/support/us/en/documents/intel-nuc/Legacy-BIOS-Boot-Support-Removal-for-Intel-Platforms.pdf)
+by Intel.
+
+If the real hardware has GRUB installed in BIOS mode, then it can add SHV as a
+menuentry in GRUB. Otherwise, it is probably easier to boot SHV via a CD or USB
+stick.
+
+#### Boot from existing GRUB installation
+
+First, put `shv.bin` to `/boot` of the machine.
+
+Second, add the following menuentry block to `/etc/grub.d/40_custom`. It is
+similar to the one in [grub.cfg](./grub.cfg), but `(hd0,msdos3)` refers to the
+`/` partition in GRUB. In my case it is `/dev/sda3` in Linux.
+```
+menuentry "shv" {
+	multiboot (hd0,msdos3)/boot/shv.bin
+}
+```
+
+Third, update `grub.cfg`. On Debian this is `sudo update-grub`. On Fedora this
+is `sudo grub2-mkconfig -o /boot/grub2/grub.cfg`.
+
+Fourth, restart the machine and select SHV in GRUB.
+
+#### Boot from USB
+
+First, write grub.iso to the USB or CD (suppose the USB is `/dev/sdX`):
+```sh
+dd if=grub.iso of=/dev/sdX
+```
+
+Then boot the real machine with the USB or CD.
 
 ### Running SHV on VMware
 TODO
 
 ### Running SHV on VirtualBox
-TODO
+
+Create a new virtual machine using VirtualBox, select `grub.iso` as the disk
+to boot the OS. Make sure to allocate enough memory.
+
+Since SHV requires nested virtualization, make sure to check
+"Enable Nested VT-x/AMD-V" in VM settings. If the checkbox is grayed out, try
+the commands from <https://stackoverflow.com/questions/54251855/>:
+```sh
+VBoxManage modifyvm <VirtualMachineName> --nested-hw-virt on
+```
 
 ### Running SHV on Hyper-V
 TODO
@@ -200,6 +245,8 @@ TODO
 
 ## TODO
 
-Complete README
-Port lhv-nmi
+* Complete README
+* Port lhv-nmi (add new configuration option, use bit map)
+* VirtualBox has serial port interrupt at 0x24
+* VirtualBox cannot boot SMP, `vcpu->id = vcpu->idx = 0`
 
