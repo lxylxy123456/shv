@@ -248,4 +248,7 @@ TODO
 * Complete README
 * Port lhv-nmi (add new configuration option, use bit map)
 * VirtualBox cannot boot SMP, `vcpu->id = vcpu->idx = 0`
+	* Check reading other APIC fields
+	* Check whether VirtualBox forces APIC virtualization
+	* Check whether this problem happens if EPT is enabled
 
