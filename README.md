@@ -186,7 +186,8 @@ TODO
 ### Running SHV on VirtualBox
 
 Create a new virtual machine using VirtualBox, select `grub.iso` as the disk
-to boot the OS. Make sure to allocate enough memory.
+to boot the OS. Make sure to allocate enough memory. VirtualBox supports serial
+port through VM settings.
 
 Since SHV requires nested virtualization, make sure to check
 "Enable Nested VT-x/AMD-V" in VM settings. If the checkbox is grayed out, try
@@ -194,6 +195,18 @@ the commands from <https://stackoverflow.com/questions/54251855/>:
 ```sh
 VBoxManage modifyvm <VirtualMachineName> --nested-hw-virt on
 ```
+
+#### VirtualBox Problems
+
+Due to problems of VirtualBox or SHV, currently these workarounds are required:
+* Only configure one CPU in VirtualBox (i.e. SMP not supported).
+* Do not let SHV access VGA mmio. That is, make sure `SHV_OPT` sets bit
+  `0x2000` (e.g. `./tools/build.sh -s 0x2000`) and make sure not to enable VGA
+  (i.e. do not use `./tools/build.sh --vga`).
+
+The problems are:
+* Guest mode of SHV cannot access LAPIC memory of VirtualBox
+* Guest mode of SHV cannot access VGA memory of VirtualBox
 
 ### Running SHV on Hyper-V
 TODO
