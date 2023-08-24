@@ -192,6 +192,7 @@ typedef struct _vcpu {
 	vmx_ctls_t vmx_caps;
 
 	u8 vmx_ept_defaulttype;
+	bool vmx_ept_fixmtrr_support;
 	bool vmx_ept_mtrr_enable;
 	bool vmx_ept_fixmtrr_enable;
 	u64 vmx_ept_paddrmask;

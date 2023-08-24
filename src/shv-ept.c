@@ -195,8 +195,11 @@ void shv_ept_init(VCPU * vcpu)
 	{
 		u64 msrval = rdmsr64(IA32_MTRRCAP);
 		vcpu->vmx_guestmtrrmsrs.var_count = (u8) msrval;
-		//sanity check that fixed MTRRs are supported
-		ASSERT(msrval & (1U << 8));
+		/*
+		 * Check whether fixed MTRRs are supported.
+		 * On VirtualBox 7.0, msrval == 0.
+		 */
+		vcpu->vmx_ept_fixmtrr_support = !!(msrval & (1U << 8));
 		//ensure number of variable MTRRs are within the maximum supported
 		ASSERT((vcpu->vmx_guestmtrrmsrs.var_count <= MAX_VARIABLE_MTRR_PAIRS));
 	}
@@ -206,8 +209,11 @@ void shv_ept_init(VCPU * vcpu)
 		vcpu->vmx_ept_mtrr_enable = !!(msrval & 0x800U);
 		vcpu->vmx_ept_fixmtrr_enable = !!(msrval & 0x400U);
 		vcpu->vmx_ept_defaulttype = msrval & 0xffU;
+		if (!vcpu->vmx_ept_fixmtrr_support) {
+			ASSERT(!vcpu->vmx_ept_fixmtrr_enable);
+		}
 	}
-	{
+	if (vcpu->vmx_ept_fixmtrr_support) {
 		u32 i;
 		for (i = 0; i < NUM_FIXED_MTRRS; i++) {
 			u64 val = rdmsr64(fixed_mtrr_prop[i].msr);
