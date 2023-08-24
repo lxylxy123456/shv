@@ -129,13 +129,13 @@ shv_disable_enable_paging:
 	movl	%eax, %cr0
 
 	/* Get printf lock */
-	movl	(emhfc_putchar_linelock_arg), %ebx
+	movl	(emhfc_putchar_linelock_arg), %edx
 	movl	$1, %eax
 1:	pause
-	cmpl	$0, (%ebx)
+	cmpl	$0, (%edx)
 	jne		1b
 	lock
-	xchg	%eax, (%ebx)
+	xchg	%eax, (%edx)
 	test	%eax, %eax
 	jne		1b
 
@@ -159,9 +159,9 @@ shv_disable_enable_paging:
 3:
 
 	/* Release printf lock */
-	movl	(emhfc_putchar_linelock_arg), %ebx
+	movl	(emhfc_putchar_linelock_arg), %edx
 	movl	$0, %eax
-	xchg	%eax, (%ebx)
+	xchg	%eax, (%edx)
 
 	/* Enable paging */
 	movl	%cr0, %eax
