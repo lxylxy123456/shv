@@ -203,10 +203,16 @@ Due to problems of VirtualBox or SHV, currently these workarounds are required:
 * Do not let SHV access VGA mmio. That is, make sure `SHV_OPT` sets bit
   `0x2000` (e.g. `./tools/build.sh -s 0x2000`) and make sure not to enable VGA
   (i.e. do not use `./tools/build.sh --vga`).
+* Do not set any bits in `0x421` of `SHV_OPT`
+  (e.g. `./tools/build.sh -s 0x29dc`).
 
 The problems are:
-* Guest mode of SHV cannot access LAPIC memory of VirtualBox
-* Guest mode of SHV cannot access VGA memory of VirtualBox
+* VirtualBox does not support MTRR.
+* Guest mode of SHV cannot access LAPIC memory of VirtualBox.
+* Guest mode of SHV cannot access VGA memory of VirtualBox.
+* VirtualBox does not seem to support MSR bitmaps.
+* For some reason `SHV_USE_UNRESTRICTED_GUEST` does not work on VirtualBox.
+	* See #GP(0) when moving 0x80000000 to CR0? Check VMX CR0 shadow
 
 ### Running SHV on Hyper-V
 TODO
