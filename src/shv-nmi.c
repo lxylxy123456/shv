@@ -19,12 +19,12 @@
 #include <xmhf.h>
 #include <shv.h>
 
-void handle_ipi_interrupt(VCPU * vcpu, int vector, int guest, uintptr_t rip)
+void handle_ipi_interrupt(VCPU * vcpu, u8 vector, bool guest, uintptr_t rip)
 {
 	ASSERT(0 && "Not implemented");
 }
 
-void handle_nmi_interrupt(VCPU * vcpu, int vector, int guest, uintptr_t rip)
+void handle_nmi_interrupt(VCPU * vcpu, u8 vector, bool guest, uintptr_t rip)
 {
 	ASSERT(0 && "Not implemented");
 }
