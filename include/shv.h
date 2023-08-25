@@ -98,7 +98,6 @@ void vmcs_load(VCPU * vcpu);
 
 /* shv-guest-asm.S */
 void shv_guest_entry(void);
-void shv_guest_xcphandler(VCPU * vcpu, struct regs *r, iret_info_t * info);
 
 /* shv-user.c */
 typedef struct ureg_t {

@@ -135,21 +135,24 @@ void dump_exception(VCPU * vcpu, struct regs *r, iret_info_t * info)
 #undef _B
 }
 
-static void handle_idt_host(VCPU * vcpu, struct regs *r, iret_info_t * info)
+void handle_idt(iret_info_t * info)
 {
+	VCPU *vcpu = get_vcpu();
+	struct regs *r = &info->r;
 	u8 vector = info->vector;
+	bool guest = !(cpuid_ecx(1, 0) & (1U << 5));
 
 	switch (vector) {
 	case 0x20:
-		handle_timer_interrupt(vcpu, vector, 0);
+		handle_timer_interrupt(vcpu, vector, guest);
 		break;
 
 	case 0x21:
-		handle_keyboard_interrupt(vcpu, vector, 0);
+		handle_keyboard_interrupt(vcpu, vector, guest);
 		break;
 
 	case 0x22:
-		handle_timer_interrupt(vcpu, vector, 0);
+		handle_timer_interrupt(vcpu, vector, guest);
 		break;
 
 	case 0x23:
@@ -177,7 +180,7 @@ static void handle_idt_host(VCPU * vcpu, struct regs *r, iret_info_t * info)
 		break;
 
 	case 0x2c:
-		handle_mouse_interrupt(vcpu, vector, 0);
+		handle_mouse_interrupt(vcpu, vector, guest);
 		break;
 
 	default:
@@ -203,22 +206,12 @@ static void handle_idt_host(VCPU * vcpu, struct regs *r, iret_info_t * info)
 		}
 
 		/* Print registers for debugging. */
-		printf("CPU(0x%02x): V Unknown host exception\n", vcpu->id);
+		printf("CPU(0x%02x): V Unknown %s exception\n", vcpu->id,
+			   guest ? "guest" : "host");
 		dump_exception(vcpu, r, info);
-		printf("CPU(0x%02x): ^ Unknown host exception\n", vcpu->id);
+		printf("CPU(0x%02x): ^ Unknown %s exception\n", vcpu->id,
+			   guest ? "guest" : "host");
 		HALT();
 		break;
-	}
-}
-
-void handle_idt(iret_info_t * info)
-{
-	VCPU *vcpu = get_vcpu();
-	struct regs *r = &info->r;
-
-	if (cpuid_ecx(1, 0) & (1U << 5)) {
-		handle_idt_host(vcpu, r, info);
-	} else {
-		shv_guest_xcphandler(vcpu, r, info);
 	}
 }
