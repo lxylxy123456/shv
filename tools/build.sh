@@ -50,8 +50,9 @@ DRY_RUN='n'
 AC='n'
 
 # Parse arguments.
-opt=$(getopt -o 'hnAipam:O:s:v' \
-			--long 'help,dry-run,ac,i386,pae,amd64,mem:,shv-opt:,vga' -- "$@")
+shortopts='hnAipam:O:s:N:v'
+longopts='help,dry-run,ac,i386,pae,amd64,mem:,shv-opt:,nmi-opt:,vga'
+opt=$(getopt -o "$shortopts" --long "$longopts" -- "$@")
 [ "$?" == "0" ] || usage 'getopt failed'
 eval set -- "$opt"
 while true; do
