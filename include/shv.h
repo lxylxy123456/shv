@@ -17,6 +17,7 @@
  */
 
 #include <xmhf.h>
+#include <shv-opts.h>
 
 #ifndef _SHV_H_
 #define _SHV_H_
@@ -30,23 +31,6 @@ typedef struct {
 	int height;
 	char color;
 } console_vc_t;
-
-/* Begin of bit definitions for SHV_OPT */
-#define SHV_USE_MSR_LOAD			0x0000000000000001ULL
-#define SHV_NO_EFLAGS_IF			0x0000000000000002ULL
-#define SHV_USE_EPT					0x0000000000000004ULL
-#define SHV_USE_SWITCH_EPT			0x0000000000000008ULL	/* Need 0x4 */
-#define SHV_USE_VPID				0x0000000000000010ULL
-#define SHV_USE_UNRESTRICTED_GUEST	0x0000000000000020ULL	/* Need 0x4 */
-#define SHV_USER_MODE				0x0000000000000040ULL	/* Need !0x2 */
-#define SHV_USE_VMXOFF				0x0000000000000080ULL
-#define SHV_USE_LARGE_PAGE			0x0000000000000100ULL	/* Need 0x4 */
-#define SHV_NO_INTERRUPT			0x0000000000000200ULL
-#define SHV_USE_MSRBITMAP			0x0000000000000400ULL
-#define SHV_NESTED_USER_MODE		0x0000000000000800ULL	/* Need !0x2 */
-#define SHV_USE_PS2_MOUSE			0x0000000000001000ULL
-#define SHV_NO_VGA_ART              0x0000000000002000ULL	/* Need !0x20 */
-/* End of bit definitions for SHV_OPT */
 
 /* shv.c */
 void shv_main(VCPU * vcpu);

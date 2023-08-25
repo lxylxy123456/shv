@@ -22,8 +22,8 @@ usage () {
 		echo "Error: $@"
 	fi
 	echo "$0: automatically configure and build SHV."
-	echo '	-h                  Print this help message.'
-	echo '	-n                  Dry run, only print configuration command.'
+	echo '	-h, --help          Print this help message.'
+	echo '	-n, --dry-run       Dry run, only print configuration command.'
 	echo '	-A, --ac            Force performing autoreconf --install.'
 	echo '	-i, --i386          Use 32-bit paging.'
 	echo '	-p, --pae           Use 32-bit PAE paging.'
@@ -31,7 +31,9 @@ usage () {
 	echo '	-m, --mem <MEM>     Set amd64 max physical mem.'
 	echo '	-O <level>          Set GCC optimization level.'
 	echo '	-s, --shv-opt <OPT> Set SHV_OPT.'
+	echo '	-N, --nmi-opt <OPT> Set NMI_OPT.'
 	echo '	-v, --vga           Also output to VGA, consider SHV_NO_VGA_ART.'
+	echo '	-- <--OPTIONS> ...  Pass extra arguments to configure.'
 	exit 1
 }
 
@@ -49,16 +51,16 @@ AC='n'
 
 # Parse arguments.
 opt=$(getopt -o 'hnAipam:O:s:v' \
-			--long 'ac,i386,pae,amd64,mem:,shv-opt:,vga' -- "$@")
+			--long 'help,dry-run,ac,i386,pae,amd64,mem:,shv-opt:,vga' -- "$@")
 [ "$?" == "0" ] || usage 'getopt failed'
 eval set -- "$opt"
 while true; do
 	#echo "$@"
 	case "$1" in
-	-h)
+	-h|--help)
 		usage
 		;;
-	-n)
+	-n|--dry-run)
 		DRY_RUN='y'
 		;;
 	-A|--ac)
@@ -88,10 +90,16 @@ while true; do
 		conf+=("--with-shv-opt=$2")
 		shift
 		;;
+	-N|--nmi-opt)
+		conf+=("--with-nmi-opt=$2")
+		shift
+		;;
 	-v|--vga)
 		conf+=("--enable-debug-vga")
 		;;
 	--)
+		shift
+		conf+=("$@")
 		break
 		;;
 	*)
@@ -100,11 +108,6 @@ while true; do
 	esac
 	shift
 done
-
-# Make sure there are no unparsed arguments.
-if [ "$#" != "1" ]; then
-	usage "unknown remaining arguments: $@"
-fi
 
 CONFIGURE="$SRCDIR/configure"
 

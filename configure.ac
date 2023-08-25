@@ -58,6 +58,13 @@ AC_ARG_WITH([shv_opt],
             [shv_opt="$withval"], [shv_opt=0])
 AC_DEFINE_UNQUOTED([SHV_OPT],[${shv_opt}],[SHV options])
 
+# NMI_OPT
+AC_ARG_WITH([nmi_opt],
+            [AS_HELP_STRING([--with-nmi-opt=NMI_OPT],
+                            [specify NMI testing options, see shv.h])],
+            [nmi_opt="$withval"], [nmi_opt=0])
+AC_DEFINE_UNQUOTED([NMI_OPT],[${nmi_opt}],[NMI testing options])
+
 # I386_PAE
 AC_ARG_ENABLE([i386_pae],
               [AS_HELP_STRING([--enable-i386-pae@<:@=yes|no@:>@],
