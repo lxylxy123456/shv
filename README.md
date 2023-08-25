@@ -153,6 +153,11 @@ If the real hardware has GRUB installed in BIOS mode, then it can add SHV as a
 menuentry in GRUB. Otherwise, it is probably easier to boot SHV via a CD or USB
 stick.
 
+If the real hardware does not have a serial port, you can let SHV print output
+to VGA (e.g. `./tools/build.sh -s 0x2000 --vga`). If the serial port does not
+use the standard 0x3f8 port and 115200 baud rate etc, unfortunately you need to
+manually edit [src/debug-uart.c](src/debug-uart.c).
+
 #### Boot from existing GRUB installation
 
 First, put `shv.bin` to `/boot` of the machine.
@@ -218,7 +223,59 @@ The problems are:
 TODO
 
 ### Running SHV on Bochs
-TODO
+
+The latest version of Bochs is probably on GitHub:
+<https://github.com/bochs-emu/Bochs>
+
+First, compile Bochs from source code. We need to make sure Bochs is compiled
+with VMX support. Suppose you want to clone Bochs to `/PATH/TO/BOCHS`:
+```sh
+cd /PATH/TO/BOCHS
+git clone https://github.com/bochs-emu/Bochs
+# I got commit 253882589d65ab17e23420a416fbd2d6e7591642
+cd Bochs/bochs
+./configure \
+            --enable-all-optimizations \
+            --enable-cpu-level=6 \
+            --enable-x86-64 \
+            --enable-vmx=2 \
+            --enable-clgd54xx \
+            --enable-busmouse \
+            --enable-show-ips \
+            \
+            --enable-smp \
+            --disable-docbook \
+            --with-x --with-x11 --with-term --with-sdl2 \
+            \
+            --prefix="$PWD"
+make -j `nproc`
+```
+
+Then create `bochsrc` that can boot SHV:
+```
+cpu: model=corei7_sandy_bridge_2600k, count=2, ips=50000000, reset_on_triple_fault=1, ignore_bad_msrs=1, msrs="msrs.def"
+memory: guest=512, host=256
+romimage: file=$BXSHARE/BIOS-bochs-latest, options=fastboot
+vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
+ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
+ata1: enabled=1, ioaddr1=0x170, ioaddr2=0x370, irq=15
+ata0-master: type=cdrom, path="grub.iso", status=inserted
+boot: cdrom, disk
+log: log.txt
+panic: action=ask
+error: action=report
+info: action=report
+debug: action=ignore, pci=report # report BX_DEBUG from module 'pci'
+debugger_log: -
+com1: enabled=1, mode=file, dev=/dev/stdout
+```
+
+Then start Bochs
+```sh
+/PATH/TO/BOCHS/Bochs/bochs/bochs
+```
+
+Select "Begin simulation" to run SHV.
 
 ## Coding Style
 

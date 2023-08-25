@@ -102,7 +102,18 @@ void dbg_x86_uart_putstr(const char *s)
 void dbg_x86_uart_init(void)
 {
 	// disable UART interrupts
-	outb(UART_PORT + 0x1, (u8) 0);
+	outb(UART_PORT + 0x1, (u8) 0x00);
 
-	// Note: some code removed. See XMHF64 dbg-x86-uart.c for full version.
+	// enable divisor latch access by writing to line control register (LCR)
+	outb(UART_PORT + 0x3, (u8) 0x80);
+
+	// write hardcoded 1 to divisor latch data
+	outb(UART_PORT + 0x0, (u8) 0x01);
+	outb(UART_PORT + 0x1, (u8) 0x00);
+
+	// set data bits, stop bits and parity info. by writing to LCR
+	outb(UART_PORT + 0x3, (u8) 0x03);
+
+	// signal ready by setting DTR and RTS high in modem control register
+	outb(UART_PORT + 0x4, (u8) 0x03);
 }
