@@ -904,19 +904,19 @@ void shv_guest_xcphandler(VCPU * vcpu, struct regs *r, iret_info_t * info)
 
 	switch (vector) {
 	case 0x20:
-		handle_timer_interrupt(get_vcpu(), vector, 1);
+		handle_timer_interrupt(vcpu, vector, 1);
 		break;
 
 	case 0x21:
-		handle_keyboard_interrupt(get_vcpu(), vector, 1);
+		handle_keyboard_interrupt(vcpu, vector, 1);
 		break;
 
 	case 0x22:
-		handle_timer_interrupt(get_vcpu(), vector, 1);
+		handle_timer_interrupt(vcpu, vector, 1);
 		break;
 
 	case 0x23:
-		handle_shv_syscall(get_vcpu(), vector, r);
+		handle_shv_syscall(vcpu, vector, r);
 		break;
 
 	case 0x27:
@@ -940,7 +940,7 @@ void shv_guest_xcphandler(VCPU * vcpu, struct regs *r, iret_info_t * info)
 		break;
 
 	case 0x2c:
-		handle_mouse_interrupt(get_vcpu(), vector, 1);
+		handle_mouse_interrupt(vcpu, vector, 1);
 		break;
 
 	default:
