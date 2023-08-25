@@ -24,7 +24,7 @@
 
 volatile u32 drop_keyboard_interrupts = 0;
 
-void handle_keyboard_interrupt(VCPU * vcpu, int vector, int guest)
+void handle_keyboard_interrupt(VCPU * vcpu, u8 vector, bool guest)
 {
 	ASSERT(vcpu->isbsp);
 	ASSERT(vector == 0x21);
@@ -34,7 +34,7 @@ void handle_keyboard_interrupt(VCPU * vcpu, int vector, int guest)
 	} else {
 		uint8_t scancode = inb(KEYBOARD_PORT);
 		printf("CPU(0x%02x): key press: 0x%hh02x, guest=%d\n", vcpu->id,
-			   scancode, guest);
+			   scancode, !!guest);
 	}
 	outb(INT_CTL_PORT, INT_ACK_CURRENT);
 }
