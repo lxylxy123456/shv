@@ -18,7 +18,9 @@ complicated. SHV rewrites the booting process to make it easy to debug.
 [**LHV**](https://github.com/lxylxy123456/uberxmhf/tree/lhv) is used during the
 development of XMHF64 to test XMHF64's nested virtualization functionality.
 LHV is written by [lxylxy123456](https://github.com/lxylxy123456), based on
-XMHF64.
+XMHF64. Some of the interrupt handling code is based on open source projects
+that are used used by [CMU's 15-410](https://www.cs.cmu.edu/~410/). See
+[15-410 Software License Statements](https://www.cs.cmu.edu/~410/licenses.html).
 
 [**XMHF64**](https://github.com/lxylxy123456/uberxmhf) is a research project by
 [lxylxy123456](https://github.com/lxylxy123456). XMHF64 is based on XMHF. XMHF
