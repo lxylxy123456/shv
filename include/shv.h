@@ -116,6 +116,10 @@ void user_main(VCPU * vcpu, ulong_t arg);
 void enter_user_mode_asm(ureg_t * ureg, uintptr_t * esp0);
 void exit_user_mode_asm(uintptr_t esp0);
 
+/* shv-nmi.c */
+void handle_ipi_interrupt(VCPU * vcpu, int vector, int guest, uintptr_t rip);
+void handle_nmi_interrupt(VCPU * vcpu, int vector, int guest, uintptr_t rip);
+
 /* LAPIC */
 #define LAPIC_DEFAULT_BASE    0xfee00000
 #define IOAPIC_DEFAULT_BASE   0xfec00000

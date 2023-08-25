@@ -140,6 +140,10 @@ static void handle_idt_host(VCPU * vcpu, struct regs *r, iret_info_t * info)
 	u8 vector = info->vector;
 
 	switch (vector) {
+	case 0x02:
+		handle_nmi_interrupt(vcpu, vector, 0, info->ip);
+		break;
+
 	case 0x20:
 		handle_timer_interrupt(vcpu, vector, 0);
 		break;
@@ -178,6 +182,10 @@ static void handle_idt_host(VCPU * vcpu, struct regs *r, iret_info_t * info)
 
 	case 0x2c:
 		handle_mouse_interrupt(vcpu, vector, 0);
+		break;
+
+	case 0x54:
+		handle_ipi_interrupt(vcpu, vector, 0, info->ip);
 		break;
 
 	default:

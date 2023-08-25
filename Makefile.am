@@ -45,6 +45,7 @@ shv_bin_SOURCES = \
 	src/shv-guest.c \
 	src/shv-keyboard.c \
 	src/shv-mouse.c \
+	src/shv-nmi.c \
 	src/shv-pic.c \
 	src/shv-timer.c \
 	src/shv-user-asm.S \

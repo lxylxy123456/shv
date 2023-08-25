@@ -96,7 +96,7 @@ void timer_init(VCPU * vcpu)
 	}
 
 	/* LAPIC Timer */
-	if (!(SHV_OPT & SHV_NO_INTERRUPT)) {
+	if (!(SHV_OPT & SHV_NO_INTERRUPT) && !(NMI_OPT & SHV_NMI_ENABLE)) {
 		write_lapic(LAPIC_TIMER_DIV, 0x0000000b);
 		write_lapic(LAPIC_TIMER_INIT, LAPIC_PERIOD);
 		write_lapic(LAPIC_LVT_TIMER, 0x00020022);
