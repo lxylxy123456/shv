@@ -34,29 +34,28 @@ typedef struct {
 
 /* shv.c */
 void shv_main(VCPU * vcpu);
-void handle_shv_syscall(VCPU * vcpu, int vector, struct regs *r);
 
 /* shv-console.c */
 void console_cursor_clear(void);
 void console_clear(console_vc_t * vc);
 char console_get_char(console_vc_t * vc, int x, int y);
 void console_put_char(console_vc_t * vc, int x, int y, char c);
-void console_get_vc(console_vc_t * vc, int num, int guest);
+void console_get_vc(console_vc_t * vc, int num, bool guest);
 
 /* shv-timer.c */
 void timer_init(VCPU * vcpu);
-void handle_timer_interrupt(VCPU * vcpu, int vector, int guest);
+void handle_timer_interrupt(VCPU * vcpu, u8 vector, bool guest);
 
 /* shv-pic.c */
 void pic_init(void);
 int pic_spurious(unsigned char irq);
 
 /* shv-keyboard.c */
-void handle_keyboard_interrupt(VCPU * vcpu, int vector, int guest);
+void handle_keyboard_interrupt(VCPU * vcpu, u8 vector, bool guest);
 
 /* shv-mouse.c */
 void mouse_init(VCPU * vcpu);
-void handle_mouse_interrupt(VCPU * vcpu, int vector, int guest);
+void handle_mouse_interrupt(VCPU * vcpu, u8 vector, bool guest);
 
 /* shv-vmx.c */
 void shv_vmx_main(VCPU * vcpu);
@@ -109,6 +108,7 @@ typedef struct ureg_t {
 	uintptr_t ss;
 } ureg_t;
 void enter_user_mode(VCPU * vcpu, ulong_t arg);
+void handle_shv_syscall(VCPU * vcpu, u8 vector, struct regs *r);
 void user_main(VCPU * vcpu, ulong_t arg);
 
 /* shv-user-asm.S */

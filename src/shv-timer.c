@@ -103,7 +103,7 @@ void timer_init(VCPU * vcpu)
 	}
 }
 
-static void update_screen(VCPU * vcpu, int *x, int y, int guest)
+static void update_screen(VCPU * vcpu, int *x, int y, bool guest)
 {
 	console_vc_t vc;
 	console_get_vc(&vc, vcpu->idx, guest);
@@ -143,7 +143,7 @@ static void calibrate_timer(VCPU * vcpu)
 		   p_t, l_t, l_quo, l_tot, cal_1, cal_2, rtc_get_sec_of_day());
 }
 
-void handle_timer_interrupt(VCPU * vcpu, int vector, int guest)
+void handle_timer_interrupt(VCPU * vcpu, u8 vector, bool guest)
 {
 	if (SHV_OPT & SHV_NO_INTERRUPT) {
 		/* Only one interrupt should arrive, ever */
@@ -156,7 +156,7 @@ void handle_timer_interrupt(VCPU * vcpu, int vector, int guest)
 	if (vector == 0x20) {
 		vcpu->pit_time++;
 		if (!(SHV_OPT & SHV_NO_VGA_ART)) {
-			update_screen(vcpu, &vcpu->shv_pit_x[guest], 0, guest);
+			update_screen(vcpu, &vcpu->shv_pit_x[!!guest], 0, guest);
 		}
 		outb(INT_CTL_PORT, INT_ACK_CURRENT);
 		if (!"Calibrate timer" && vcpu->pit_time % 50 == 0) {
@@ -165,7 +165,7 @@ void handle_timer_interrupt(VCPU * vcpu, int vector, int guest)
 	} else if (vector == 0x22) {
 		vcpu->lapic_time++;
 		if (!(SHV_OPT & SHV_NO_VGA_ART)) {
-			update_screen(vcpu, &vcpu->shv_lapic_x[guest], 1, guest);
+			update_screen(vcpu, &vcpu->shv_lapic_x[!!guest], 1, guest);
 		}
 		write_lapic(LAPIC_EOI, 0);
 		if (!"Calibrate timer" && vcpu->isbsp && vcpu->lapic_time % 50 == 0) {

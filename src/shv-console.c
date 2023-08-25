@@ -72,14 +72,13 @@ void console_put_char(console_vc_t * vc, int x, int y, char c)
 	p[0] = c;
 }
 
-void console_get_vc(console_vc_t * vc, int num, int guest)
+void console_get_vc(console_vc_t * vc, int num, bool guest)
 {
 	ASSERT(0 <= num && num < CONSOLE_MAX_CPU);
-	ASSERT(0 <= guest && guest < 2);
-	vc->left = (CONSOLE_WIDTH / 2) * guest;
+	vc->left = (CONSOLE_WIDTH / 2) * (!!guest);
 	vc->top = (CONSOLE_HEIGHT / CONSOLE_MAX_CPU) * num;
 	vc->width = (CONSOLE_WIDTH / 2);
 	vc->height = (CONSOLE_HEIGHT / CONSOLE_MAX_CPU);
 	/* Use 9 - 15 */
-	vc->color = (char)((1 + num * 2 + guest) % 7 + 9);
+	vc->color = (char)((1 + num * 2 + (!!guest)) % 7 + 9);
 }

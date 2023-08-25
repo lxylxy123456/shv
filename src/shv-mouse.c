@@ -149,7 +149,7 @@ void mouse_init(VCPU * vcpu)
 	printf("Initialized mouse\n");
 }
 
-void handle_mouse_interrupt(VCPU * vcpu, int vector, int guest)
+void handle_mouse_interrupt(VCPU * vcpu, u8 vector, bool guest)
 {
 	ASSERT(vcpu->isbsp);
 	ASSERT(vector == 0x2c);
@@ -159,7 +159,7 @@ void handle_mouse_interrupt(VCPU * vcpu, int vector, int guest)
 	} else {
 		uint8_t scancode = inb(PS2_DATA_PORT);
 		printf("CPU(0x%02x): mouse: 0x%hh02x, guest=%d\n", vcpu->id,
-			   scancode, guest);
+			   scancode, !!guest);
 	}
 	outb(SLAVE_ICW, INT_ACK_CURRENT);
 	outb(INT_CTL_PORT, INT_ACK_CURRENT);
