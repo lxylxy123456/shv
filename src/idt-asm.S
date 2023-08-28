@@ -107,7 +107,17 @@ idt_stub_common:
 	/* If handle_idt() returns 0, we perform IRET. */
 	IRET
 
-	/* If handle_idt() returns 1, we simulate IRET. */
+	/*
+	 * If handle_idt() returns 1, we simulate IRET using other instructions.
+	 * This is prevents NMI unblocking, and is used in NMI tests.
+	 *
+	 * When simulating IRET, we cannot modify GPR other than ESP. The
+	 * modification of ESP depends on the definition of the IRET instruction.
+	 * We also need to restore EIP and EFLAGS based on IRET definition.
+	 *
+	 * The limitation of simulating IRET is that CS, SS cannot be
+	 * changed before and after the IRET instruction.
+	 */
 1:
 
 #ifdef __amd64__
@@ -118,15 +128,21 @@ idt_stub_common:
 #elif defined(__i386__)
 
 	/*
-	 * Simulate IRET instruction without executing IRET, to prevent NMI
-	 * unblocking.
+	 * At this point the stack looks like:
+	 *  esp+12: esp of interrupted code
+	 *  esp+8:  EFLAGS
+	 *  esp+4:  CS
+	 *  esp+0:  EIP
 	 *
-	 * At this point the stack contains EFLAGS, CS, EIP (high to low addr).
-	 * To simulate the IRET instruction, first move EFLAGS to actual
-	 * EFLAGS, then move EIP to EFLAGS. Then RET will set the correct stack
-	 * and jump to EIP. CS is assumed to be non-changing.
+	 * We need to modify the stack to look like:
+	 *  esp+16: esp of interrupted code
+	 *  esp+12: EIP
+	 *  esp+8:  EFLAGS
+	 *  esp+4:  EAX
+	 *  esp+0:  EAX
 	 *
-	 * Note that all GPRs other than ESP cannot be changed.
+	 * Then use pop to restore EAX, use POPF to restore EFLAGS, and use RET to
+	 * restore EIP and ESP.
 	 */
 	pushl   %eax
 	movl	12(%esp), %eax
