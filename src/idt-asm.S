@@ -122,8 +122,39 @@ idt_stub_common:
 
 #ifdef __amd64__
 
-	// TODO: x64 not implemented
-	#error 'Not implemented'
+	/*
+	 * At this point the stack looks like:
+	 *  rsp+40: rsp of interrupted code
+	 *  rsp+32: SS
+	 *  rsp+24: RSP
+	 *  rsp+16: RFLAGS
+	 *  rsp+8:  CS
+	 *  rsp+0:  RIP
+	 *
+	 * We need to modify the stack to look like:
+	 *  rsp+48: rsp of interrupted code
+	 *  rsp+40: RIP			was SS
+	 *  rsp+32: RFLAGS		was RSP
+	 *  rsp+24: RAX			was RFLAGS
+	 *  rsp+16: ignored		was CS
+	 *  rsp+8:  ignored		was RIP
+	 *  rsp+0:  ignored		was RAX
+	 *
+	 * Then use pop to restore RAX, use POPF to restore RFLAGS, and use RET to
+	 * restore RIP and RSP.
+	 */
+
+	pushq	%rax
+	movq	24(%rsp), %rax	/* Move value of EFLAGS around */
+	movq	%rax, 32(%rsp)
+	movq	8(%rsp), %rax	/* Move value of RIP around */
+	movq	%rax, 40(%rsp)
+	movq	(%rsp), %rax	/* Move value of RAX around */
+	movq	%rax, 24(%rsp)
+	leaq	24(%rsp), %rsp
+	popq	%rax			/* Restore value of RAX */
+	popfq					/* Restore value of RFLAGS */
+	ret						/* Restore value of RIP and RSP */
 
 #elif defined(__i386__)
 
@@ -136,25 +167,25 @@ idt_stub_common:
 	 *
 	 * We need to modify the stack to look like:
 	 *  esp+16: esp of interrupted code
-	 *  esp+12: EIP
-	 *  esp+8:  EFLAGS
-	 *  esp+4:  EAX
-	 *  esp+0:  EAX
+	 *  esp+12: EIP			was EFLAGS
+	 *  esp+8:  EFLAGS		was CS
+	 *  esp+4:  EAX			was EIP
+	 *  esp+0:  ignored		was EAX
 	 *
 	 * Then use pop to restore EAX, use POPF to restore EFLAGS, and use RET to
 	 * restore EIP and ESP.
 	 */
 	pushl   %eax
-	movl	12(%esp), %eax
+	movl	12(%esp), %eax	/* Move value of EFLAGS around */
 	movl	%eax, 8(%esp)
-	movl	4(%esp), %eax
+	movl	4(%esp), %eax	/* Move value of EIP around */
 	movl	%eax, 12(%esp)
-	movl	(%esp), %eax
+	movl	(%esp), %eax	/* Move value of EAX around */
 	movl	%eax, 4(%esp)
 	popl	%eax
-	popl	%eax
-	popfl
-	ret
+	popl	%eax			/* Restore value of EAX */
+	popfl					/* Restore value of EFLAGS */
+	ret						/* Restore value of EIP and ESP */
 
 #else /* !defined(__i386__) && !defined(__amd64__) */
 	#error "Unsupported Arch"

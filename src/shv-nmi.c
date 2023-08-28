@@ -23,14 +23,6 @@
 // TODO: make it configurable
 #define INTERRUPT_PERIOD 10
 
-#if (NMI_OPT & SHV_NMI_ENABLE)
-
-#ifndef __i386__
-#error "SHV NMI experiments only support 32-bit at this time."
-#endif
-
-#endif							/* (NMI_OPT & SHV_NMI_ENABLE) */
-
 /*
  * An interrupt handler or VMEXIT handler will see exit_source. If it sees
  * other than EXIT_IGNORE or EXIT_MEASURE, it will error. If it sees
