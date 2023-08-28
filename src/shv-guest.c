@@ -823,6 +823,9 @@ void shv_guest_main(ulong_t cpu_id)
 	bool in_xmhf = false;
 	VCPU *vcpu = get_vcpu();
 	ASSERT(cpu_id == vcpu->idx);
+	if (NMI_OPT & SHV_NMI_ENABLE) {
+		shv_nmi_guest_main(vcpu);
+	}
 	{
 		u32 eax, ebx, ecx, edx;
 		cpuid(0x46484d58U, &eax, &ebx, &ecx, &edx);

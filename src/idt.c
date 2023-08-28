@@ -85,9 +85,17 @@ void init_idt(void)
 /* From XMHF64 _svm_and_vmx_getvcpu(). */
 VCPU *get_vcpu(void)
 {
-	u64 msr_val;
+	u64 msr_val = 0xfee00000ULL;
 	u32 lapic_id;
-	msr_val = rdmsr64(MSR_APIC_BASE);
+
+	/*
+	 * When testing NMI, need to avoid VMEXIT in interrupt handlers.
+	 * When not testing NMI, read MSR_APIC_BASE to ensure msr_val is correct.
+	 */
+	if (!(NMI_OPT & SHV_NMI_ENABLE)) {
+		ASSERT(msr_val == rdmsr64(MSR_APIC_BASE));
+	}
+
 	if (msr_val & (1ULL << 10)) {
 		/* x2APIC is enabled, use it */
 		lapic_id = (u32) (rdmsr64(IA32_X2APIC_APICID));
@@ -140,6 +148,7 @@ void handle_idt(iret_info_t * info)
 	VCPU *vcpu = get_vcpu();
 	struct regs *r = &info->r;
 	u8 vector = info->vector;
+	// TODO: avoid calling cpuid, use different IDT for host and guest, add info in "/* Push vector. */"
 	bool guest = !(cpuid_ecx(1, 0) & (1U << 5));
 
 	switch (vector) {

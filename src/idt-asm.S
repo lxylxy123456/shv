@@ -97,7 +97,47 @@ idt_stub_common:
 	/* Skip error code on the stack. */
 	lea		2*SIZE(SP), SP
 
+#if !(NMI_OPT & SHV_NMI_ENABLE)
+
 	IRET
+
+#else /* (NMI_OPT & SHV_NMI_ENABLE) */
+
+#ifdef __amd64__
+
+	// TODO: x64 not implemented
+	#error 'Not implemented'
+
+#elif defined(__i386__)
+
+	/*
+	 * Simulate IRET instruction without executing IRET, to prevent NMI
+	 * unblocking.
+	 *
+	 * At this point the stack contains EFLAGS, CS, EIP (high to low addr).
+	 * To simulate the IRET instruction, first move EFLAGS to actual
+	 * EFLAGS, then move EIP to EFLAGS. Then RET will set the correct stack
+	 * and jump to EIP. CS is assumed to be non-changing.
+	 *
+	 * Note that all GPRs other than ESP cannot be changed.
+	 */
+	pushl   %eax
+	movl	12(%esp), %eax
+	movl	%eax, 8(%esp)
+	movl	4(%esp), %eax
+	movl	%eax, 12(%esp)
+	movl	(%esp), %eax
+	movl	%eax, 4(%esp)
+	popl	%eax
+	popl	%eax
+	popfl
+	ret
+
+#else /* !defined(__i386__) && !defined(__amd64__) */
+	#error "Unsupported Arch"
+#endif /* __amd64__ */
+
+#endif /* !(NMI_OPT & SHV_NMI_ENABLE) */
 
 /*
  * Macro for defining IDT stubs.
@@ -105,6 +145,7 @@ idt_stub_common:
  */
 .macro def_stubs cur=0 name=
 
+.global idt_stub_&name&
 idt_stub_&name&:
 
 	/* Push error code. */

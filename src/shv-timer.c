@@ -153,6 +153,10 @@ void handle_timer_interrupt(VCPU * vcpu, u8 vector, bool guest)
 		shot_arrived = true;
 		return;
 	}
+	if (NMI_OPT & SHV_NMI_ENABLE) {
+		shv_nmi_handle_timer_interrupt(vcpu, vector, guest);
+		return;
+	}
 	if (vector == 0x20) {
 		vcpu->pit_time++;
 		if (!(SHV_OPT & SHV_NO_VGA_ART)) {

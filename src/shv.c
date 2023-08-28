@@ -30,7 +30,27 @@ void shv_main(VCPU * vcpu)
 			printf("%d", *a);
 		}
 	}
+
+	/* Barrier */
+	{
+		static u32 count = 0;
+		lock_incl(&count);
+		while (count < g_midtable_numentries) {
+			cpu_relax();
+		}
+	}
+
+	/* When testing NMI, we need exactly 2 CPUs. */
+	if (NMI_OPT & SHV_NMI_ENABLE) {
+		if (vcpu->idx < 2) {
+			ASSERT(g_midtable_numentries >= 2);
+		} else {
+			HALT();
+		}
+	}
+
 	timer_init(vcpu);
+
 	if (!(SHV_OPT & SHV_NO_VGA_ART)) {
 		console_vc_t vc;
 		console_get_vc(&vc, vcpu->idx, 0);
@@ -45,6 +65,7 @@ void shv_main(VCPU * vcpu)
 			}
 		}
 	}
+
 	/* Demonstrate disabling paging in hypervisor */
 	if (SHV_OPT & SHV_USE_UNRESTRICTED_GUEST) {
 #ifdef __amd64__
@@ -68,6 +89,13 @@ void shv_main(VCPU * vcpu)
 	if (SHV_OPT & SHV_USE_PS2_MOUSE) {
 		if (vcpu->isbsp) {
 			mouse_init(vcpu);
+		}
+	}
+
+	/* When testing NMI, CPU 0 only forwards interrupts (does not enter VMX). */
+	if (NMI_OPT & SHV_NMI_ENABLE) {
+		if (vcpu->isbsp) {
+			HALT();
 		}
 	}
 
