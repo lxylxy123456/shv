@@ -142,7 +142,11 @@ void dump_exception(VCPU * vcpu, struct regs *r, iret_info_t * info)
 #undef _B
 }
 
-void handle_idt(iret_info_t * info)
+/*
+ * If return value is 0, perform IRET normally.
+ * Otherwise, use other instructions to simulate IRET. This is used to test NMI.
+ */
+u32 handle_idt(iret_info_t * info)
 {
 	VCPU *vcpu = get_vcpu();
 	struct regs *r = &info->r;
@@ -230,4 +234,11 @@ void handle_idt(iret_info_t * info)
 		HALT();
 		break;
 	}
+
+	if (NMI_OPT & SHV_NMI_ENABLE) {
+		/* TODO: only return true based on vcpu->idx and vector. */
+		return 1;
+	}
+
+	return 0;
 }

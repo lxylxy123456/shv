@@ -77,6 +77,9 @@ idt_stub_common:
 	/* Call C handler. */
 	call	handle_idt
 
+	/* Check the return value. From now on, RFLAGS cannot change. */
+	test	%eax, %eax
+
 	/* Restore stack. */
 #ifdef __i386__
 	popl	%eax
@@ -98,11 +101,14 @@ idt_stub_common:
 	/* Skip error code on the stack. */
 	lea		2*SIZE(SP), SP
 
-#if !(NMI_OPT & SHV_NMI_ENABLE)
+	/* Jump based on return value of handle_idt(). */
+	jne		1f
 
+	/* If handle_idt() returns 0, we perform IRET. */
 	IRET
 
-#else /* (NMI_OPT & SHV_NMI_ENABLE) */
+	/* If handle_idt() returns 1, we simulate IRET. */
+1:
 
 #ifdef __amd64__
 
@@ -137,8 +143,6 @@ idt_stub_common:
 #else /* !defined(__i386__) && !defined(__amd64__) */
 	#error "Unsupported Arch"
 #endif /* __amd64__ */
-
-#endif /* !(NMI_OPT & SHV_NMI_ENABLE) */
 
 /*
  * Macro for defining IDT stubs.
