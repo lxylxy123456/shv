@@ -87,7 +87,7 @@ static volatile bool quiet = false;
     } while (0)
 
 extern void idt_stub_11(void);
-extern void idt_stub_h11111(void);
+extern void idt_stub_hh1(void);
 
 /* https://zh.wikipedia.org/wiki/%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%80%A7 */
 u32 rand(void)
@@ -163,6 +163,11 @@ void shv_nmi_handle_timer_interrupt(VCPU * vcpu, u8 vector, bool guest)
 		}
 	}
 	outb(INT_CTL_PORT, INT_ACK_CURRENT);
+}
+
+void shv_nmi_handle_keyboard_interrupt(VCPU * vcpu, u8 vector, bool guest)
+{
+	
 }
 
 void handle_ipi_interrupt(VCPU * vcpu, u8 vector, bool guest, uintptr_t rip)
@@ -980,7 +985,7 @@ static void experiment_15(void)
 	printf("Experiment: %d\n", (experiment_no = 15));
 	state_no = 0;
 	asm volatile ("vmcall");
-	assert_measure(EXIT_NMI_G, (uintptr_t) idt_stub_h11111);
+	assert_measure(EXIT_NMI_G, (uintptr_t) idt_stub_hh1);
 	state_no = 1;
 	asm volatile ("vmcall");
 }
@@ -1020,7 +1025,7 @@ static void experiment_16(void)
 	printf("Experiment: %d\n", (experiment_no = 16));
 	state_no = 0;
 	asm volatile ("vmcall");
-	assert_measure(EXIT_VMEXIT, (uintptr_t) idt_stub_h11111);
+	assert_measure(EXIT_VMEXIT, (uintptr_t) idt_stub_hh1);
 	state_no = 1;
 	asm volatile ("vmcall");
 }
@@ -1060,7 +1065,7 @@ static void experiment_17(void)
 	printf("Experiment: %d\n", (experiment_no = 17));
 	state_no = 0;
 	asm volatile ("vmcall");
-	assert_measure(EXIT_VMEXIT, (uintptr_t) idt_stub_h11111);
+	assert_measure(EXIT_VMEXIT, (uintptr_t) idt_stub_hh1);
 	state_no = 1;
 	asm volatile ("vmcall");
 }
