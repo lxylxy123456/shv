@@ -292,7 +292,7 @@ uintptr_t unblock_nmi_with_rip(void) {
         "pushl   %%eax          \n"
         "pushl   $1f            \n"
         "iretl                  \n"
-        "1: leal 1b, %0         \n"
+        "1: lea 1b, %0         \n"
         : "=g"(rip)
         : // no input
         : "%eax", "cc", "memory");
@@ -458,7 +458,7 @@ void hlt_wait(u32 source)
 	exit_source = EXIT_MEASURE;
 	l2_ready = 1;
 loop:
-	asm volatile ("pushf; sti; hlt; 1: leal 1b, %0; popf" : "=g"(rip));
+	asm volatile ("pushf; sti; hlt; 1: lea 1b, %0; popf" : "=g"(rip));
 	if ("qemu workaround" && exit_source == EXIT_MEASURE) {
 		if (!quiet) {
 			printf("      Strange wakeup from HLT\n");
@@ -569,7 +569,7 @@ static void experiment_3(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 3));
 	state_no = 0;
-	asm volatile ("vmcall; 1: leal 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
 	assert_measure(EXIT_NMI_G, rip);
 	iret_wait(EXIT_MEASURE);
 }
@@ -705,7 +705,7 @@ static void experiment_7(void)
 	printf("Experiment: %d\n", (experiment_no = 7));
 	state_no = 0;
 	prepare_measure();
-	asm volatile ("vmcall; 1: leal 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
 	assert_measure(EXIT_VMEXIT, rip);
 	state_no = 1;
 	asm volatile ("vmcall");
@@ -805,7 +805,7 @@ static void experiment_10(void)
 	printf("Experiment: %d\n", (experiment_no = 10));
 	state_no = 0;
 	prepare_measure();
-	asm volatile ("vmcall; 1: leal 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
 	assert_measure(EXIT_VMEXIT, rip);
 	state_no = 1;
 	asm volatile ("vmcall");
@@ -842,7 +842,7 @@ static void experiment_11(void)
 	printf("Experiment: %d\n", (experiment_no = 11));
 	state_no = 0;
 	prepare_measure();
-	asm volatile ("vmcall; 1: leal 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
 	assert_measure(EXIT_VMEXIT, rip);
 	state_no = 1;
 	asm volatile ("vmcall");
@@ -1104,7 +1104,7 @@ static void experiment_18(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 18));
 	state_no = 0;
-	asm volatile ("vmcall; 1: leal 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
 	assert_measure(EXIT_NMI_G, rip);
 	state_no = 1;
 	asm volatile ("vmcall");
@@ -1144,7 +1144,7 @@ static void experiment_19(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 19));
 	state_no = 0;
-	asm volatile ("vmcall; 1: leal 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
 	assert_measure(EXIT_NMI_G, rip);
 	state_no = 1;
 	asm volatile ("vmcall");
@@ -1183,7 +1183,7 @@ static void experiment_20(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 20));
 	state_no = 0;
-	asm volatile ("vmcall; 1: leal 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
 	assert_measure(EXIT_NMI_G, rip);
 	state_no = 1;
 	asm volatile ("vmcall");
@@ -1221,7 +1221,7 @@ static void experiment_21(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 21));
 	state_no = 0;
-	asm volatile ("vmcall; 1: leal 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
 	assert_measure(EXIT_NMIWIND, rip);
 	state_no = 1;
 	asm volatile ("vmcall");
@@ -1258,7 +1258,7 @@ static void experiment_22(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 22));
 	state_no = 0;
-	asm volatile ("vmcall; 1: leal 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
 	assert_measure(EXIT_MEASURE, rip);
 	state_no = 1;
 	asm volatile ("vmcall");
@@ -1336,7 +1336,7 @@ static void experiment_24(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 24));
 	state_no = 0;
-	asm volatile ("vmcall; 1: leal 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
 	/*
 	 * Note: VMEXIT is recorded before NMI injection because after NMI
 	 * injection is completed, VMEXIT happens. After VMEXIT completes, the
@@ -1381,7 +1381,7 @@ static void experiment_25(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 25));
 	state_no = 0;
-	asm volatile ("vmcall; 1: leal 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
 	assert_measure(EXIT_NMI_G, rip);
 	iret_wait(EXIT_NMIWIND);
 	state_no = 1;
@@ -1422,7 +1422,7 @@ static void experiment_26(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 26));
 	state_no = 0;
-	asm volatile ("vmcall; 1: leal 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
 	/*
 	 * Note: VMEXIT is recorded before NMI injection because after NMI
 	 * injection is completed, VMEXIT happens. After VMEXIT completes, the
@@ -1467,7 +1467,7 @@ static void experiment_27(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 27));
 	state_no = 0;
-	asm volatile ("vmcall; 1: leal 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
 	assert_measure(EXIT_NMI_G, rip);
 	iret_wait(EXIT_MEASURE);
 	state_no = 1;
@@ -1508,7 +1508,7 @@ static void experiment_28(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 28));
 	state_no = 0;
-	asm volatile ("vmcall; 1: leal 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
 	assert_measure(EXIT_VMEXIT, rip);
 	iret_wait(EXIT_MEASURE);
 	state_no = 1;
@@ -1582,7 +1582,7 @@ static void experiment_30(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 30));
 	state_no = 0;
-	asm volatile ("vmcall; 1: leal 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
 	assert_measure(EXIT_VMEXIT, rip);
 	iret_wait(EXIT_MEASURE);
 	state_no = 1;
