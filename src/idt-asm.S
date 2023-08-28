@@ -48,6 +48,7 @@ idt_stub_common:
 	PUSHA
 
 	/* Save segment registers. */
+	xor		AX, AX
 	movw	%gs, %ax
 	push	AX
 	movw	%fs, %ax
