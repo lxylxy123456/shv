@@ -29,7 +29,7 @@
 #error "SHV NMI experiments only support 32-bit at this time."
 #endif
 
-#endif /* (NMI_OPT & SHV_NMI_ENABLE) */
+#endif							/* (NMI_OPT & SHV_NMI_ENABLE) */
 
 /*
  * An interrupt handler or VMEXIT handler will see exit_source. If it sees
@@ -38,15 +38,15 @@
  * exit_source.
  */
 enum exit_source {
-	EXIT_IGNORE,	/* Ignore the interrupt */
-	EXIT_MEASURE,	/* Measure the interrupt */
-	EXIT_MEAS_2,	/* Measure two interrupts */
-	EXIT_NMI_G,		/* Interrupt comes from guest NMI interrupt handler */
-	EXIT_TIMER_G,	/* Interrupt comes from guest timer interrupt handler */
-	EXIT_NMI_H,		/* Interrupt comes from host NMI interrupt handler */
-	EXIT_TIMER_H,	/* Interrupt comes from host timer interrupt handler */
-	EXIT_VMEXIT,	/* Interrupt comes from NMI VMEXIT handler */
-	EXIT_NMIWIND,	/* Interrupt comes from NMI Windowing handler */
+	EXIT_IGNORE,				/* Ignore the interrupt */
+	EXIT_MEASURE,				/* Measure the interrupt */
+	EXIT_MEAS_2,				/* Measure two interrupts */
+	EXIT_NMI_G,					/* Interrupt comes from guest NMI interrupt handler */
+	EXIT_TIMER_G,				/* Interrupt comes from guest timer interrupt handler */
+	EXIT_NMI_H,					/* Interrupt comes from host NMI interrupt handler */
+	EXIT_TIMER_H,				/* Interrupt comes from host timer interrupt handler */
+	EXIT_VMEXIT,				/* Interrupt comes from NMI VMEXIT handler */
+	EXIT_NMIWIND,				/* Interrupt comes from NMI Windowing handler */
 };
 
 const char *exit_source_str[] = {
@@ -188,15 +188,15 @@ void handle_nmi_interrupt(VCPU * vcpu, u8 vector, bool guest, uintptr_t rip)
 	}
 }
 
-void shv_nmi_vmexit_handler(VCPU *vcpu, struct regs *r, vmexit_info_t * info)
+void shv_nmi_vmexit_handler(VCPU * vcpu, struct regs *r, vmexit_info_t * info)
 {
 	switch (info->vmexit_reason) {
 	case VMX_VMEXIT_CPUID:
 		{
 			u32 old_eax = r->eax;
-			asm volatile ("cpuid\n"
-				  :"=a"(r->eax), "=b"(r->ebx), "=c"(r->ecx), "=d"(r->edx)
-				  :"a"(r->eax), "c" (r->ecx));
+			asm volatile ("cpuid\n":"=a" (r->eax), "=b"(r->ebx), "=c"(r->ecx),
+						  "=d"(r->edx)
+						  :"a"(r->eax), "c"(r->ecx));
 			if (old_eax == 0x1) {
 				/* Clear VMX capability */
 				r->ecx &= ~(1U << 5);
@@ -265,40 +265,37 @@ void shv_nmi_vmexit_handler(VCPU *vcpu, struct regs *r, vmexit_info_t * info)
 }
 
 /* Unblock NMI and return the RIP at which NMI is unblocked. */
-uintptr_t unblock_nmi_with_rip(void) {
+uintptr_t unblock_nmi_with_rip(void)
+{
 	uintptr_t rip;
 #ifdef __amd64__
-    asm volatile (
-        "movq    %%rsp, %%rsi   \n"
-        "xorq    %%rax, %%rax   \n"
-        "movw    %%ss, %%ax     \n"
-        "pushq   %%rax          \n"
-        "pushq   %%rsi          \n"
-        "pushfq                 \n"
-        "xorq    %%rax, %%rax   \n"
-        "movw    %%cs, %%ax     \n"
-        "pushq   %%rax          \n"
-        "pushq   $1f            \n"
-        "iretq                  \n"
-        "1: leaq 1b, %0         \n"
-        : "=g"(rip)
-        : // no input
-        : "%rax", "%rsi", "cc", "memory");
+	asm volatile ("movq    %%rsp, %%rsi   \n"
+				  "xorq    %%rax, %%rax   \n"
+				  "movw    %%ss, %%ax     \n"
+				  "pushq   %%rax          \n"
+				  "pushq   %%rsi          \n"
+				  "pushfq                 \n"
+				  "xorq    %%rax, %%rax   \n"
+				  "movw    %%cs, %%ax     \n"
+				  "pushq   %%rax          \n"
+				  "pushq   $1f            \n"
+				  "iretq                  \n"
+				  "1: leaq 1b, %0         \n":"=g" (rip)
+				  :				// no input
+				  :"%rax", "%rsi", "cc", "memory");
 #elif defined(__i386__)
-    asm volatile (
-        "pushfl                 \n"
-        "xorl    %%eax, %%eax   \n"
-        "movw    %%cs, %%ax     \n"
-        "pushl   %%eax          \n"
-        "pushl   $1f            \n"
-        "iretl                  \n"
-        "1: lea 1b, %0         \n"
-        : "=g"(rip)
-        : // no input
-        : "%eax", "cc", "memory");
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
+	asm volatile ("pushfl                 \n"
+				  "xorl    %%eax, %%eax   \n"
+				  "movw    %%cs, %%ax     \n"
+				  "pushl   %%eax          \n"
+				  "pushl   $1f            \n"
+				  "iretl                  \n"
+				  "1: lea 1b, %0         \n":"=g" (rip)
+				  :				// no input
+				  :"%eax", "cc", "memory");
+#else							/* !defined(__i386__) && !defined(__amd64__) */
+#error "Unsupported Arch"
+#endif							/* !defined(__i386__) && !defined(__amd64__) */
 	return rip;
 }
 
@@ -380,8 +377,7 @@ static void set_inject_nmi(void)
 {
 	u32 val = __vmx_vmread32(VMCS_control_VM_entry_interruption_information);
 	TEST_ASSERT((val & 0x80000000) == 0);
-	__vmx_vmwrite32(VMCS_control_VM_entry_interruption_information,
-				 0x80000202);
+	__vmx_vmwrite32(VMCS_control_VM_entry_interruption_information, 0x80000202);
 }
 
 /* Prepare for assert_measure() */
@@ -457,8 +453,8 @@ void hlt_wait(u32 source)
 	prepare_measure();
 	exit_source = EXIT_MEASURE;
 	l2_ready = 1;
-loop:
-	asm volatile ("pushf; sti; hlt; 1: lea 1b, %0; popf" : "=g"(rip));
+ loop:
+	asm volatile ("pushf; sti; hlt; 1: lea 1b, %0; popf":"=g" (rip));
 	if ("qemu workaround" && exit_source == EXIT_MEASURE) {
 		if (!quiet) {
 			printf("      Strange wakeup from HLT\n");
@@ -569,7 +565,7 @@ static void experiment_3(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 3));
 	state_no = 0;
-	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0":"=g" (rip));
 	assert_measure(EXIT_NMI_G, rip);
 	iret_wait(EXIT_MEASURE);
 }
@@ -705,7 +701,7 @@ static void experiment_7(void)
 	printf("Experiment: %d\n", (experiment_no = 7));
 	state_no = 0;
 	prepare_measure();
-	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0":"=g" (rip));
 	assert_measure(EXIT_VMEXIT, rip);
 	state_no = 1;
 	asm volatile ("vmcall");
@@ -805,7 +801,7 @@ static void experiment_10(void)
 	printf("Experiment: %d\n", (experiment_no = 10));
 	state_no = 0;
 	prepare_measure();
-	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0":"=g" (rip));
 	assert_measure(EXIT_VMEXIT, rip);
 	state_no = 1;
 	asm volatile ("vmcall");
@@ -842,7 +838,7 @@ static void experiment_11(void)
 	printf("Experiment: %d\n", (experiment_no = 11));
 	state_no = 0;
 	prepare_measure();
-	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0":"=g" (rip));
 	assert_measure(EXIT_VMEXIT, rip);
 	state_no = 1;
 	asm volatile ("vmcall");
@@ -998,7 +994,7 @@ static void experiment_15_vmcall(void)
 		hlt_wait(EXIT_TIMER_H);
 		set_state(0, 0, 0, 0);
 		__vmx_vmwrite32(VMCS_control_VM_entry_interruption_information,
-					 0x80000021);
+						0x80000021);
 		prepare_measure();
 		break;
 	case 1:
@@ -1038,7 +1034,7 @@ static void experiment_16_vmcall(void)
 		hlt_wait(EXIT_TIMER_H);
 		set_state(1, 0, 0, 0);
 		__vmx_vmwrite32(VMCS_control_VM_entry_interruption_information,
-					 0x80000021);
+						0x80000021);
 		prepare_measure();
 		break;
 	case 1:
@@ -1078,7 +1074,7 @@ static void experiment_17_vmcall(void)
 		hlt_wait(EXIT_TIMER_H);
 		set_state(1, 1, 1, 0);
 		__vmx_vmwrite32(VMCS_control_VM_entry_interruption_information,
-					 0x80000021);
+						0x80000021);
 		prepare_measure();
 		break;
 	case 1:
@@ -1104,7 +1100,7 @@ static void experiment_18(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 18));
 	state_no = 0;
-	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0":"=g" (rip));
 	assert_measure(EXIT_NMI_G, rip);
 	state_no = 1;
 	asm volatile ("vmcall");
@@ -1144,7 +1140,7 @@ static void experiment_19(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 19));
 	state_no = 0;
-	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0":"=g" (rip));
 	assert_measure(EXIT_NMI_G, rip);
 	state_no = 1;
 	asm volatile ("vmcall");
@@ -1183,7 +1179,7 @@ static void experiment_20(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 20));
 	state_no = 0;
-	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0":"=g" (rip));
 	assert_measure(EXIT_NMI_G, rip);
 	state_no = 1;
 	asm volatile ("vmcall");
@@ -1221,7 +1217,7 @@ static void experiment_21(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 21));
 	state_no = 0;
-	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0":"=g" (rip));
 	assert_measure(EXIT_NMIWIND, rip);
 	state_no = 1;
 	asm volatile ("vmcall");
@@ -1258,7 +1254,7 @@ static void experiment_22(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 22));
 	state_no = 0;
-	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0":"=g" (rip));
 	assert_measure(EXIT_MEASURE, rip);
 	state_no = 1;
 	asm volatile ("vmcall");
@@ -1336,7 +1332,7 @@ static void experiment_24(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 24));
 	state_no = 0;
-	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0":"=g" (rip));
 	/*
 	 * Note: VMEXIT is recorded before NMI injection because after NMI
 	 * injection is completed, VMEXIT happens. After VMEXIT completes, the
@@ -1381,7 +1377,7 @@ static void experiment_25(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 25));
 	state_no = 0;
-	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0":"=g" (rip));
 	assert_measure(EXIT_NMI_G, rip);
 	iret_wait(EXIT_NMIWIND);
 	state_no = 1;
@@ -1422,7 +1418,7 @@ static void experiment_26(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 26));
 	state_no = 0;
-	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0":"=g" (rip));
 	/*
 	 * Note: VMEXIT is recorded before NMI injection because after NMI
 	 * injection is completed, VMEXIT happens. After VMEXIT completes, the
@@ -1467,7 +1463,7 @@ static void experiment_27(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 27));
 	state_no = 0;
-	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0":"=g" (rip));
 	assert_measure(EXIT_NMI_G, rip);
 	iret_wait(EXIT_MEASURE);
 	state_no = 1;
@@ -1508,7 +1504,7 @@ static void experiment_28(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 28));
 	state_no = 0;
-	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0":"=g" (rip));
 	assert_measure(EXIT_VMEXIT, rip);
 	iret_wait(EXIT_MEASURE);
 	state_no = 1;
@@ -1582,7 +1578,7 @@ static void experiment_30(void)
 	uintptr_t rip;
 	printf("Experiment: %d\n", (experiment_no = 30));
 	state_no = 0;
-	asm volatile ("vmcall; 1: lea 1b, %0" : "=g"(rip));
+	asm volatile ("vmcall; 1: lea 1b, %0":"=g" (rip));
 	assert_measure(EXIT_VMEXIT, rip);
 	iret_wait(EXIT_MEASURE);
 	state_no = 1;
@@ -1619,17 +1615,17 @@ static struct {
 	bool support_xmhf;
 	bool support_qemu;
 	bool support_bochs;
-} experiments[] = { /*                    a  x  q  b */
-	{NULL,          NULL,                 1, 0, 0, 0},
-	{experiment_1,  experiment_1_vmcall,  1, 1, 1, 1},
-	{experiment_2,  experiment_2_vmcall,  1, 1, 0, 1},
-	{experiment_3,  experiment_3_vmcall,  1, 1, 0, 1},
-	{experiment_4,  experiment_4_vmcall,  1, 1, 0, 1},
-	{experiment_5,  experiment_5_vmcall,  1, 1, 1, 0},
-	{experiment_6,  experiment_6_vmcall,  1, 1, 0, 1},
-	{experiment_7,  experiment_7_vmcall,  1, 1, 1, 0},
-	{experiment_8,  experiment_8_vmcall,  1, 1, 1, 1},
-	{experiment_9,  experiment_9_vmcall,  1, 1, 1, 1},
+} experiments[] = {				/*                    a  x  q  b */
+	{NULL, NULL, 1, 0, 0, 0},
+	{experiment_1, experiment_1_vmcall, 1, 1, 1, 1},
+	{experiment_2, experiment_2_vmcall, 1, 1, 0, 1},
+	{experiment_3, experiment_3_vmcall, 1, 1, 0, 1},
+	{experiment_4, experiment_4_vmcall, 1, 1, 0, 1},
+	{experiment_5, experiment_5_vmcall, 1, 1, 1, 0},
+	{experiment_6, experiment_6_vmcall, 1, 1, 0, 1},
+	{experiment_7, experiment_7_vmcall, 1, 1, 1, 0},
+	{experiment_8, experiment_8_vmcall, 1, 1, 1, 1},
+	{experiment_9, experiment_9_vmcall, 1, 1, 1, 1},
 	{experiment_10, experiment_10_vmcall, 1, 1, 1, 1},
 	{experiment_11, experiment_11_vmcall, 1, 1, 1, 0},
 	{experiment_12, experiment_12_vmcall, 1, 1, 1, 1},
