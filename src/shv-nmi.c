@@ -21,7 +21,7 @@
 #include <shv-pic.h>
 
 // TODO: make it configurable
-#define INTERRUPT_PERIOD 20
+#define INTERRUPT_PERIOD 10
 
 #if (NMI_OPT & SHV_NMI_ENABLE)
 

@@ -85,15 +85,14 @@ void init_idt(void)
 /* From XMHF64 _svm_and_vmx_getvcpu(). */
 VCPU *get_vcpu(void)
 {
-	u64 msr_val = 0xfee00000ULL;
+	u64 msr_val;
 	u32 lapic_id;
 
-	/*
-	 * When testing NMI, need to avoid VMEXIT in interrupt handlers.
-	 * When not testing NMI, read MSR_APIC_BASE to ensure msr_val is correct.
-	 */
-	if (!(NMI_OPT & SHV_NMI_ENABLE)) {
-		ASSERT(msr_val == rdmsr64(MSR_APIC_BASE));
+	if ((NMI_OPT & SHV_NMI_ENABLE)) {
+		/* Hardcode LAPIC address to avoid VMEXIT due to RDMSR. */
+		msr_val = 0xfee00000ULL;
+	} else {
+		msr_val = rdmsr64(MSR_APIC_BASE);
 	}
 
 	if (msr_val & (1ULL << 10)) {
