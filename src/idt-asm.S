@@ -123,7 +123,6 @@ idt_stub_common:
 	 * changed before and after the IRET instruction.
 	 */
 1:
-	// TODO: combine similar code
 
 #ifdef __amd64__
 
@@ -174,32 +173,35 @@ idt_stub_common:
 
 #elif defined(__i386__)
 
+	push	AX
+
 	/*
 	 * At this point the stack looks like:
-	 *  esp+12: esp of interrupted code
-	 *  esp+8:  EFLAGS
-	 *  esp+4:  CS
-	 *  esp+0:  EIP
+	 *  esp+SIZE*4:  esp of interrupted code
+	 *  esp+SIZE*3:  EFLAGS
+	 *  esp+SIZE*2:  CS
+	 *  esp+SIZE*1:  EIP
+	 *  esp+SIZE*0:  EAX
 	 *
 	 * We need to modify the stack to look like:
-	 *  esp+16: esp of interrupted code
-	 *  esp+12: EIP			was EFLAGS
-	 *  esp+8:  EFLAGS		was CS
-	 *  esp+4:  EAX			was EIP
-	 *  esp+0:  ignored		was EAX
+	 *  esp+SIZE*3:  esp of interrupted code
+	 *  esp+SIZE*2:  EIP		was EFLAGS
+	 *  esp+SIZE*1:  EFLAGS		was CS
+	 *  esp+SIZE*0:  EAX		was EIP
+	 *  esp+SIZE*-1: ignored	was EAX
 	 *
 	 * Then use pop to restore EAX, use POPF to restore EFLAGS, and use RET to
 	 * restore EIP and ESP.
 	 */
-	push	AX
-	movl	12(%esp), %eax	/* Move value of EFLAGS around */
-	movl	%eax, 8(%esp)
-	movl	4(%esp), %eax	/* Move value of EIP around */
-	movl	%eax, 12(%esp)
-	movl	(%esp), %eax	/* Move value of EAX around */
-	movl	%eax, 4(%esp)
-	popl	%eax
-	popl	%eax			/* Restore value of EAX */
+
+	mov		SIZE*3(SP), AX	/* Move value of EFLAGS around */
+	mov		AX, SIZE*2(SP)
+	mov		SIZE*1(SP), AX	/* Move value of EIP around */
+	mov		AX, SIZE*3(SP)
+	mov		SIZE*0(SP), AX	/* Move value of EAX around */
+	mov		AX, SIZE*1(SP)
+	pop		AX
+	pop		AX				/* Restore value of EAX */
 	popfl					/* Restore value of EFLAGS */
 	ret						/* Restore value of EIP and ESP */
 
