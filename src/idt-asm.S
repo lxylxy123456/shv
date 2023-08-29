@@ -27,6 +27,7 @@
 #define IRET	iretq
 #define SP		%rsp
 #define AX		%rax
+#define DX		%rdx
 
 #elif defined(__i386__)
 
@@ -37,6 +38,7 @@
 #define IRET	iretl
 #define SP		%esp
 #define AX		%eax
+#define DX		%edx
 
 #else /* !defined(__i386__) && !defined(__amd64__) */
 	#error "Unsupported Arch"
@@ -73,6 +75,8 @@ idt_stub_common:
 #else /* !defined(__i386__) && !defined(__amd64__) */
 	#error "Unsupported Arch"
 #endif /* __amd64__ */
+
+	// TODO: is it possible to do something and let debugger jump to interrupted code?
 
 	/* Call C handler. */
 	call	handle_idt
@@ -119,40 +123,52 @@ idt_stub_common:
 	 * changed before and after the IRET instruction.
 	 */
 1:
+	// TODO: combine similar code
 
 #ifdef __amd64__
 
+	push	AX
+	push	DX
+
 	/*
+	 * According to SDM, Intel aligns the stack to 16 bytes. So there may be
+	 * an extra 8 bytes between SS and interrupted code. We need to read RSP
+	 * and move data accordingly.
+	 *
 	 * At this point the stack looks like:
-	 *  rsp+40: rsp of interrupted code
-	 *  rsp+32: SS
-	 *  rsp+24: RSP
-	 *  rsp+16: RFLAGS
-	 *  rsp+8:  CS
-	 *  rsp+0:  RIP
+	 *  rsp+SIZE*8: rsp of interrupted code (case 2)
+	 *  rsp+SIZE*7: rsp of interrupted code (case 1)
+	 *  rsp+SIZE*6: SS
+	 *  rsp+SIZE*5: RSP (points to rsp+SIZE*7 or rsp+SIZE*8)
+	 *  rsp+SIZE*4: RFLAGS
+	 *  rsp+SIZE*3: CS
+	 *  rsp+SIZE*2: RIP
+	 *  rsp+SIZE*1: RAX
+	 *  rsp+SIZE*0: RDX
 	 *
 	 * We need to modify the stack to look like:
-	 *  rsp+48: rsp of interrupted code
-	 *  rsp+40: RIP			was SS
-	 *  rsp+32: RFLAGS		was RSP
-	 *  rsp+24: RAX			was RFLAGS
-	 *  rsp+16: ignored		was CS
-	 *  rsp+8:  ignored		was RIP
-	 *  rsp+0:  ignored		was RAX
+	 *  rsp+SIZE*4: rsp of interrupted code
+	 *  rsp+SIZE*3: RIP
+	 *  rsp+SIZE*2: RFLAGS
+	 *  rsp+SIZE*1: RAX
+	 *  rsp+SIZE*0: RDX
 	 *
-	 * Then use pop to restore RAX, use POPF to restore RFLAGS, and use RET to
-	 * restore RIP and RSP.
+	 * Then use pop to restore RDX and RAX, use POPF to restore RFLAGS, and use
+	 * RET to restore RIP and RSP.
 	 */
 
-	pushq	%rax
-	movq	24(%rsp), %rax	/* Move value of EFLAGS around */
-	movq	%rax, 32(%rsp)
-	movq	8(%rsp), %rax	/* Move value of RIP around */
-	movq	%rax, 40(%rsp)
-	movq	(%rsp), %rax	/* Move value of RAX around */
-	movq	%rax, 24(%rsp)
-	leaq	24(%rsp), %rsp
-	popq	%rax			/* Restore value of RAX */
+	mov		SIZE*5(SP), DX
+	mov		SIZE*2(SP), AX	/* Move value of RIP around */
+	mov		AX, -SIZE*1(DX)
+	mov		SIZE*4(SP), AX	/* Move value of RFLAGS around */
+	mov		AX, -SIZE*2(DX)
+	mov		SIZE*1(SP), AX	/* Move value of RAX around */
+	mov		AX, -SIZE*3(DX)
+	mov		SIZE*0(SP), AX	/* Move value of RDX around */
+	mov		AX, -SIZE*4(DX)
+	lea		-SIZE*4(DX), SP	/* Adjust RSP */
+	pop		DX				/* Restore value of RDX */
+	popq	AX				/* Restore value of RAX */
 	popfq					/* Restore value of RFLAGS */
 	ret						/* Restore value of RIP and RSP */
 
@@ -175,7 +191,7 @@ idt_stub_common:
 	 * Then use pop to restore EAX, use POPF to restore EFLAGS, and use RET to
 	 * restore EIP and ESP.
 	 */
-	pushl   %eax
+	push	AX
 	movl	12(%esp), %eax	/* Move value of EFLAGS around */
 	movl	%eax, 8(%esp)
 	movl	4(%esp), %eax	/* Move value of EIP around */
