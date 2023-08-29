@@ -252,8 +252,10 @@ u32 handle_idt(iret_info_t * info)
 	}
 
 	if (NMI_OPT & SHV_NMI_ENABLE) {
-		/* TODO: only return true based on vcpu->idx and vector. */
-		return 1;
+		if (vcpu->idx == 1 &&
+			(vector == 0x02 || vector == 0x21 || vector == 0x54)) {
+			return 1;
+		}
 	}
 
 	return 0;
