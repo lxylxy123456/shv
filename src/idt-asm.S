@@ -251,13 +251,13 @@ idt_stub_&mode&_&name&:
 
 	/* 0 -> 1 -> ... -> 15 */
 	.if (\cur + 1) % 16
-		def_stubs "\mode" "(\cur + 1)" &name&1
+		def_stubs &mode "(\cur + 1)" &name&1
 	.endif
 
 	/* 0 -> 16 -> ... -> 240 */
 	.ifeq (\cur % 16)
 		.iflt \cur - 240
-			def_stubs "\mode" "(\cur + 16)" &name&h
+			def_stubs &mode "(\cur + 16)" &name&h
 		.endif
 	.endif
 .endm
@@ -272,13 +272,13 @@ def_stubs guest
 
 	/* 0 -> 1 -> ... -> 15 */
 	.if (\cur + 1) % 16
-		ref_stubs "\mode" "(\cur + 1)" &name&1
+		ref_stubs &mode "(\cur + 1)" &name&1
 	.endif
 
 	/* 0 -> 16 -> ... -> 240 */
 	.ifeq (\cur % 16)
 		.iflt \cur - 240
-			ref_stubs "\mode" "(\cur + 16)" &name&h
+			ref_stubs &mode "(\cur + 16)" &name&h
 		.endif
 	.endif
 .endm
