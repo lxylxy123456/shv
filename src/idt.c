@@ -20,7 +20,30 @@
 #include <shv.h>
 
 #define IDT_NELEMS 256
-uintptr_t g_idt[IDT_NELEMS][2];
+uintptr_t g_idt_host[IDT_NELEMS][2];
+uintptr_t g_idt_guest[IDT_NELEMS][2];
+
+static void construct_idt_entry(u8 vector, uintptr_t stub, idtentry_t *entry)
+{
+	entry->isrLow16 = (u16) stub;
+	entry->isrHigh16 = (u16) (stub >> 16);
+#ifdef __amd64__
+	entry->isrHigh32 = (u32) (stub >> 32);
+	entry->reserved_zero = 0;
+#endif							/* defined(__amd64__) */
+	entry->isrSelector = __CS;
+	/* Set IST to 0. */
+	entry->count = 0x0;
+	/*
+	 * 32-bit / 64-bit interrupt gate.
+	 * present=1, DPL=00b, system=0, type=1110b.
+	 */
+	entry->type = 0x8E;
+	/* For 0x23, set DPL to 11b because it is used for syscall. */
+	if (vector == 0x23) {
+		entry->type |= 0x60;
+	}
+}
 
 static void construct_idt(void)
 {
@@ -40,26 +63,15 @@ static void construct_idt(void)
 
 	/* From XMHF64 xmhf_xcphandler_arch_initialize(). */
 	for (u32 i = 0; i < IDT_NELEMS; i++) {
-		uintptr_t stub = g_idt_stubs[i];
-		idtentry_t *entry = (idtentry_t *) & (g_idt[i][0]);
-		entry->isrLow16 = (u16) stub;
-		entry->isrHigh16 = (u16) (stub >> 16);
-#ifdef __amd64__
-		entry->isrHigh32 = (u32) (stub >> 32);
-		entry->reserved_zero = 0;
-#endif							/* defined(__amd64__) */
-		entry->isrSelector = __CS;
-		/* Set IST to 0. */
-		entry->count = 0x0;
-		/*
-		 * 32-bit / 64-bit interrupt gate.
-		 * present=1, DPL=00b, system=0, type=1110b.
-		 */
-		entry->type = 0x8E;
-		/* For 0x23, set DPL to 11b because it is used for syscall. */
-		if (i == 0x23) {
-			entry->type |= 0x60;
-		}
+		uintptr_t stub = g_idt_stubs_host[i];
+		idtentry_t *entry = (idtentry_t *) & (g_idt_host[i][0]);
+		construct_idt_entry(i, stub, entry);
+	}
+
+	for (u32 i = 0; i < IDT_NELEMS; i++) {
+		uintptr_t stub = g_idt_stubs_guest[i];
+		idtentry_t *entry = (idtentry_t *) & (g_idt_guest[i][0]);
+		construct_idt_entry(i, stub, entry);
 	}
 }
 
@@ -75,8 +87,8 @@ void init_idt(void)
 			u16 limit;
 			uintptr_t base;
 		} __attribute__((packed)) idtr = {
-			.limit = (uintptr_t) g_idt[IDT_NELEMS] - (uintptr_t) g_idt[0] - 1,
-			.base = (uintptr_t) & g_idt,
+			.limit = IDT_NELEMS * sizeof(uintptr_t) * 2 - 1,
+			.base = (uintptr_t) & g_idt_host,
 		};
 		asm volatile ("lidt %0"::"m" (idtr));
 	}

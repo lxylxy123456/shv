@@ -212,11 +212,16 @@ idt_stub_common:
 /*
  * Macro for defining IDT stubs.
  * Tutorial in https://sourceware.org/binutils/docs/as/Macro.html .
+ * mode is either host or guest.
+ * cur evaluates to the vector number.
+ * name contains 'h' and '1', where each 'h' represents 16 and each '1'
+ *  represents 1. Adding all these characters give the vector number. For
+ *  example, "hh11" means 16 + 16 + 1 + 1 = 34 = 0x22.
  */
-.macro def_stubs cur=0 name=
+.macro def_stubs mode cur=0 name=
 
-.global idt_stub_&name&
-idt_stub_&name&:
+.global idt_stub_&mode&_&name&
+idt_stub_&mode&_&name&:
 
 	/* Push error code. */
 	.ifne \cur - 0x08
@@ -242,39 +247,44 @@ idt_stub_&name&:
 
 	/* 0 -> 1 -> ... -> 15 */
 	.if (\cur + 1) % 16
-		def_stubs "(\cur + 1)" &name&1
+		def_stubs "\mode" "(\cur + 1)" &name&1
 	.endif
 
 	/* 0 -> 16 -> ... -> 240 */
 	.ifeq (\cur % 16)
 		.iflt \cur - 240
-			def_stubs "(\cur + 16)" &name&h
+			def_stubs "\mode" "(\cur + 16)" &name&h
 		.endif
 	.endif
 .endm
 
-def_stubs
+def_stubs host
+def_stubs guest
 
 /* Macro for referencing IDT stubs. */
-.macro ref_stubs cur=0 name=
+.macro ref_stubs mode cur=0 name=
 
-	.PTR	idt_stub_&name&
+	.PTR	idt_stub_&mode&_&name&
 
 	/* 0 -> 1 -> ... -> 15 */
 	.if (\cur + 1) % 16
-		ref_stubs "(\cur + 1)" &name&1
+		ref_stubs "\mode" "(\cur + 1)" &name&1
 	.endif
 
 	/* 0 -> 16 -> ... -> 240 */
 	.ifeq (\cur % 16)
 		.iflt \cur - 240
-			ref_stubs "(\cur + 16)" &name&h
+			ref_stubs "\mode" "(\cur + 16)" &name&h
 		.endif
 	.endif
 .endm
 
 .section .rodata
-.global g_idt_stubs
-g_idt_stubs:
-	ref_stubs
+.global g_idt_stubs_host
+g_idt_stubs_host:
+	ref_stubs host
+
+.global g_idt_stubs_guest
+g_idt_stubs_guest:
+	ref_stubs guest
 

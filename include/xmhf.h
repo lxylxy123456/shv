@@ -265,8 +265,10 @@ typedef struct {
 	uintptr_t ss;
 #endif							/* __amd64__ */
 } __attribute__((packed)) iret_info_t;
-extern uintptr_t g_idt_stubs[IDT_NELEMS];
-extern uintptr_t g_idt[IDT_NELEMS][2];
+extern uintptr_t g_idt_stubs_host[IDT_NELEMS];
+extern uintptr_t g_idt_stubs_guest[IDT_NELEMS];
+extern uintptr_t g_idt_host[IDT_NELEMS][2];
+extern uintptr_t g_idt_guest[IDT_NELEMS][2];
 extern void init_idt(void);
 extern VCPU *get_vcpu(void);
 extern void dump_exception(VCPU * vcpu, struct regs *r, iret_info_t * info);

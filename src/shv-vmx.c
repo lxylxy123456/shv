@@ -58,7 +58,7 @@ static void shv_vmx_vmcs_init(VCPU * vcpu)
 	__vmx_vmwrite16(VMCS_host_SS_selector, read_ss());
 	__vmx_vmwrite16(VMCS_host_TR_selector, read_tr());
 	__vmx_vmwriteNW(VMCS_host_GDTR_base, (uintptr_t) g_gdt[vcpu->idx]);
-	__vmx_vmwriteNW(VMCS_host_IDTR_base, (uintptr_t) g_idt);
+	__vmx_vmwriteNW(VMCS_host_IDTR_base, (uintptr_t) g_idt_host);	// TODO: change to g_idt_guest
 	__vmx_vmwriteNW(VMCS_host_TR_base, (u64) (hva_t) g_tss[vcpu->idx]);
 	__vmx_vmwriteNW(VMCS_host_RIP, (u64) (hva_t) vmexit_asm);
 
