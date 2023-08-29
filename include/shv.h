@@ -117,7 +117,6 @@ void exit_user_mode_asm(uintptr_t esp0);
 
 /* shv-nmi.c */
 void shv_nmi_handle_timer_interrupt(VCPU * vcpu, u8 vector, bool guest);
-void shv_nmi_handle_keyboard_interrupt(VCPU * vcpu, u8 vector, bool guest);
 void handle_ipi_interrupt(VCPU * vcpu, u8 vector, bool guest, uintptr_t rip);
 void handle_nmi_interrupt(VCPU * vcpu, u8 vector, bool guest, uintptr_t rip);
 void shv_nmi_guest_main(VCPU * vcpu);

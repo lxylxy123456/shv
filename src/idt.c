@@ -23,7 +23,7 @@
 uintptr_t g_idt_host[IDT_NELEMS][2];
 uintptr_t g_idt_guest[IDT_NELEMS][2];
 
-static void construct_idt_entry(u8 vector, uintptr_t stub, idtentry_t *entry)
+static void construct_idt_entry(u8 vector, uintptr_t stub, idtentry_t * entry)
 {
 	entry->isrLow16 = (u16) stub;
 	entry->isrHigh16 = (u16) (stub >> 16);

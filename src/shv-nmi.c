@@ -158,11 +158,6 @@ void shv_nmi_handle_timer_interrupt(VCPU * vcpu, u8 vector, bool guest)
 	outb(INT_CTL_PORT, INT_ACK_CURRENT);
 }
 
-void shv_nmi_handle_keyboard_interrupt(VCPU * vcpu, u8 vector, bool guest)
-{
-	
-}
-
 void handle_ipi_interrupt(VCPU * vcpu, u8 vector, bool guest, uintptr_t rip)
 {
 	ASSERT(!vcpu->isbsp);
@@ -1423,7 +1418,8 @@ static void experiment_26(void)
 	 * injection is completed, VMEXIT happens. After VMEXIT completes, the
 	 * first instruction of NMI injection is executed.
 	 */
-	assert_measure_2(EXIT_VMEXIT, (uintptr_t) idt_stub_guest_11, EXIT_NMI_G, rip);
+	assert_measure_2(EXIT_VMEXIT, (uintptr_t) idt_stub_guest_11, EXIT_NMI_G,
+					 rip);
 	state_no = 1;
 	asm volatile ("vmcall");
 }
