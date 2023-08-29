@@ -241,7 +241,11 @@ idt_stub_&mode&_&name&:
 	.endif
 
 	/* Push vector. */
+	.ifc \mode,guest
+	push	$0x100 + \cur
+	.else
 	push	$\cur
+	.endif
 
 	jmp		idt_stub_common
 

@@ -165,6 +165,11 @@ u32 handle_idt(iret_info_t * info)
 	u8 vector = info->vector;
 	// TODO: avoid calling cpuid, use different IDT for host and guest, add info in "/* Push vector. */"
 	bool guest = !(cpuid_ecx(1, 0) & (1U << 5));
+	if (guest) {
+		ASSERT(info->vector & 0x100);
+	} else {
+		ASSERT(!(info->vector & 0x100));
+	}
 
 	switch (vector) {
 	case 0x02:

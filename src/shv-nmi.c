@@ -78,8 +78,8 @@ static volatile bool quiet = false;
         } \
     } while (0)
 
-extern void idt_stub_host_11(void);
-extern void idt_stub_host_hh1(void);
+extern void idt_stub_guest_11(void);
+extern void idt_stub_guest_hh1(void);
 
 /* https://zh.wikipedia.org/wiki/%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%80%A7 */
 u32 rand(void)
@@ -977,7 +977,7 @@ static void experiment_15(void)
 	printf("Experiment: %d\n", (experiment_no = 15));
 	state_no = 0;
 	asm volatile ("vmcall");
-	assert_measure(EXIT_NMI_G, (uintptr_t) idt_stub_host_hh1);
+	assert_measure(EXIT_NMI_G, (uintptr_t) idt_stub_guest_hh1);
 	state_no = 1;
 	asm volatile ("vmcall");
 }
@@ -1017,7 +1017,7 @@ static void experiment_16(void)
 	printf("Experiment: %d\n", (experiment_no = 16));
 	state_no = 0;
 	asm volatile ("vmcall");
-	assert_measure(EXIT_VMEXIT, (uintptr_t) idt_stub_host_hh1);
+	assert_measure(EXIT_VMEXIT, (uintptr_t) idt_stub_guest_hh1);
 	state_no = 1;
 	asm volatile ("vmcall");
 }
@@ -1057,7 +1057,7 @@ static void experiment_17(void)
 	printf("Experiment: %d\n", (experiment_no = 17));
 	state_no = 0;
 	asm volatile ("vmcall");
-	assert_measure(EXIT_VMEXIT, (uintptr_t) idt_stub_host_hh1);
+	assert_measure(EXIT_VMEXIT, (uintptr_t) idt_stub_guest_hh1);
 	state_no = 1;
 	asm volatile ("vmcall");
 }
@@ -1421,7 +1421,7 @@ static void experiment_26(void)
 	 * injection is completed, VMEXIT happens. After VMEXIT completes, the
 	 * first instruction of NMI injection is executed.
 	 */
-	assert_measure_2(EXIT_VMEXIT, (uintptr_t) idt_stub_host_11, EXIT_NMI_G, rip);
+	assert_measure_2(EXIT_VMEXIT, (uintptr_t) idt_stub_guest_11, EXIT_NMI_G, rip);
 	state_no = 1;
 	asm volatile ("vmcall");
 }
