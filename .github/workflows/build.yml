@@ -35,6 +35,9 @@ jobs:
           - 'O0'
           - 'O2'
           - 'O3'
+        nmi_opt:
+          - 0x00000000
+          - 0x00000001
 
     steps:
     - uses: actions/checkout@v3
@@ -48,12 +51,13 @@ jobs:
       run: |
         tools/build.sh --${{ matrix.target_arch }} \
                        -${{ matrix.optimize_mode }} \
-                       --shv-opt 0xdfd
+                       --shv-opt 0xdfd \
+                       --nmi-opt ${{ matrix.nmi_opt }}
         make -j $(nproc)
     - name: Release
       uses: actions/upload-artifact@v3
       with:
-        name: boot-${{ matrix.target_arch }}-${{ matrix.optimize_mode }}
+        name: boot-${{ matrix.target_arch }}-${{ matrix.optimize_mode }}-${{ matrix.nmi_opt }}
         path: |
           shv.bin
           grub.iso
