@@ -163,12 +163,11 @@ u32 handle_idt(iret_info_t * info)
 	VCPU *vcpu = get_vcpu();
 	struct regs *r = &info->r;
 	u8 vector = info->vector;
-	// TODO: avoid calling cpuid, use different IDT for host and guest, add info in "/* Push vector. */"
-	bool guest = !(cpuid_ecx(1, 0) & (1U << 5));
-	if (guest) {
-		ASSERT(info->vector & 0x100);
-	} else {
-		ASSERT(!(info->vector & 0x100));
+	bool guest = !!(info->vector & 0x100);
+
+	/* When testing NMI, we want to avoid VMEXITs as much as possible. */
+	if (!(NMI_OPT & SHV_NMI_ENABLE)) {
+		ASSERT(guest == !(cpuid_ecx(1, 0) & (1U << 5)));
 	}
 
 	switch (vector) {

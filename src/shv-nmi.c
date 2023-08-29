@@ -66,6 +66,7 @@ static volatile uintptr_t exit_rip = 0;
 static volatile enum exit_source exit_source_old = EXIT_MEASURE;
 static volatile uintptr_t exit_rip_old = 0;
 static volatile bool quiet = false;
+static volatile bool disable_cpuid = false;
 
 /* Similar to ASSERT, but set master_fail to indicate something failed. */
 #define TEST_ASSERT(_p) \
@@ -189,6 +190,7 @@ void shv_nmi_vmexit_handler(VCPU * vcpu, struct regs *r, vmexit_info_t * info)
 {
 	switch (info->vmexit_reason) {
 	case VMX_VMEXIT_CPUID:
+		TEST_ASSERT(!disable_cpuid);
 		{
 			u32 old_eax = r->eax;
 			asm volatile ("cpuid\n":"=a" (r->eax), "=b"(r->ebx), "=c"(r->ecx),
@@ -1723,6 +1725,7 @@ void shv_nmi_guest_main(VCPU * vcpu)
 			quiet = false;
 		}
 	}
+	disable_cpuid = true;
 	asm volatile ("sti");
 	if (1 && "hardcode") {
 		//experiment_17();
