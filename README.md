@@ -143,6 +143,32 @@ To connect GDB to QEMU and load debug info in `shv.bin`:
 gdb --ex 'target remote localhost:1234' --ex 'symbol-file shv.bin'
 ```
 
+The approximate boot sequence is:
+```
+_start (boot.S, BSP only, protected mode without paging)
+kernel_main (kernel.c, BSP only)
+smp_init (smp.c, BSP only)
+(BSP calls wakeupAPs() to wake up APs)
+0x10000 (was _ap_bootstrap_start, smp-asm.S, AP only, real mode)
+0x10??? (was _ap_clear_pipe, smp-asm.S, AP only, protected mode without paging)
+init_core_lowlevel_setup_32 (smp-asm.S, AP only, protected mode without paging)
+init_core_lowlevel_setup (smp-asm.S)
+kernel_main_smp (kernel.c)
+shv_main (shv.c)
+shv_vmx_main (shv-vmx.c)
+vmlaunch_asm (shv-asm.S)
+shv_guest_entry (shv-guest-asm.S, VMX guest mode)
+shv_guest_main (shv-guest.c, VMX guest mode)
+```
+
+The interrupt / exception call stack is approximately:
+```
+idt_stub_{host,guest}_h...h1...1 (idt-asm.S, e.g. idt_stub_host_hh11)
+idt_stub_common (idt-asm.S)
+	handle_idt (idt.c)
+		handle_..._interrupt
+```
+
 ### Running SHV on real hardware
 
 Running SHV on real hardware requires a machine with Intel CPU that supports
