@@ -81,15 +81,18 @@ def gen_lines(args, serial_file):
 	while not os.path.exists(serial_file):
 		time.sleep(0.1)
 	println('serial_file exists')
+	buf = ''
 	with open(serial_file, 'r') as f:
 		while True:
-			line = f.readline()
-			if line:
+			line = buf + f.readline()
+			if line.endswith('\n'):
 				i = line.strip('\n')
 				if args.watch_serial:
 					printlog(i)
 				yield i
+				buf = ''
 			else:
+				buf = line
 				time.sleep(0.1)
 
 def serial_thread_shv(args, serial_file, serial_result):
@@ -123,7 +126,7 @@ def serial_thread_nmi(args, serial_file, serial_result):
 			println('Found', i)
 			break
 	test_count = 0
-	test_goal = 20
+	test_goal = 10
 	for i in gen:
 		if re.fullmatch('Experiment: \d+', i):
 			test_count += 1

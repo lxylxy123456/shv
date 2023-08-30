@@ -90,9 +90,11 @@ jobs:
       - run:
           name: "Versions"
           command: |
+            set -xe
             lscpu
             ssh -V
             qemu-system-x86_64 -version
+            uname -r
             gcc -v
       - store_artifacts:
           path: shv.bin
@@ -109,6 +111,7 @@ jobs:
                 --no-display \
                 --verbose \
                 --watch-serial \
+                --qemu-timeout 60 \
                 --nmi
 
 workflows:
