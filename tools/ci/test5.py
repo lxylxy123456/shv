@@ -45,6 +45,7 @@ def parse_args():
 	parser.add_argument('--watch-serial', action='store_true')
 	parser.add_argument('--memory', default='1024M')
 	parser.add_argument('--qemu-timeout', type=int, default=30)
+	parser.add_argument('--nmi', action='store_true', help='Test SHV NMI')
 	args = parser.parse_args()
 	return args
 
@@ -76,29 +77,26 @@ def spawn_qemu(args, serial_file):
 	p = Popen(qemu_args, stdin=-1, stdout=-1, **popen_stderr)
 	return p
 
-def serial_thread(args, serial_file, serial_result):
-	def gen_lines():
-		while not os.path.exists(serial_file):
-			time.sleep(0.1)
-		println('serial_file exists')
-		with open(serial_file, 'r') as f:
-			while True:
-				line = f.readline()
-				if line:
-					i = line.strip('\n')
-					if args.watch_serial:
-						printlog(i)
-					yield i
-				else:
-					time.sleep(0.1)
-	gen = gen_lines()
+def gen_lines(args, serial_file):
+	while not os.path.exists(serial_file):
+		time.sleep(0.1)
+	println('serial_file exists')
+	with open(serial_file, 'r') as f:
+		while True:
+			line = f.readline()
+			if line:
+				i = line.strip('\n')
+				if args.watch_serial:
+					printlog(i)
+				yield i
+			else:
+				time.sleep(0.1)
+
+def serial_thread_shv(args, serial_file, serial_result):
+	gen = gen_lines(args, serial_file)
 #	for i in gen:
 #		if 'eXtensible Modular Hypervisor' in i:
 #			println('Banner found!')
-#			break
-#	for i in gen:
-#		if 'e820' in i:
-#			println('E820 found!')
 #			break
 	test_count = defaultdict(int)
 	for i in gen:
@@ -118,6 +116,25 @@ def serial_thread(args, serial_file, serial_result):
 	for i in gen:
 		pass
 
+def serial_thread_nmi(args, serial_file, serial_result):
+	gen = gen_lines(args, serial_file)
+	for i in gen:
+		if i == 'Sequential experiments pass':
+			println('Found', i)
+			break
+	test_count = 0
+	test_goal = 20
+	for i in gen:
+		if re.fullmatch('Experiment: \d+', i):
+			test_count += 1
+			println('Random exp progress: %d / %d' % (test_count, test_goal))
+			if test_count >= test_goal:
+				break
+	with serial_result[0]:
+		serial_result[1] = SERIAL_PASS
+	for i in gen:
+		pass
+
 def main():
 	args = parse_args()
 	serial_file = os.path.join(args.work_dir, 'serial')
@@ -126,7 +143,11 @@ def main():
 
 	try:
 		serial_result = [threading.Lock(), SERIAL_WAITING]
-		threading.Thread(target=serial_thread,
+		if args.nmi:
+			target = serial_thread_nmi
+		else:
+			target = serial_thread_shv
+		threading.Thread(target=target,
 						args=(args, serial_file, serial_result),
 						daemon=True).start()
 		for i in range(args.qemu_timeout):
