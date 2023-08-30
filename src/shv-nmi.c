@@ -21,7 +21,7 @@
 #include <shv-pic.h>
 
 // TODO: make it configurable
-#define INTERRUPT_PERIOD 10
+#define INTERRUPT_PERIOD 5
 
 /*
  * An interrupt handler or VMEXIT handler will see exit_source. If it sees
@@ -1713,7 +1713,7 @@ void shv_nmi_guest_main(VCPU * vcpu)
 		/* Wait for some time to make the results visible */
 		if ("Sleep") {
 			quiet = true;
-			for (u32 i = 0; i < 30; i += INTERRUPT_PERIOD) {
+			for (u32 i = 0; i < 10; i += INTERRUPT_PERIOD) {
 				hlt_wait(EXIT_NMI_G);
 				iret_wait(EXIT_MEASURE);
 				hlt_wait(EXIT_TIMER_G);
@@ -1730,6 +1730,10 @@ void shv_nmi_guest_main(VCPU * vcpu)
 		for (u32 i = 0; i < nexperiments; i++) {
 			run_experiment(i);
 		}
+		TEST_ASSERT(!master_fail);
+		for (u32 i = 0; i < 3; i++) {
+			printf("Sequential experiments pass\n");
+		}
 	}
 	if (0 && "enable all experiments") {
 		for (u32 i = 0; i < nexperiments; i++) {
@@ -1738,15 +1742,23 @@ void shv_nmi_guest_main(VCPU * vcpu)
 			experiments[i].support_xmhf = true;
 			run_experiment(i);
 		}
+		TEST_ASSERT(!master_fail);
+		for (u32 i = 0; i < 3; i++) {
+			printf("All experiments pass\n");
+		}
 	}
 	if (1 && "random") {
 		for (u32 i = 0; i < 100000; i++) {
 			run_experiment(rand() % nexperiments);
 		}
+		TEST_ASSERT(!master_fail);
+		for (u32 i = 0; i < 3; i++) {
+			printf("Random experiments pass\n");
+		}
 	}
 	{
 		TEST_ASSERT(!master_fail);
-		printf("TEST PASS\nTEST PASS\nTEST PASS\n");
+		printf("ALL TEST PASS\nALL TEST PASS\nALL TEST PASS\n");
 		l2_ready = 0;
 		HALT();
 	}
