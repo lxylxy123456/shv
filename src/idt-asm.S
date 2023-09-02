@@ -77,6 +77,22 @@ idt_stub_common:
 #endif /* __amd64__ */
 
 	// TODO: is it possible to do something and let debugger jump to interrupted code?
+#ifdef __amd64__
+	movq	8*22(%rsp), %rax
+	pushq	%rax
+	pushq	%rbp
+	movq	%rsp, %rbp
+#elif defined(__i386__)
+	movl	4*15(%esp), %eax
+	pushl	%eax
+	pushl	%ebp
+	movl	%esp, %ebp
+#else /* !defined(__i386__) && !defined(__amd64__) */
+	#error "Unsupported Arch"
+#endif /* __amd64__ */
+	// TODO: Backtrace stopped: frame did not save the PC
+	// TODO: simplify memory
+	// TODO: try to debug with GDB script / 15410 P0 code
 
 	/* Call C handler. */
 	call	handle_idt
