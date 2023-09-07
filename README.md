@@ -169,6 +169,26 @@ idt_stub_common (idt-asm.S)
 		handle_..._interrupt
 ```
 
+##### Debugging interrupts
+
+`idt_stub_common()` calls `handle_idt()` with the ESP/RSP containing the
+EIP/RIP of interrupted code. This allows GDB to back trace to interrupted code.
+Note that back trace works the best when compiled with `-O0`. When SHV is
+compiled in 32-bits, QEMU must also be 32-bits (use `qemu-system-i386` or
+`./tools/qemu.sh --qb32`).
+
+For example, GDB's `bt` command may output something like:
+```
+#0  update_screen (...)                         // callee of #1
+#1  0x001100ee in handle_timer_interrupt (...)  // callee of #2
+#2  0x0010676c in handle_idt (...)              // C interrupt handler
+#3  0x00104aec in idt_stub_common ()            // assembly interrupt handler
+#4  0x0010b2fc in shv_guest_main (cpu_id=3)     // interrupted code
+#5  0x0010903e in shv_guest_entry ()            // caller of #4
+```
+
+TODO: do something similar for vmexit?
+
 ### Running SHV on real hardware
 
 Running SHV on real hardware requires a machine with Intel CPU that supports

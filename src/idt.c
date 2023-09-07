@@ -158,12 +158,14 @@ void dump_exception(VCPU * vcpu, struct regs *r, iret_info_t * info)
  * If return value is 0, perform IRET normally.
  * Otherwise, use other instructions to simulate IRET. This is used to test NMI.
  */
-u32 handle_idt(iret_info_t * info)
+u32 handle_idt(uintptr_t _ip, iret_info_t * info)
 {
 	VCPU *vcpu = get_vcpu();
 	struct regs *r = &info->r;
 	u8 vector = info->vector;
 	bool guest = !!(info->vector & 0x100);
+
+	ASSERT(_ip == info->ip);
 
 	/* When testing NMI, we want to avoid VMEXITs as much as possible. */
 	if (!(NMI_OPT & SHV_NMI_ENABLE)) {
