@@ -18,47 +18,7 @@
 
 #include <xmhf.h>
 #include <shv.h>
-
-#define ASM_HALT \
-	701119: \
-		hlt; \
-		jmp 701119b;
-
-#ifdef __amd64__
-
-#define NGPRS	16
-#define SIZE	8
-#define PUSHA	PUSHAQ
-#define POPA	POPAQ
-#define PUSHF	pushfq
-#define SP		%rsp
-#define AX		%rax
-
-/* For convenience, push the first argument to the stack. */
-#define SET_ARG1(x)	movq x, %rdi; pushq x;
-#define SET_ARG2(x)	movq x, %rsi;
-#define SET_ARG3(x)	movq x, %rdx;
-#define GET_ARG1(x)	movq %rdi, x;
-
-#elif defined(__i386__)
-
-#define NGPRS	8
-#define SIZE	4
-#define PUSHA	pushal
-#define POPA	popal
-#define PUSHF	pushfl
-#define SP		%esp
-#define AX		%eax
-
-/* Must be called in 32-bit argument push order (arg3, arg2, arg1). */
-#define SET_ARG1(x)	pushl x;
-#define SET_ARG2(x)	pushl x;
-#define SET_ARG3(x)	pushl x;
-#define GET_ARG1(x)	movl SIZE(SP), x
-
-#else /* !defined(__i386__) && !defined(__amd64__) */
-	#error "Unsupported Arch"
-#endif /* __amd64__ */
+#include <asm_helper.h>
 
 .global vmexit_asm
 vmexit_asm:

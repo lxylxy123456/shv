@@ -18,28 +18,9 @@
 
 #include <xmhf.h>
 #include <shv.h>
+#include <asm_helper.h>
 
 .global shv_guest_entry
-
-#define ASM_HALT \
-	701119: \
-		hlt; \
-		jmp 701119b;
-
-#ifdef __amd64__
-
-#define DI		%rdi
-#define SET_ARG1(x)	movq x, %rdi;
-
-#elif defined(__i386__)
-
-#define DI		%edi
-#define SET_ARG1(x)	pushl x;
-
-#else /* !defined(__i386__) && !defined(__amd64__) */
-	#error "Unsupported Arch"
-#endif /* __amd64__ */
-
 shv_guest_entry:
 	SET_ARG1(DI)
 	call	shv_guest_main
