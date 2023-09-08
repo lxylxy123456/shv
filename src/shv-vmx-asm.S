@@ -63,9 +63,6 @@
 .global vmexit_asm
 vmexit_asm:
 	PUSHA
-	mov		SIZE*NGPRS(SP), AX
-	SET_ARG2(SP)
-	SET_ARG1(AX)
 
 	/*
 	 * Optional code to check EFLAGS / RFLAGS.
@@ -83,7 +80,20 @@ vmexit_asm:
 #endif /* __amd64__ */
 	je		9f
 	ASM_HALT
-9:	call	vmexit_handler
+9:
+
+	/*
+	 * Prepare arguments for vmexit_handler(). Place guest_RIP at top of stack
+	 * for GDB to construct back trace.
+	 */
+	mov		SIZE*NGPRS(SP), AX
+	SET_ARG3(SP)
+	SET_ARG2(AX)
+	mov		$0x681e, AX
+	vmread	AX, AX
+	SET_ARG1(AX)
+
+	call	vmexit_handler
 	ASM_HALT			/* Should never return */
 
 .altmacro

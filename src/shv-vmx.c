@@ -380,11 +380,11 @@ void shv_vmx_main(VCPU * vcpu)
 	ASSERT(0 && "vmlaunch_asm() should never return");
 }
 
-void vmexit_handler(VCPU * vcpu, struct regs *r)
+void vmexit_handler(ulong_t guest_rip, VCPU * vcpu, struct regs *r)
 {
 	u32 vmexit_reason = __vmx_vmread32(VMCS_info_vmexit_reason);
-	ulong_t guest_rip = __vmx_vmreadNW(VMCS_guest_RIP);
 	u32 inst_len = __vmx_vmread32(VMCS_info_vmexit_instruction_length);
+	ASSERT(guest_rip == __vmx_vmreadNW(VMCS_guest_RIP));
 
 	if (vcpu->vmexit_handler_override) {
 		vmexit_info_t vmexit_info = {
