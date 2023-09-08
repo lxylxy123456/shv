@@ -294,4 +294,3 @@ g_idt_stubs_host:
 .global g_idt_stubs_guest
 g_idt_stubs_guest:
 	ref_stubs guest
-

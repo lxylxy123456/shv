@@ -200,4 +200,3 @@ This is useful when debugging or when you implement call tracing.
 	.quad 0x0000000000000000	/* __CS_R3 */
 	.quad 0x0000000000000000	/* __DS_R3 */
 	boot_gdt_end:
-

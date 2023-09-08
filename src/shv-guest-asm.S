@@ -29,4 +29,3 @@ shv_guest_entry:
 #endif /* !defined(__amd64__) */
 	call	shv_guest_main
 1:	jmp		1b		/* Should never return */
-

@@ -51,6 +51,7 @@ shv_bin_SOURCES = \
 	src/shv-user-asm.S \
 	src/shv-user.c \
 	src/shv-vmcs.c \
+	src/shv-vmx-asm.S \
 	src/shv-vmx.c \
 	src/shv.c \
 	src/smp-asm.S \
