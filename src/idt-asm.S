@@ -43,20 +43,14 @@ idt_stub_common:
 	movw	%ax, %gs
 
 	/*
-	 * Prepare argument. GDB uses the first value above the return address for
+	 * Prepare arguments. GDB uses the first value above the return address for
 	 * handle_idt on stack to construct back trace. We use this feature to
 	 * let GDB display the interrupted RIP in back trace.
 	 */
-#ifdef __amd64__
-	movq	%rsp, %rsi
-	pushq	SIZE*22(%rsp)		/* Push interrupted RIP on stack. */
-	movq	(%rsp), %rdi
-#elif defined(__i386__)
-	pushl	%esp
-	pushl	SIZE*15(%esp)		/* Push interrupted RIP on stack. */
-#else /* !defined(__i386__) && !defined(__amd64__) */
-	#error "Unsupported Arch"
-#endif /* __amd64__ */
+	mov		SIZE*(NGPRS+6)(_SP), _DI
+	SET_ARG2(_SP)
+	SET_ARG1(_DI)
+	SET_STACKTOP(_DI)		/* Push interrupted RIP on stack. */
 
 	/* Call C handler. */
 	call	handle_idt

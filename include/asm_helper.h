@@ -51,19 +51,20 @@
 #ifdef __amd64__
 
 /* For convenience, push the first argument to the stack. */
-// TODO: do not push the first argument to the stack by default.
-#define SET_ARG1(x)	movq x, %rdi; pushq x;
-#define SET_ARG2(x)	movq x, %rsi;
-#define SET_ARG3(x)	movq x, %rdx;
-#define GET_ARG1(x)	movq %rdi, x;
+#define SET_STACKTOP(x)	pushq x;
+#define SET_ARG1(x)		movq x, %rdi;
+#define SET_ARG2(x)		movq x, %rsi;
+#define SET_ARG3(x)		movq x, %rdx;
+#define GET_ARG1(x)		movq %rdi, x;
 
 #elif defined(__i386__)
 
 /* Must be called in 32-bit argument push order (arg3, arg2, arg1). */
-#define SET_ARG1(x)	pushl x;
-#define SET_ARG2(x)	pushl x;
-#define SET_ARG3(x)	pushl x;
-#define GET_ARG1(x)	movl SIZE(_SP), x
+#define SET_STACKTOP(x)	;
+#define SET_ARG1(x)		pushl x;
+#define SET_ARG2(x)		pushl x;
+#define SET_ARG3(x)		pushl x;
+#define GET_ARG1(x)		movl SIZE(_SP), x
 
 #else /* !defined(__i386__) && !defined(__amd64__) */
 	#error "Unsupported Arch"

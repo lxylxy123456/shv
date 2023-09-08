@@ -52,6 +52,7 @@ vmexit_asm:
 	mov		$0x681e, _AX
 	vmread	_AX, _AX
 	SET_ARG1(_AX)
+	SET_STACKTOP(_AX)
 
 	call	vmexit_handler
 	ASM_HALT			/* Should never return */
