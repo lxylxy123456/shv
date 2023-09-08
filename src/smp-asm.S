@@ -66,28 +66,7 @@
 // author: amit vasudevan (amitvasudevan@acm.org)
 
 #include <xmhf.h>
-
-#ifdef __i386__
-#define _AX %eax
-#define _CX %ecx
-#define _DX %edx
-#define _BX %ebx
-#define _SP %esp
-#define _BP %ebp
-#define _SI %esi
-#define _DI %edi
-#elif defined(__amd64__)
-#define _AX %rax
-#define _CX %rcx
-#define _DX %rdx
-#define _BX %rbx
-#define _SP %rsp
-#define _BP %rbp
-#define _SI %rsi
-#define _DI %rdi
-#else
-	#error "Unsupported Arch"
-#endif /* __i386__ */
+#include <asm_helper.h>
 
 //---AP boot-strap code---------------------------------------------------------
 .section .text

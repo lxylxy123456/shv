@@ -17,32 +17,7 @@
  */
 
 #include <xmhf.h>
-
-#ifdef __amd64__
-
-#define PTR		quad
-#define SIZE	8
-#define PUSHA	PUSHAQ
-#define POPA	POPAQ
-#define IRET	iretq
-#define _SP		%rsp
-#define _AX		%rax
-#define _DX		%rdx
-
-#elif defined(__i386__)
-
-#define PTR		long
-#define SIZE	4
-#define PUSHA	pushal
-#define POPA	popal
-#define IRET	iretl
-#define _SP		%esp
-#define _AX		%eax
-#define _DX		%edx
-
-#else /* !defined(__i386__) && !defined(__amd64__) */
-	#error "Unsupported Arch"
-#endif /* __amd64__ */
+#include <asm_helper.h>
 
 idt_stub_common:
 
@@ -271,7 +246,7 @@ def_stubs guest
 /* Macro for referencing IDT stubs. */
 .macro ref_stubs mode cur=0 name=
 
-	.PTR	idt_stub_&mode&_&name&
+	._PTR	idt_stub_&mode&_&name&
 
 	/* 0 -> 1 -> ... -> 15 */
 	.if (\cur + 1) % 16

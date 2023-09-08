@@ -30,15 +30,22 @@
 		hlt; \
 		jmp 701119b;
 
+#define _PTR	_CASE_BITSIZE(long, quad)
 #define NGPRS	_CASE_BITSIZE(8, 16)
 #define SIZE	_CASE_BITSIZE(4, 8)
+
 #define PUSHA	_CASE_BITSIZE(pushal, PUSHAQ)
 #define POPA	_CASE_BITSIZE(popal, POPAQ)
 #define PUSHF	_CASE_BITSIZE(pushfl, pushfq)
+#define IRET	_CASE_BITSIZE(iretl, iretq)
 
-// TODO: SP -> _SP
-#define _SP		_CASE_BITSIZE(%esp, %rsp)
 #define _AX		_CASE_BITSIZE(%eax, %rax)
+#define _CX		_CASE_BITSIZE(%ecx, %rcx)
+#define _DX		_CASE_BITSIZE(%edx, %rdx)
+#define _BX		_CASE_BITSIZE(%ebx, %rbx)
+#define _SP		_CASE_BITSIZE(%esp, %rsp)
+#define _BP		_CASE_BITSIZE(%ebp, %rbp)
+#define _SI		_CASE_BITSIZE(%esi, %rsi)
 #define _DI		_CASE_BITSIZE(%edi, %rdi)
 
 #ifdef __amd64__
