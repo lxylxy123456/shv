@@ -19,6 +19,11 @@
 #include <xmhf.h>
 #include <shv.h>
 
+#define ASM_HALT \
+	701119: \
+		hlt; \
+		jmp 701119b;
+
 #ifdef __amd64__
 
 #define NGPRS	16
@@ -63,28 +68,24 @@ vmexit_asm:
 	SET_ARG2(SP)
 	SET_ARG1(AX)
 
-#ifdef __amd64__
 	/*
-	 * Optional code to check EFLAGS.
+	 * Optional code to check EFLAGS / RFLAGS.
 	 *
-	 * Note: PUSHAQ changes EFLAGS, so we do not check status flags.
+	 * Note: PUSHAQ changes RFLAGS, so we do not check status flags in 64-bit.
 	 */
 	PUSHF
 	pop		AX
-9:	test	$~0x8d7, AX
-	jne		9b
+#ifdef __amd64__
+	testq	$~0x8d7, AX
 #elif defined(__i386__)
-	/* Optional code to check EFLAGS. */
-	PUSHF
-	pop		AX
-9:	cmpl	$2, AX
-	jne		9b
+	cmpl	$2, AX
 #else /* !defined(__i386__) && !defined(__amd64__) */
     #error "Unsupported Arch"
 #endif /* __amd64__ */
-	call	vmexit_handler
-1:	hlt
-	jmp 1b				/* Should never return */
+	je		9f
+	ASM_HALT
+9:	call	vmexit_handler
+	ASM_HALT			/* Should never return */
 
 .altmacro
 .macro vmentry_asm_template inst_name inst_num
@@ -101,8 +102,7 @@ inst_name&_asm:
 	inst_name
 	je		2f			/* ZF set means VMfailValid */
 	jb		3f			/* CF set means VMfailInvalid */
-1:	hlt
-	jmp		1b			/* Unknown error */
+	ASM_HALT			/* Unknown error */
 2:
 #ifdef __amd64__
 	movq	$1, %rsi
@@ -130,8 +130,7 @@ inst_name&_asm:
     #error "Unsupported Arch"
 #endif /* __amd64__ */
 	call	vmentry_error
-1:	hlt
-	jmp		1b			/* Should never return */
+	ASM_HALT			/* Should never return */
 
 .endm
 
