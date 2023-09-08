@@ -106,13 +106,7 @@ static void shv_guest_test_msr_ls_vmexit_handler(VCPU * vcpu, struct regs *r,
 	if (info->vmexit_reason != VMX_VMEXIT_VMCALL) {
 		return;
 	}
-#ifdef __amd64__
-	data = (void *)r->rbx;
-#elif defined(__i386__)
-	data = (void *)r->ebx;
-#else							/* !defined(__i386__) && !defined(__amd64__) */
-#error "Unsupported Arch"
-#endif							/* !defined(__i386__) && !defined(__amd64__) */
+	data = (void *)r->bx;
 	switch (r->eax) {
 	case 12:
 		/*
