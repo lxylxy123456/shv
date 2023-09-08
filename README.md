@@ -184,17 +184,17 @@ compiled in 32-bits, QEMU must also be 32-bits (use `qemu-system-i386` or
 For example, GDB's `bt` command may output something like:
 ```
 (gdb) bt
-#0  update_screen (..., guest=false)			// callee of #1
-#1  0x00110099 in handle_timer_interrupt (...)	// callee of #2
-#2  0x0010676c in handle_idt (...)				// C interrupt handler
-#3  0x00104aec in idt_stub_common ()			// assembly interrupt handler
+#0  update_screen (..., guest=false)            // callee of #1
+#1  0x00110099 in handle_timer_interrupt (...)  // callee of #2
+#2  0x0010676c in handle_idt (...)              // C interrupt handler
+#3  0x00104aec in idt_stub_common ()            // assembly interrupt handler
 #4  0x0010a7bf in shv_guest_wait_int_vmexit_handler (...)
-												// interrupted code
-#5  0x0011da8e in vmexit_handler (...)			// C VMEXIT handler
-#6  0x0011c993 in vmexit_asm ()					// assembly VMEXIT handler
-#7  0x0010a817 in shv_guest_wait_int (...)		// guest code that causes VMEXIT
-#8  0x0010b377 in shv_guest_main (...)			// caller of #7
-#9  0x00108fe9 in shv_guest_entry ()			// caller of #8
+                                                // interrupted code
+#5  0x0011da8e in vmexit_handler (...)          // C VMEXIT handler
+#6  0x0011c993 in vmexit_asm ()                 // assembly VMEXIT handler
+#7  0x0010a817 in shv_guest_wait_int (...)      // guest code that causes VMEXIT
+#8  0x0010b377 in shv_guest_main (...)          // caller of #7
+#9  0x00108fe9 in shv_guest_entry ()            // caller of #8
 (gdb) x/3i 0x0010a7bf - 2
    0x10a7bd <shv_guest_wait_int_vmexit_handler+78>:	sti
    0x10a7be <shv_guest_wait_int_vmexit_handler+79>:	hlt
