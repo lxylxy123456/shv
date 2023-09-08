@@ -59,7 +59,7 @@ idt_stub_common:
 	test	%eax, %eax
 
 	/* Restore stack. */
-	lea		8(_SP), _SP
+	UNSET_ARGS(2, 1)
 
 	/* Restore segment registers. */
 	pop		_AX

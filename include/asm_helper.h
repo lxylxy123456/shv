@@ -50,11 +50,12 @@
 
 #ifdef __amd64__
 
-/* For convenience, push the first argument to the stack. */
+/* Define macros to interact with C calling convention. */
 #define SET_STACKTOP(x)	pushq x;
 #define SET_ARG1(x)		movq x, %rdi;
 #define SET_ARG2(x)		movq x, %rsi;
 #define SET_ARG3(x)		movq x, %rdx;
+#define UNSET_ARGS(a,s)	leaq SIZE*(s)(%rsp), %rsp;
 #define GET_ARG1(x)		movq %rdi, x;
 
 #elif defined(__i386__)
@@ -64,6 +65,7 @@
 #define SET_ARG1(x)		pushl x;
 #define SET_ARG2(x)		pushl x;
 #define SET_ARG3(x)		pushl x;
+#define UNSET_ARGS(a,s)	leal SIZE*(a)(%esp), %esp;
 #define GET_ARG1(x)		movl SIZE(_SP), x
 
 #else /* !defined(__i386__) && !defined(__amd64__) */
