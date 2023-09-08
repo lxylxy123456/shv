@@ -19,42 +19,64 @@
 #include <xmhf.h>
 #include <shv.h>
 
+#ifdef __amd64__
+
+#define SIZE	8
+#define PUSHA	PUSHAQ
+#define POPA	POPAQ
+#define PUSHF	pushfq
+#define SP		%rsp
+#define AX		%rax
+
+#elif defined(__i386__)
+
+#define SIZE	4
+#define PUSHA	pushal
+#define POPA	popal
+#define PUSHF	pushfl
+#define SP		%esp
+#define AX		%eax
+
+#else /* !defined(__i386__) && !defined(__amd64__) */
+	#error "Unsupported Arch"
+#endif /* __amd64__ */
+
 .global vmexit_asm
 .global vmlaunch_asm
 .global vmresume_asm
 
 vmexit_asm:
+	PUSHA
 #ifdef __amd64__
-	PUSHAQ
-	movq	128(%rsp), %rdi
-	movq	%rsp, %rsi
+	movq	SIZE*16(SP), %rdi
+	movq	SP, %rsi
 
 	/*
 	 * Optional code to check EFLAGS.
 	 *
 	 * Note: PUSHAQ changes EFLAGS, so we do not check status flags.
 	 */
-	pushfq
-	popq	%rax
-9:	test	$~0x8d7, %rax
+	PUSHF
+	pop		AX
+9:	test	$~0x8d7, AX
 	jne		9b
 #elif defined(__i386__)
-	pushal
-	movl	32(%esp), %esi
-	movl	%esp, %eax
-	pushl	%eax
+	movl	SIZE*8(SP), %esi
+	movl	SP, AX
+	push	AX
 	pushl	%esi
 
 	/* Optional code to check EFLAGS. */
-	pushfl
-	popl	%eax
-9:	cmpl	$2, %eax
+	PUSHF
+	pop		AX
+9:	cmpl	$2, AX
 	jne		9b
 #else /* !defined(__i386__) && !defined(__amd64__) */
     #error "Unsupported Arch"
 #endif /* __amd64__ */
 	call	vmexit_handler
-1:	jmp 1b				/* Should never return */
+1:	hlt
+	jmp 1b				/* Should never return */
 
 .altmacro
 .macro vmentry_asm_template inst_name inst_num
@@ -62,13 +84,12 @@ vmexit_asm:
 inst_name&_asm:
 #ifdef __amd64__
 	movq	%rdi, %rsp
-	POPAQ
 #elif defined(__i386__)
-	movl	4(%esp), %esp
-	popal
+	movl	SIZE(%esp), %esp
 #else /* !defined(__i386__) && !defined(__amd64__) */
     #error "Unsupported Arch"
 #endif /* __amd64__ */
+	POPA
 	inst_name
 	je		2f			/* ZF set means VMfailValid */
 	jb		3f			/* CF set means VMfailInvalid */
@@ -100,7 +121,8 @@ inst_name&_asm:
     #error "Unsupported Arch"
 #endif /* __amd64__ */
 	call	vmentry_error
-1:	jmp		1b			/* Should never return */
+1:	hlt
+	jmp		1b			/* Should never return */
 
 .endm
 
