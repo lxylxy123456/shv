@@ -16,23 +16,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifdef __amd64__
+#define _CASE_BITSIZE(_32, _64) _64
+#elif defined(__i386__)
+#define _CASE_BITSIZE(_32, _64) _32
+#else /* !defined(__i386__) && !defined(__amd64__) */
+	#error "Unsupported Arch"
+#endif /* __amd64__ */
+
+/* Assembly version of HALT(). */
 #define ASM_HALT \
 	701119: \
 		hlt; \
 		jmp 701119b;
 
-#ifdef __amd64__
-
-#define NGPRS	16
-#define SIZE	8
-#define PUSHA	PUSHAQ
-#define POPA	POPAQ
-#define PUSHF	pushfq
+#define NGPRS	_CASE_BITSIZE(8, 16)
+#define SIZE	_CASE_BITSIZE(4, 8)
+#define PUSHA	_CASE_BITSIZE(pushal, PUSHAQ)
+#define POPA	_CASE_BITSIZE(popal, POPAQ)
+#define PUSHF	_CASE_BITSIZE(pushfl, pushfq)
 
 // TODO: SP -> _SP
-#define SP		%rsp
-#define AX		%rax
-#define DI		%rdi
+#define SP		_CASE_BITSIZE(%esp, %rsp)
+#define AX		_CASE_BITSIZE(%eax, %rax)
+#define DI		_CASE_BITSIZE(%edi, %rdi)
+
+#ifdef __amd64__
 
 /* For convenience, push the first argument to the stack. */
 // TODO: do not push the first argument to the stack by default.
@@ -43,17 +52,6 @@
 
 #elif defined(__i386__)
 
-#define NGPRS	8
-#define SIZE	4
-#define PUSHA	pushal
-#define POPA	popal
-#define PUSHF	pushfl
-
-// TODO: SP -> _SP
-#define SP		%esp
-#define AX		%eax
-#define DI		%edi
-
 /* Must be called in 32-bit argument push order (arg3, arg2, arg1). */
 #define SET_ARG1(x)	pushl x;
 #define SET_ARG2(x)	pushl x;
@@ -63,4 +61,3 @@
 #else /* !defined(__i386__) && !defined(__amd64__) */
 	#error "Unsupported Arch"
 #endif /* __amd64__ */
-
