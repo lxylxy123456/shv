@@ -35,9 +35,10 @@
 #define AX		%rax
 
 /* For convenience, push the first argument to the stack. */
-#define SET_ARG1(x)		movq x, %rdi; pushq x;
-#define SET_ARG2(x)		movq x, %rsi;
-#define SET_ARG3(x)		movq x, %rdx;
+#define SET_ARG1(x)	movq x, %rdi; pushq x;
+#define SET_ARG2(x)	movq x, %rsi;
+#define SET_ARG3(x)	movq x, %rdx;
+#define GET_ARG1(x)	movq %rdi, x;
 
 #elif defined(__i386__)
 
@@ -50,18 +51,16 @@
 #define AX		%eax
 
 /* Must be called in 32-bit argument push order (arg3, arg2, arg1). */
-#define SET_ARG1(x)		pushl x;
-#define SET_ARG2(x)		pushl x;
-#define SET_ARG3(x)		pushl x;
+#define SET_ARG1(x)	pushl x;
+#define SET_ARG2(x)	pushl x;
+#define SET_ARG3(x)	pushl x;
+#define GET_ARG1(x)	movl SIZE(SP), x
 
 #else /* !defined(__i386__) && !defined(__amd64__) */
 	#error "Unsupported Arch"
 #endif /* __amd64__ */
 
 .global vmexit_asm
-.global vmlaunch_asm
-.global vmresume_asm
-
 vmexit_asm:
 	PUSHA
 	mov		SIZE*NGPRS(SP), AX
@@ -80,7 +79,7 @@ vmexit_asm:
 #elif defined(__i386__)
 	cmpl	$2, AX
 #else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
+	#error "Unsupported Arch"
 #endif /* __amd64__ */
 	je		9f
 	ASM_HALT
@@ -91,50 +90,25 @@ vmexit_asm:
 .macro vmentry_asm_template inst_name inst_num
 
 inst_name&_asm:
-#ifdef __amd64__
-	movq	%rdi, %rsp
-#elif defined(__i386__)
-	movl	SIZE(%esp), %esp
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* __amd64__ */
+	GET_ARG1(SP)
 	POPA
 	inst_name
-	je		2f			/* ZF set means VMfailValid */
-	jb		3f			/* CF set means VMfailInvalid */
-	ASM_HALT			/* Unknown error */
-2:
-#ifdef __amd64__
-	movq	$1, %rsi
-#elif defined(__i386__)
-	pushl	$1
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* __amd64__ */
+	je		2f				/* ZF set means VMfailValid */
+	jb		3f				/* CF set means VMfailInvalid */
+	ASM_HALT				/* Unknown error */
+2:	SET_ARG2($1)
 	jmp		4f
-3:
-#ifdef __amd64__
-	movq	$0, %rsi
-#elif defined(__i386__)
-	pushl	$0
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* __amd64__ */
-	jmp		4f
-4:
-#ifdef __amd64__
-	movq	$&inst_num&, %rdi	/* vmlaunch = 0, vmresume = 1 */
-#elif defined(__i386__)
-	pushl	$&inst_num&			/* vmlaunch = 0, vmresume = 1 */
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* __amd64__ */
+3:	SET_ARG2($0)
+4:	SET_ARG1($&inst_num&)	/* vmlaunch = 0, vmresume = 1 */
 	call	vmentry_error
-	ASM_HALT			/* Should never return */
+	ASM_HALT				/* Should never return */
 
 .endm
 
+.global vmlaunch_asm
 vmentry_asm_template vmlaunch 0
+
+.global vmresume_asm
 vmentry_asm_template vmresume 1
 
 #ifdef __amd64__
