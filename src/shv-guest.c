@@ -811,12 +811,11 @@ static void shv_guest_msr_bitmap(VCPU * vcpu)
 #undef MSR_TEST_EXCEPT
 
 /* Main logic to call subsequent tests */
-void shv_guest_main(ulong_t cpu_id)
+void shv_guest_main(VCPU * vcpu)
 {
 	u64 iter = 0;
 	bool in_xmhf = false;
-	VCPU *vcpu = get_vcpu();
-	ASSERT(cpu_id == vcpu->idx);
+	ASSERT(vcpu == get_vcpu());
 	if (NMI_OPT & SHV_NMI_ENABLE) {
 		shv_nmi_guest_main(vcpu);
 	}

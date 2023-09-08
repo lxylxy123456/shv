@@ -21,11 +21,26 @@
 
 .global shv_guest_entry
 
+#define ASM_HALT \
+	701119: \
+		hlt; \
+		jmp 701119b;
+
+#ifdef __amd64__
+
+#define DI		%rdi
+#define SET_ARG1(x)	movq x, %rdi;
+
+#elif defined(__i386__)
+
+#define DI		%edi
+#define SET_ARG1(x)	pushl x;
+
+#else /* !defined(__i386__) && !defined(__amd64__) */
+	#error "Unsupported Arch"
+#endif /* __amd64__ */
+
 shv_guest_entry:
-#ifdef __i386__
-	push	%edi
-#elif !defined(__amd64__)
-    #error "Unsupported Arch"
-#endif /* !defined(__amd64__) */
+	SET_ARG1(DI)
 	call	shv_guest_main
-1:	jmp		1b		/* Should never return */
+	ASM_HALT		/* Should never return */
