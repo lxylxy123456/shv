@@ -28,15 +28,8 @@ enter_user_mode_asm:
 	/* Save kernel mode state */
 	PUSHA
 	PUSHF
-	// TODO: replace with GET_ARG2
-#ifdef __amd64__
-	movq	%rsp, (%rsi)
-#elif defined(__i386__)
-	movl	12(%ebp), %eax
-	movl	%esp, (%eax)
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
+	GET_ARG2(_AX)
+	mov		_SP, (_AX)
 
 	/* Set user DS and ES */
 	movw	$__DS_R3, %ax
@@ -44,29 +37,18 @@ enter_user_mode_asm:
 	movw	%ax, %es
 
 	/* IRET to user mode */
-	// TODO: replace with GET_ARG1
-#ifdef __amd64__
-	movq	%rdi, %rsp
-#elif defined(__i386__)
-	movl	8(%ebp), %esp
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
+	GET_ARG1(_SP)
 	POPA
 	IRET
 
 .global exit_user_mode_asm
 exit_user_mode_asm:
+	/* Prologue */
+	push	_BP
+	mov		_SP, _BP
 
 	/* Restore kernel mode state */
-	// TODO: replace with GET_ARG1
-#ifdef __amd64__
-	movq	%rdi, %rsp
-#elif defined(__i386__)
-	movl	4(%esp), %esp
-#else /* !defined(__i386__) && !defined(__amd64__) */
-    #error "Unsupported Arch"
-#endif /* !defined(__i386__) && !defined(__amd64__) */
+	GET_ARG1(_SP)
 	POPF
 	POPA
 	movw	$__DS, %ax

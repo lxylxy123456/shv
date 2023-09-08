@@ -61,6 +61,10 @@ vmexit_asm:
 .macro vmentry_asm_template inst_name inst_num
 
 inst_name&_asm:
+	/* Prologue */
+	push	_BP
+	mov		_SP, _BP
+
 	GET_ARG1(_SP)
 	POPA
 	inst_name

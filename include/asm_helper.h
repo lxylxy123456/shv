@@ -57,6 +57,8 @@
 #define SET_ARG3(x)		movq x, %rdx;
 #define UNSET_ARGS(a,s)	leaq SIZE*(s)(%rsp), %rsp;
 #define GET_ARG1(x)		movq %rdi, x;
+#define GET_ARG2(x)		movq %rsi, x;
+#define GET_ARG3(x)		movq %rdx, x;
 
 #elif defined(__i386__)
 
@@ -66,7 +68,9 @@
 #define SET_ARG2(x)		pushl x;
 #define SET_ARG3(x)		pushl x;
 #define UNSET_ARGS(a,s)	leal SIZE*(a)(%esp), %esp;
-#define GET_ARG1(x)		movl SIZE(_SP), x
+#define GET_ARG1(x)		movl SIZE*2(_BP), x;
+#define GET_ARG2(x)		movl SIZE*3(_BP), x;
+#define GET_ARG3(x)		movl SIZE*4(_BP), x;
 
 #else /* !defined(__i386__) && !defined(__amd64__) */
 	#error "Unsupported Arch"
