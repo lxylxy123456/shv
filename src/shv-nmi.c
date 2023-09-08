@@ -20,9 +20,6 @@
 #include <shv.h>
 #include <shv-pic.h>
 
-// TODO: make it configurable
-#define INTERRUPT_PERIOD 10
-
 /*
  * An interrupt handler or VMEXIT handler will see exit_source. If it sees
  * other than EXIT_IGNORE or EXIT_MEASURE, it will error. If it sees
@@ -56,6 +53,7 @@ const char *exit_source_str[] = {
 	"OVERFLOW",
 };
 
+static volatile u32 interrupt_period = 0;
 static volatile u32 l2_ready = 0;
 static volatile u32 l2_init_apic_id = 0U;
 static volatile u32 master_fail = 0;
@@ -138,22 +136,18 @@ void shv_nmi_handle_timer_interrupt(VCPU * vcpu, u8 vector, bool guest)
 		volatile u32 *icr_low = (volatile u32 *)(0xfee00300);
 		ASSERT(l2_init_apic_id != 0);
 		*icr_high = l2_init_apic_id;
-		switch ((count++) % (INTERRUPT_PERIOD * 2)) {
-		case 0:
+		if ((count % (interrupt_period * 2)) == 0) {
 			if (!quiet) {
 				printf("      Inject NMI\n");
 			}
 			*icr_low = 0x00004400U;
-			break;
-		case INTERRUPT_PERIOD:
+		} else if ((count % (interrupt_period * 2)) == interrupt_period) {
 			if (!quiet) {
 				printf("      Inject interrupt\n");
 			}
 			*icr_low = 0x00004054U;
-			break;
-		default:
-			break;
 		}
+		count++;
 	}
 	outb(INT_CTL_PORT, INT_ACK_CURRENT);
 }
@@ -1679,6 +1673,9 @@ void shv_nmi_guest_main(VCPU * vcpu)
 {
 	vcpu->vmexit_handler_override = shv_nmi_vmexit_handler;
 
+	// TODO: configure it based on NMI_OPT
+	interrupt_period = 10;
+
 	TEST_ASSERT(vcpu->idx == 1);
 	{
 		u32 eax, ebx, ecx, edx;
@@ -1713,7 +1710,7 @@ void shv_nmi_guest_main(VCPU * vcpu)
 		/* Wait for some time to make the results visible */
 		if ("Sleep") {
 			quiet = true;
-			for (u32 i = 0; i < 10; i += INTERRUPT_PERIOD) {
+			for (u32 i = 0; i < 10; i += interrupt_period) {
 				hlt_wait(EXIT_NMI_G);
 				iret_wait(EXIT_MEASURE);
 				hlt_wait(EXIT_TIMER_G);
