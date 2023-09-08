@@ -87,7 +87,7 @@ static void shv_vmx_vmcs_init(VCPU * vcpu)
 	{
 		u32 vmexit_ctls = vcpu->vmx_msrs[INDEX_IA32_VMX_EXIT_CTLS_MSR];
 #ifdef __amd64__
-		vmexit_ctls |= (1UL << 9);
+		vmexit_ctls |= (1U << VMX_VMEXIT_HOST_ADDRESS_SPACE_SIZE);
 #elif !defined(__i386__)
 #error "Unsupported Arch"
 #endif							/* !defined(__i386__) */
@@ -96,7 +96,7 @@ static void shv_vmx_vmcs_init(VCPU * vcpu)
 	{
 		u32 vmentry_ctls = vcpu->vmx_msrs[INDEX_IA32_VMX_ENTRY_CTLS_MSR];
 #ifdef __amd64__
-		vmentry_ctls |= (1UL << 9);
+		vmentry_ctls |= (1U << VMX_VMENTRY_IA_32E_MODE_GUEST);
 #elif !defined(__i386__)
 #error "Unsupported Arch"
 #endif							/* !defined(__i386__) */
