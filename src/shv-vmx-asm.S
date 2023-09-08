@@ -30,11 +30,11 @@ vmexit_asm:
 	 * Note: PUSHAQ changes RFLAGS, so we do not check status flags in 64-bit.
 	 */
 	PUSHF
-	pop		AX
+	pop		_AX
 #ifdef __amd64__
-	testq	$~0x8d7, AX
+	testq	$~0x8d7, _AX
 #elif defined(__i386__)
-	cmpl	$2, AX
+	cmpl	$2, _AX
 #else /* !defined(__i386__) && !defined(__amd64__) */
 	#error "Unsupported Arch"
 #endif /* __amd64__ */
@@ -46,12 +46,12 @@ vmexit_asm:
 	 * Prepare arguments for vmexit_handler(). Place guest_RIP at top of stack
 	 * for GDB to construct back trace.
 	 */
-	mov		SIZE*NGPRS(SP), AX
-	SET_ARG3(SP)
-	SET_ARG2(AX)
-	mov		$0x681e, AX
-	vmread	AX, AX
-	SET_ARG1(AX)
+	mov		SIZE*NGPRS(_SP), _AX
+	SET_ARG3(_SP)
+	SET_ARG2(_AX)
+	mov		$0x681e, _AX
+	vmread	_AX, _AX
+	SET_ARG1(_AX)
 
 	call	vmexit_handler
 	ASM_HALT			/* Should never return */
@@ -60,7 +60,7 @@ vmexit_asm:
 .macro vmentry_asm_template inst_name inst_num
 
 inst_name&_asm:
-	GET_ARG1(SP)
+	GET_ARG1(_SP)
 	POPA
 	inst_name
 	je		2f				/* ZF set means VMfailValid */

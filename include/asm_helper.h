@@ -37,9 +37,9 @@
 #define PUSHF	_CASE_BITSIZE(pushfl, pushfq)
 
 // TODO: SP -> _SP
-#define SP		_CASE_BITSIZE(%esp, %rsp)
-#define AX		_CASE_BITSIZE(%eax, %rax)
-#define DI		_CASE_BITSIZE(%edi, %rdi)
+#define _SP		_CASE_BITSIZE(%esp, %rsp)
+#define _AX		_CASE_BITSIZE(%eax, %rax)
+#define _DI		_CASE_BITSIZE(%edi, %rdi)
 
 #ifdef __amd64__
 
@@ -56,7 +56,7 @@
 #define SET_ARG1(x)	pushl x;
 #define SET_ARG2(x)	pushl x;
 #define SET_ARG3(x)	pushl x;
-#define GET_ARG1(x)	movl SIZE(SP), x
+#define GET_ARG1(x)	movl SIZE(_SP), x
 
 #else /* !defined(__i386__) && !defined(__amd64__) */
 	#error "Unsupported Arch"

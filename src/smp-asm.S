@@ -68,23 +68,23 @@
 #include <xmhf.h>
 
 #ifdef __i386__
-#define _EAX %eax
-#define _ECX %ecx
-#define _EDX %edx
-#define _EBX %ebx
-#define _ESP %esp
-#define _EBP %ebp
-#define _ESI %esi
-#define _EDI %edi
+#define _AX %eax
+#define _CX %ecx
+#define _DX %edx
+#define _BX %ebx
+#define _SP %esp
+#define _BP %ebp
+#define _SI %esi
+#define _DI %edi
 #elif defined(__amd64__)
-#define _EAX %rax
-#define _ECX %rcx
-#define _EDX %rdx
-#define _EBX %rbx
-#define _ESP %rsp
-#define _EBP %rbp
-#define _ESI %rsi
-#define _EDI %rdi
+#define _AX %rax
+#define _CX %rcx
+#define _DX %rdx
+#define _BX %rbx
+#define _SP %rsp
+#define _BP %rbp
+#define _SI %rsi
+#define _DI %rdi
 #else
 	#error "Unsupported Arch"
 #endif /* __i386__ */
@@ -190,20 +190,20 @@ init_core_lowlevel_setup:
 	rdmsr
 	andl	$0xFFFFF000, %eax
 	addl	$0x20, %eax
-	movl	(_EAX), %eax
+	movl	(_AX), %eax
 	shrl	$24, %eax
 
 	movl	g_midtable_numentries, %edx
 
 	//get vcpu virtual address of this CPU/core
-	mov		$(g_midtable), _EBX
+	mov		$(g_midtable), _BX
 	xorl	%ecx, %ecx
 getvcpuloop:
 #ifdef __i386__
-	movl	0x0(_EBX, _ECX, 8), %ebp  //ebp contains the lapic id
+	movl	0x0(_BX, _CX, 8), %ebp  //ebp contains the lapic id
 #elif defined(__amd64__)
-	lea		0x0(_EBX, _ECX, 8), _ESP
-	movl	0x0(_ESP, _ECX, 8), %ebp  //ebp contains the lapic id
+	lea		0x0(_BX, _CX, 8), _SP
+	movl	0x0(_SP, _CX, 8), %ebp  //ebp contains the lapic id
 #else
 	#error "Unsupported Arch"
 #endif /* __i386__ */
@@ -216,14 +216,14 @@ getvcpuloop:
 	hlt
 gotvcpu:
 #ifdef __i386__
-	mov		0x4(_EBX, _ECX, 8), _EDI //edi contains vcpu pointer
+	mov		0x4(_BX, _CX, 8), _DI //edi contains vcpu pointer
 #elif defined(__amd64__)
-	mov		0x8(_ESP, _ECX, 8), _EDI //rdi contains vcpu pointer
+	mov		0x8(_SP, _CX, 8), _DI //rdi contains vcpu pointer
 #else
 	#error "Unsupported Arch"
 #endif /* __i386__ */
-	mov		0x0(_EDI), _ESP	//load stack for this CPU
-	push	_EDI
+	mov		0x0(_DI), _SP	//load stack for this CPU
+	push	_DI
 	call	kernel_main_smp
 	//we should never get here, if so just halt
 	hlt

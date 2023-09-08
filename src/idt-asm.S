@@ -25,9 +25,9 @@
 #define PUSHA	PUSHAQ
 #define POPA	POPAQ
 #define IRET	iretq
-#define SP		%rsp
-#define AX		%rax
-#define DX		%rdx
+#define _SP		%rsp
+#define _AX		%rax
+#define _DX		%rdx
 
 #elif defined(__i386__)
 
@@ -36,9 +36,9 @@
 #define PUSHA	pushal
 #define POPA	popal
 #define IRET	iretl
-#define SP		%esp
-#define AX		%eax
-#define DX		%edx
+#define _SP		%esp
+#define _AX		%eax
+#define _DX		%edx
 
 #else /* !defined(__i386__) && !defined(__amd64__) */
 	#error "Unsupported Arch"
@@ -50,15 +50,15 @@ idt_stub_common:
 	PUSHA
 
 	/* Save segment registers. */
-	xor		AX, AX
+	xor		_AX, _AX
 	movw	%gs, %ax
-	push	AX
+	push	_AX
 	movw	%fs, %ax
-	push	AX
+	push	_AX
 	movw	%es, %ax
-	push	AX
+	push	_AX
 	movw	%ds, %ax
-	push	AX
+	push	_AX
 
 	/* Load segment registers. */
 	movw	$(__DS), %ax
@@ -90,23 +90,23 @@ idt_stub_common:
 	test	%eax, %eax
 
 	/* Restore stack. */
-	lea		8(SP), SP
+	lea		8(_SP), _SP
 
 	/* Restore segment registers. */
-	pop		AX
+	pop		_AX
 	movw	%ax, %ds
-	pop		AX
+	pop		_AX
 	movw	%ax, %es
-	pop		AX
+	pop		_AX
 	movw	%ax, %fs
-	pop		AX
+	pop		_AX
 	movw	%ax, %gs
 
 	/* Pop GPR. */
 	POPA
 
 	/* Skip error code on the stack. */
-	lea		2*SIZE(SP), SP
+	lea		2*SIZE(_SP), _SP
 
 	/* Jump based on return value of handle_idt(). */
 	jne		1f
@@ -129,8 +129,8 @@ idt_stub_common:
 
 #ifdef __amd64__
 
-	push	AX
-	push	DX
+	push	_AX
+	push	_DX
 
 	/*
 	 * According to SDM, Intel aligns the stack to 16 bytes. So there may be
@@ -159,24 +159,24 @@ idt_stub_common:
 	 * RET to restore RIP and RSP.
 	 */
 
-	mov		SIZE*5(SP), DX
-	mov		SIZE*2(SP), AX	/* Move value of RIP around */
-	mov		AX, -SIZE*1(DX)
-	mov		SIZE*4(SP), AX	/* Move value of RFLAGS around */
-	mov		AX, -SIZE*2(DX)
-	mov		SIZE*1(SP), AX	/* Move value of RAX around */
-	mov		AX, -SIZE*3(DX)
-	mov		SIZE*0(SP), AX	/* Move value of RDX around */
-	mov		AX, -SIZE*4(DX)
-	lea		-SIZE*4(DX), SP	/* Adjust RSP */
-	pop		DX				/* Restore value of RDX */
-	popq	AX				/* Restore value of RAX */
-	popfq					/* Restore value of RFLAGS */
-	ret						/* Restore value of RIP and RSP */
+	mov		SIZE*5(_SP), _DX
+	mov		SIZE*2(_SP), _AX	/* Move value of RIP around */
+	mov		_AX, -SIZE*1(_DX)
+	mov		SIZE*4(_SP), _AX	/* Move value of RFLAGS around */
+	mov		_AX, -SIZE*2(_DX)
+	mov		SIZE*1(_SP), _AX	/* Move value of RAX around */
+	mov		_AX, -SIZE*3(_DX)
+	mov		SIZE*0(_SP), _AX	/* Move value of RDX around */
+	mov		_AX, -SIZE*4(_DX)
+	lea		-SIZE*4(_DX), _SP	/* Adjust RSP */
+	pop		_DX					/* Restore value of RDX */
+	popq	_AX					/* Restore value of RAX */
+	popfq						/* Restore value of RFLAGS */
+	ret							/* Restore value of RIP and RSP */
 
 #elif defined(__i386__)
 
-	push	AX
+	push	_AX
 
 	/*
 	 * At this point the stack looks like:
@@ -197,16 +197,16 @@ idt_stub_common:
 	 * restore EIP and ESP.
 	 */
 
-	mov		SIZE*3(SP), AX	/* Move value of EFLAGS around */
-	mov		AX, SIZE*2(SP)
-	mov		SIZE*1(SP), AX	/* Move value of EIP around */
-	mov		AX, SIZE*3(SP)
-	mov		SIZE*0(SP), AX	/* Move value of EAX around */
-	mov		AX, SIZE*1(SP)
-	pop		AX
-	pop		AX				/* Restore value of EAX */
-	popfl					/* Restore value of EFLAGS */
-	ret						/* Restore value of EIP and ESP */
+	mov		SIZE*3(_SP), _AX	/* Move value of EFLAGS around */
+	mov		_AX, SIZE*2(_SP)
+	mov		SIZE*1(_SP), _AX	/* Move value of EIP around */
+	mov		_AX, SIZE*3(_SP)
+	mov		SIZE*0(_SP), _AX	/* Move value of EAX around */
+	mov		_AX, SIZE*1(_SP)
+	pop		_AX
+	pop		_AX					/* Restore value of EAX */
+	popfl						/* Restore value of EFLAGS */
+	ret							/* Restore value of EIP and ESP */
 
 #else /* !defined(__i386__) && !defined(__amd64__) */
 	#error "Unsupported Arch"

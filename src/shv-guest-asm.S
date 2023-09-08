@@ -22,6 +22,6 @@
 
 .global shv_guest_entry
 shv_guest_entry:
-	SET_ARG1(DI)
+	SET_ARG1(_DI)
 	call	shv_guest_main
 	ASM_HALT		/* Should never return */
