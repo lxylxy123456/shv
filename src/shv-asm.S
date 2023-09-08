@@ -21,6 +21,7 @@
 
 #ifdef __amd64__
 
+#define NGPRS	16
 #define SIZE	8
 #define PUSHA	PUSHAQ
 #define POPA	POPAQ
@@ -28,14 +29,25 @@
 #define SP		%rsp
 #define AX		%rax
 
+/* For convenience, push the first argument to the stack. */
+#define SET_ARG1(x)		movq x, %rdi; pushq x;
+#define SET_ARG2(x)		movq x, %rsi;
+#define SET_ARG3(x)		movq x, %rdx;
+
 #elif defined(__i386__)
 
+#define NGPRS	8
 #define SIZE	4
 #define PUSHA	pushal
 #define POPA	popal
 #define PUSHF	pushfl
 #define SP		%esp
 #define AX		%eax
+
+/* Must be called in 32-bit argument push order (arg3, arg2, arg1). */
+#define SET_ARG1(x)		pushl x;
+#define SET_ARG2(x)		pushl x;
+#define SET_ARG3(x)		pushl x;
 
 #else /* !defined(__i386__) && !defined(__amd64__) */
 	#error "Unsupported Arch"
@@ -47,10 +59,11 @@
 
 vmexit_asm:
 	PUSHA
-#ifdef __amd64__
-	movq	SIZE*16(SP), %rdi
-	movq	SP, %rsi
+	mov		SIZE*NGPRS(SP), AX
+	SET_ARG2(SP)
+	SET_ARG1(AX)
 
+#ifdef __amd64__
 	/*
 	 * Optional code to check EFLAGS.
 	 *
@@ -61,11 +74,6 @@ vmexit_asm:
 9:	test	$~0x8d7, AX
 	jne		9b
 #elif defined(__i386__)
-	movl	SIZE*8(SP), %esi
-	movl	SP, AX
-	push	AX
-	pushl	%esi
-
 	/* Optional code to check EFLAGS. */
 	PUSHF
 	pop		AX
@@ -93,7 +101,8 @@ inst_name&_asm:
 	inst_name
 	je		2f			/* ZF set means VMfailValid */
 	jb		3f			/* CF set means VMfailInvalid */
-1:	jmp		1b			/* Unknown error */
+1:	hlt
+	jmp		1b			/* Unknown error */
 2:
 #ifdef __amd64__
 	movq	$1, %rsi
