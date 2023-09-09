@@ -1683,7 +1683,7 @@ void shv_nmi_guest_main(VCPU * vcpu)
 	// TODO: configure it based on NMI_OPT
 	interrupt_period = 10;
 
-	if (SHV_OPT & SHV_NMI_DETECT_ENV) {
+	if (NMI_OPT & SHV_NMI_DETECT_ENV) {
 		u32 eax, ebx, ecx, edx;
 		printf("Detecting environment\n");
 		/*
