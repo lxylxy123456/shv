@@ -1604,17 +1604,17 @@ static struct {
 	bool support_xmhf;
 	bool support_qemu;
 	bool support_bochs;
-} experiments[] = {				/*                    a  x  q  b */
+} experiments[] = {				/*       a  x  q  b */
 	{NULL, NULL, 1, 0, 0, 0},
-	{experiment_1, experiment_1_vmcall, 1, 1, 1, 1},
-	{experiment_2, experiment_2_vmcall, 1, 1, 0, 1},
-	{experiment_3, experiment_3_vmcall, 1, 1, 0, 1},
-	{experiment_4, experiment_4_vmcall, 1, 1, 0, 1},
-	{experiment_5, experiment_5_vmcall, 1, 1, 1, 0},
-	{experiment_6, experiment_6_vmcall, 1, 1, 0, 1},
-	{experiment_7, experiment_7_vmcall, 1, 1, 1, 0},
-	{experiment_8, experiment_8_vmcall, 1, 1, 1, 1},
-	{experiment_9, experiment_9_vmcall, 1, 1, 1, 1},
+	{experiment_1, experiment_1_vmcall, 0x1, 1, 1, 1},
+	{experiment_2, experiment_2_vmcall, 0x1, 1, 0, 1},
+	{experiment_3, experiment_3_vmcall, 0x1, 1, 0, 1},
+	{experiment_4, experiment_4_vmcall, 0x1, 1, 0, 1},
+	{experiment_5, experiment_5_vmcall, 0x1, 1, 1, 0},
+	{experiment_6, experiment_6_vmcall, 0x1, 1, 0, 1},
+	{experiment_7, experiment_7_vmcall, 0x1, 1, 1, 0},
+	{experiment_8, experiment_8_vmcall, 0x1, 1, 1, 1},
+	{experiment_9, experiment_9_vmcall, 0x1, 1, 1, 1},
 	{experiment_10, experiment_10_vmcall, 1, 1, 1, 1},
 	{experiment_11, experiment_11_vmcall, 1, 1, 1, 0},
 	{experiment_12, experiment_12_vmcall, 1, 1, 1, 1},
@@ -1672,25 +1672,28 @@ void run_experiment(u32 i)
 void shv_nmi_guest_main(VCPU * vcpu)
 {
 	vcpu->vmexit_handler_override = shv_nmi_vmexit_handler;
+	printf("NMI_OPT: 0x%llx\n", (u64)(NMI_OPT));
+	printf("NMI_EXP: 0x%llx\n", (u64)(NMI_EXP));
+
+	TEST_ASSERT(vcpu->idx == 1);
+
+	/* Set APIC ID (Bits 31 - 24: Initial APIC ID) */
+	l2_init_apic_id = cpuid_ebx(1, 0) & 0xff000000;
 
 	// TODO: configure it based on NMI_OPT
 	interrupt_period = 10;
 
-	TEST_ASSERT(vcpu->idx == 1);
-	{
+	if (SHV_OPT & SHV_NMI_DETECT_ENV) {
 		u32 eax, ebx, ecx, edx;
 		printf("Detecting environment\n");
 		/*
 		 * I am not sure of a good way to detect Bochs. For now just use the
 		 * current CPU version information I see.
 		 */
-		cpuid(0x00000001U, &eax, &ebx, &ecx, &edx);
-		if (eax == 0x000206a7) {
+		if (cpuid_eax(1, 0) == 0x000206a7) {
 			in_bochs = true;
 			printf("    Bochs detected\n");
 		}
-		/* Set APIC ID (Bits 31 - 24: Initial APIC ID) */
-		l2_init_apic_id = ebx & 0xff000000;
 		/*
 		 * Detect QEMU / KVM using
 		 * https://01.org/linuxgraphics/gfx-docs/drm/virt/kvm/cpuid.html
@@ -1701,8 +1704,7 @@ void shv_nmi_guest_main(VCPU * vcpu)
 			printf("    QEMU / KVM detected\n");
 		}
 		/* Detect XMHF */
-		cpuid(0x46484d58U, &eax, &ebx, &ecx, &edx);
-		if (eax == 0x46484d58U) {
+		if (cpuid_eax(0x46484d58U, 0) == 0x46484d58U) {
 			in_xmhf = true;
 			printf("    XMHF detected\n");
 		}
@@ -1723,7 +1725,7 @@ void shv_nmi_guest_main(VCPU * vcpu)
 	if (1 && "hardcode") {
 		//experiment_17();
 	}
-	if (1 && "sequential") {
+	if (NMI_OPT & SHV_NMI_RUN_SEQUENTIAL) {
 		for (u32 i = 0; i < nexperiments; i++) {
 			run_experiment(i);
 		}
@@ -1744,7 +1746,7 @@ void shv_nmi_guest_main(VCPU * vcpu)
 			printf("All experiments pass\n");
 		}
 	}
-	if (1 && "random") {
+	if (NMI_OPT & SHV_NMI_RUN_RANDOM) {
 		for (u32 i = 0; i < 100000; i++) {
 			run_experiment(rand() % nexperiments);
 		}

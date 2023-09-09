@@ -86,7 +86,7 @@ jobs:
       - run:
           name: "Build"
           command: |
-            tools/build.sh --<< parameters.subarch >> -O0 --nmi-opt 0x1
+            tools/build.sh --<< parameters.subarch >> -O0 --nmi-opt 0xf
       - run:
           name: "Versions"
           command: |

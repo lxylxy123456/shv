@@ -44,12 +44,24 @@
 
 /*
  * NMI_OPT is used to configure NMI testing SHV. Bit 0 of NMI_OPT enables NMI
- * testing. Once NMI testing is enabled, most bits in SHV_OPT are ignored. For
- * i > 0, Bit i enables NMI test i (see shv-nmi.c).
+ * testing. Once NMI testing is enabled, most bits in SHV_OPT are ignored.
  */
 
 /* Begin of bit definitions for NMI_OPT */
 #define SHV_NMI_ENABLE				0x0000000000000001ULL
+#define SHV_NMI_DETECT_ENV			0x0000000000000002ULL
+#define SHV_NMI_RUN_SEQUENTIAL		0x0000000000000004ULL
+#define SHV_NMI_RUN_RANDOM			0x0000000000000008ULL
+/* End of bit definitions for NMI_OPT */
+
+/*
+ * NMI_EXP is used to select a list of NMI experiments to perform. It is
+ * ignored when (NMI_OPT & SHV_NMI_ENABLE) == 0. Bit 0 of NMI_EXP enables
+ * NMI_EXP masking. For i > 0, Bit i enables NMI test i (see shv-nmi.c).
+ */
+
+/* Begin of bit definitions for NMI_EXP */
+#define SHV_NMI_EXP_ENABLE			0x0000000000000001ULL
 #define SHV_NMI_EXPERIMENT_01		0x0000000000000002ULL
 #define SHV_NMI_EXPERIMENT_02		0x0000000000000004ULL
 #define SHV_NMI_EXPERIMENT_03		0x0000000000000008ULL
@@ -113,6 +125,6 @@
 #define SHV_NMI_EXPERIMENT_61		0x2000000000000000ULL
 #define SHV_NMI_EXPERIMENT_62		0x4000000000000000ULL
 #define SHV_NMI_EXPERIMENT_63		0x8000000000000000ULL
-/* End of bit definitions for NMI_OPT */
+/* End of bit definitions for NMI_EXP */
 
 #endif							/* _SHV_OPTS_H_ */
