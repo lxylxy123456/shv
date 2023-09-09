@@ -90,6 +90,7 @@ u32 rand(void)
 
 void handle_interrupt_cpu1(u32 source, uintptr_t rip)
 {
+	l2_ready = 0;
 	ASSERT(!master_fail);
 	switch (exit_source) {
 	case EXIT_IGNORE:
@@ -440,16 +441,19 @@ void hlt_wait(u32 source)
 	}
 	prepare_measure();
 	exit_source = EXIT_MEASURE;
- loop:
 	l2_ready = 1;
+ loop:
 	asm volatile ("pushf; sti; hlt; 1: popf; lea 1b, %0":"=g" (rip));
-	l2_ready = 0;
 	if ("qemu workaround" && exit_source == EXIT_MEASURE) {
+		l2_ready = 0;
 		if (!quiet) {
 			printf("      Strange wakeup from HLT\n");
 		}
+		l2_ready = 1;
 		goto loop;
 	}
+	/* The interrupt handler sets "l2_ready = 0;" in handle_interrupt_cpu1(). */
+	ASSERT(!l2_ready);
 	assert_measure(source, rip);
 	if (!quiet) {
 		printf("    hlt_wait() end\n");
