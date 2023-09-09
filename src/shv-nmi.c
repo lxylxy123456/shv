@@ -1696,7 +1696,7 @@ void shv_nmi_guest_main(VCPU * vcpu)
 		}
 		/*
 		 * Detect QEMU / KVM using
-		 * https://01.org/linuxgraphics/gfx-docs/drm/virt/kvm/cpuid.html
+		 * https://www.kernel.org/doc/html/v6.1/virt/kvm/x86/cpuid.html
 		 */
 		cpuid(0x40000000U, &eax, &ebx, &ecx, &edx);
 		if (ebx == 0x4b4d564b && ecx == 0x564b4d56 && edx == 0x0000004d) {
