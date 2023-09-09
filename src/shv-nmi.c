@@ -1672,10 +1672,10 @@ void shv_nmi_guest_main(VCPU * vcpu)
 		interrupt_period = 1;
 	} else if (NMI_OPT & SHV_NMI_INTR_PERIOD_5) {
 		interrupt_period = 5;
+	} else if (NMI_OPT & SHV_NMI_INTR_PERIOD_15) {
+		interrupt_period = 15;
 	} else if (NMI_OPT & SHV_NMI_INTR_PERIOD_20) {
 		interrupt_period = 20;
-	} else if (NMI_OPT & SHV_NMI_INTR_PERIOD_50) {
-		interrupt_period = 50;
 	} else {
 		interrupt_period = 10;
 	}

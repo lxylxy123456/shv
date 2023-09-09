@@ -86,7 +86,7 @@ jobs:
       - run:
           name: "Build"
           command: |
-            tools/build.sh --<< parameters.subarch >> -O0 --nmi-opt 0xf
+            tools/build.sh --<< parameters.subarch >> -O0 --nmi-opt 0x4f
       - run:
           name: "Versions"
           command: |
@@ -111,7 +111,7 @@ jobs:
                 --no-display \
                 --verbose \
                 --watch-serial \
-                --qemu-timeout 60 \
+                --qemu-timeout 120 \
                 --nmi
 
 workflows:
