@@ -280,6 +280,9 @@ extern u64 g_gdt[MAX_VCPU_ENTRIES][GDT_NELEMS];
 extern u8 g_tss[MAX_VCPU_ENTRIES][PAGE_SIZE_4K] ALIGNED_PAGE;
 extern void init_gdt(VCPU * vcpu);
 
+/* strtoul.c */
+unsigned long tb_strtoul(const char *nptr, char **endptr, int base);
+
 #endif							/* !__ASSEMBLY__ */
 
 #define __CS32	0x08			/* CS (code segment selector) */
