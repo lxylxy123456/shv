@@ -20,9 +20,9 @@
 #define _CASE_BITSIZE(_32, _64) _64
 #elif defined(__i386__)
 #define _CASE_BITSIZE(_32, _64) _32
-#else /* !defined(__i386__) && !defined(__amd64__) */
-	#error "Unsupported Arch"
-#endif /* __amd64__ */
+#else							/* !defined(__i386__) && !defined(__amd64__) */
+#error "Unsupported Arch"
+#endif							/* __amd64__ */
 
 /* Assembly version of HALT(). */
 #define ASM_HALT \
@@ -72,6 +72,6 @@
 #define GET_ARG2(x)		movl SIZE*3(_BP), x;
 #define GET_ARG3(x)		movl SIZE*4(_BP), x;
 
-#else /* !defined(__i386__) && !defined(__amd64__) */
-	#error "Unsupported Arch"
-#endif /* __amd64__ */
+#else							/* !defined(__i386__) && !defined(__amd64__) */
+#error "Unsupported Arch"
+#endif							/* __amd64__ */

@@ -1672,8 +1672,8 @@ void run_experiment(u32 i)
 void shv_nmi_guest_main(VCPU * vcpu)
 {
 	vcpu->vmexit_handler_override = shv_nmi_vmexit_handler;
-	printf("NMI_OPT: 0x%llx\n", (u64)(NMI_OPT));
-	printf("NMI_EXP: 0x%llx\n", (u64)(NMI_EXP));
+	printf("NMI_OPT: 0x%llx\n", (u64) (NMI_OPT));
+	printf("NMI_EXP: 0x%llx\n", (u64) (NMI_EXP));
 
 	TEST_ASSERT(vcpu->idx == 1);
 
