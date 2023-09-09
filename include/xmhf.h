@@ -83,6 +83,7 @@
 
 #include <_processor.h>
 #include <_paging.h>
+#include <_multiboot.h>
 
 #ifndef __ASSEMBLY__
 
@@ -282,6 +283,9 @@ extern void init_gdt(VCPU * vcpu);
 
 /* strtoul.c */
 unsigned long tb_strtoul(const char *nptr, char **endptr, int base);
+
+/* cmdline.c */
+void parse_cmdline(const char *cmdline);
 
 #endif							/* !__ASSEMBLY__ */
 

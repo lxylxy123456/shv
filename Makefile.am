@@ -24,6 +24,7 @@ bin_PROGRAMS = shv.bin
 # "subdir-objects" in configure.ac allows source file in sub-directories.
 shv_bin_SOURCES = \
 	src/boot.S \
+	src/cmdline.c \
 	src/debug-uart.c \
 	src/debug-vga.c \
 	src/debug.c \
@@ -56,7 +57,8 @@ shv_bin_SOURCES = \
 	src/shv.c \
 	src/smp-asm.S \
 	src/smp.c \
-	src/spinlock.c
+	src/spinlock.c \
+	src/strtoul.c
 
 shv_bin_CPPFLAGS = -I$(top_srcdir)/include/
 shv_bin_CCASFLAGS = -D__ASSEMBLY__ \

@@ -19,6 +19,7 @@
 /* Template from https://wiki.osdev.org/Bare_Bones */
 
 #include <xmhf.h>
+#include <asm_helper.h>
 
 /* Declare constants for the multiboot header. */
 .set FLAGS, 0x10003				/* this is the Multiboot 'flag' field */
@@ -169,6 +170,10 @@ _boot_start_lret:
 
 	/* Set up stack pointer. */
 	movl	$stack_top, %esp
+
+	/* Clear upper 32 bits of RBX, then load multiboot info pointer from EBX. */
+	movl	%ebx, %ebx
+	SET_ARG1(_BX)
 
 	/* Transfer control to C code. */
 	call	kernel_main

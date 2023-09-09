@@ -55,7 +55,13 @@
 #include <ctype.h>
 #include <string.h>
 
-#define ULONG_MAX     0xFFFFFFFFUL
+#define _isspace(c)		((c) == ' ' || ((c) >= '\t' && (c) <= '\r'))
+#define _isupper(c)		((c) >= 'A' && (c) <= 'Z')
+#define _islower(c)		((c) >= 'a' && (c) <= 'z')
+#define _isalpha(c)		(_isupper(c) || _islower(c))
+#define _isdigit(c)		((c) >= '0' && (c) <= '9')
+
+#define ULONG_MAX		0xFFFFFFFFUL
 
 /*
  * Convert a string to an unsigned long integer.
@@ -78,7 +84,7 @@ unsigned long tb_strtoul(const char *nptr, char **endptr, int base)
 	 */
 	do {
 		c = *s++;
-	} while (isspace(c));
+	} while (_isspace(c));
 	if (c == '-') {
 		neg = 1;
 		c = *s++;
@@ -94,10 +100,10 @@ unsigned long tb_strtoul(const char *nptr, char **endptr, int base)
 	cutoff = (unsigned long)ULONG_MAX / (unsigned long)base;
 	cutlim = (unsigned long)ULONG_MAX % (unsigned long)base;
 	for (acc = 0, any = 0;; c = *s++) {
-		if (isdigit(c))
+		if (_isdigit(c))
 			c -= '0';
-		else if (isalpha(c))
-			c -= isupper(c) ? 'A' - 10 : 'a' - 10;
+		else if (_isalpha(c))
+			c -= _isupper(c) ? 'A' - 10 : 'a' - 10;
 		else
 			break;
 		if (c >= base)

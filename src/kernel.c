@@ -21,7 +21,7 @@
 #include <xmhf.h>
 
 /* This function is called from boot.S, only BSP. */
-void kernel_main(void)
+void kernel_main(multiboot_info_t * mbi)
 {
 	/* Initialize terminal interface. */
 	{
@@ -35,8 +35,25 @@ void kernel_main(void)
 #ifdef __amd64__
 		printf("Subarch: amd64\n");
 #elif __i386__
-		printf("Subarch: i386\n");
+#if I386_PAE
+		printf("Subarch: i386 (PAE)\n");
+#else							/* !I386_PAE */
+		printf("Subarch: i386 (not PAE)\n");
+#endif							/* I386_PAE */
 #endif
+	}
+
+	/* Parse command line. */
+	if (mbi->flags & MBI_CMDLINE) {
+		char *cmdline = (char *)(uintptr_t)mbi->cmdline;
+		printf("Multiboot command line: %s\n", cmdline);
+		parse_cmdline(cmdline);
+	} else {
+		printf("No multiboot command line\n");
+	}
+
+	/* Print options. */
+	{
 		printf("SHV Options: 0x%x\n", SHV_OPT);
 	}
 
