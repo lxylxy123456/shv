@@ -1680,9 +1680,22 @@ void shv_nmi_guest_main(VCPU * vcpu)
 	/* Set APIC ID (Bits 31 - 24: Initial APIC ID) */
 	l2_init_apic_id = cpuid_ebx(1, 0) & 0xff000000;
 
-	// TODO: configure it based on NMI_OPT
-	interrupt_period = 10;
+	/* Configure interrupt_period. */
+	if (NMI_OPT & SHV_NMI_INTR_PERIOD_1) {
+		interrupt_period = 1;
+	} else if (NMI_OPT & SHV_NMI_INTR_PERIOD_5) {
+		interrupt_period = 5;
+	} else if (NMI_OPT & SHV_NMI_INTR_PERIOD_20) {
+		interrupt_period = 20;
+	} else if (NMI_OPT & SHV_NMI_INTR_PERIOD_50) {
+		interrupt_period = 50;
+	} else {
+		interrupt_period = 10;
+	}
 
+	/*
+	 * Detect environment and automatically disable tests.
+	 */
 	if (NMI_OPT & SHV_NMI_DETECT_ENV) {
 		u32 eax, ebx, ecx, edx;
 		printf("Detecting environment\n");
