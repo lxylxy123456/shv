@@ -70,6 +70,10 @@
 //author: amit vasudevan (amitvasudevan@acm.org)
 #include <xmhf.h>
 
+/* Disable _printf outputs since the code seems stable. */
+//#define _printf printf
+#define _printf(...) do {} while (0)
+
 //forward prototypes
 ACPI_RSDP *ACPIGetRSDP(void);
 void wakeupAPs(void);
@@ -132,31 +136,31 @@ void wakeupAPs(void)
 
 	//our test code is at 1000:0000, we need to send 10 as vector
 	//send INIT
-	printf("Sending INIT IPI to all APs\n");
+	_printf("Sending INIT IPI to all APs\n");
 	*icr = 0x000c4500U;
 	udelay(10000);
 	//wait for command completion
 	while ((*icr) & 0x1000U) {
 		cpu_relax();
 	}
-	printf("Sent INIT IPI to all APs\n");
+	_printf("Sent INIT IPI to all APs\n");
 
 	//send SIPI (twice as per the MP protocol)
 	{
 		int i;
 		for (i = 0; i < 2; i++) {
-			printf("Sending SIPI-%u\n", i);
+			_printf("Sending SIPI-%u\n", i);
 			*icr = 0x000c4610U;
 			udelay(200);
 			//wait for command completion
 			while ((*icr) & 0x1000U) {
 				cpu_relax();
 			}
-			printf("Sent SIPI-%u\n", i);
+			_printf("Sent SIPI-%u\n", i);
 		}
 	}
 
-	printf("APs should be awake!\n");
+	_printf("APs should be awake!\n");
 }
 
 //exposed interface to the outside world
@@ -189,7 +193,7 @@ u32 smp_getinfo(PCPU * pcpus, u32 * num_pcpus, void *uefi_rsdp)
 	//we need to look at ACPI MADT. Logical cores on some machines
 	//(e.g HP8540p laptop with Core i5) are reported only using ACPI MADT
 	//and there is no MP structures on such systems!
-	printf("Finding SMP info. via ACPI...\n");
+	_printf("Finding SMP info. via ACPI...\n");
 	if (uefi_rsdp == NULL) {
 		rsdp = (ACPI_RSDP *) ACPIGetRSDP();
 	} else {
@@ -197,18 +201,18 @@ u32 smp_getinfo(PCPU * pcpus, u32 * num_pcpus, void *uefi_rsdp)
 		ASSERT(_ACPIGetRSDPComputeChecksum((uintptr_t) rsdp, 20) == 0);
 	}
 	if (!rsdp) {
-		printf("System is not ACPI Compliant, falling through...\n");
+		_printf("System is not ACPI Compliant, falling through...\n");
 		goto fallthrough;
 	}
 
-	printf("ACPI RSDP at 0x%08lx\n", rsdp);
+	_printf("ACPI RSDP at 0x%08lx\n", rsdp);
 
 #if 0
 	xsdt = (ACPI_XSDT *) (u32) rsdp->xsdtaddress;
 	n_xsdt_entries = (u32) ((xsdt->length - sizeof(ACPI_XSDT)) / 8);
 
-	printf("ACPI XSDT at 0x%08x\n", xsdt);
-	printf("  len=0x%08x, headerlen=0x%08x, numentries=%u\n",
+	_printf("ACPI XSDT at 0x%08x\n", xsdt);
+	_printf("  len=0x%08x, headerlen=0x%08x, numentries=%u\n",
 		   xsdt->length, sizeof(ACPI_XSDT), n_xsdt_entries);
 
 	xsdtentrylist = (u64 *) ((u32) xsdt + sizeof(ACPI_XSDT));
@@ -224,8 +228,8 @@ u32 smp_getinfo(PCPU * pcpus, u32 * num_pcpus, void *uefi_rsdp)
 	rsdt = (ACPI_RSDT *) (uintptr_t) rsdp->rsdtaddress;
 	n_rsdt_entries = (u32) ((rsdt->length - sizeof(ACPI_RSDT)) / 4);
 
-	printf("ACPI RSDT at 0x%08lx\n", rsdt);
-	printf("  len=0x%08x, headerlen=0x%08x, numentries=%u\n",
+	_printf("ACPI RSDT at 0x%08lx\n", rsdt);
+	_printf("  len=0x%08x, headerlen=0x%08x, numentries=%u\n",
 		   rsdt->length, sizeof(ACPI_RSDT), n_rsdt_entries);
 
 	rsdtentrylist = (u32 *) ((uintptr_t) rsdt + sizeof(ACPI_RSDT));
@@ -241,12 +245,12 @@ u32 smp_getinfo(PCPU * pcpus, u32 * num_pcpus, void *uefi_rsdp)
 #endif
 
 	if (!madt_found) {
-		printf("ACPI MADT not found, falling through...\n");
+		_printf("ACPI MADT not found, falling through...\n");
 		goto fallthrough;
 	}
 
-	printf("ACPI MADT at 0x%08lx\n", madt);
-	printf("  len=0x%08x, record-length=%u bytes\n", madt->length,
+	_printf("ACPI MADT at 0x%08lx\n", madt);
+	_printf("  len=0x%08x, record-length=%u bytes\n", madt->length,
 		   madt->length - sizeof(ACPI_MADT));
 
 	//scan through MADT APIC records to find processors
@@ -261,7 +265,7 @@ u32 smp_getinfo(PCPU * pcpus, u32 * num_pcpus, void *uefi_rsdp)
 			ACPI_MADT_APIC *apicrecord =
 				(ACPI_MADT_APIC *) ((uintptr_t) madt + sizeof(ACPI_MADT) +
 									madtcurrentrecordoffset);
-			printf
+			_printf
 				("rec type=0x%02x, length=%u bytes, flags=0x%08x, id=0x%02x\n",
 				 apicrecord->type, apicrecord->length, apicrecord->flags,
 				 apicrecord->lapicid);
