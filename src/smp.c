@@ -213,7 +213,7 @@ u32 smp_getinfo(PCPU * pcpus, u32 * num_pcpus, void *uefi_rsdp)
 
 	_printf("ACPI XSDT at 0x%08x\n", xsdt);
 	_printf("  len=0x%08x, headerlen=0x%08x, numentries=%u\n",
-		   xsdt->length, sizeof(ACPI_XSDT), n_xsdt_entries);
+			xsdt->length, sizeof(ACPI_XSDT), n_xsdt_entries);
 
 	xsdtentrylist = (u64 *) ((u32) xsdt + sizeof(ACPI_XSDT));
 
@@ -230,7 +230,7 @@ u32 smp_getinfo(PCPU * pcpus, u32 * num_pcpus, void *uefi_rsdp)
 
 	_printf("ACPI RSDT at 0x%08lx\n", rsdt);
 	_printf("  len=0x%08x, headerlen=0x%08x, numentries=%u\n",
-		   rsdt->length, sizeof(ACPI_RSDT), n_rsdt_entries);
+			rsdt->length, sizeof(ACPI_RSDT), n_rsdt_entries);
 
 	rsdtentrylist = (u32 *) ((uintptr_t) rsdt + sizeof(ACPI_RSDT));
 
@@ -251,7 +251,7 @@ u32 smp_getinfo(PCPU * pcpus, u32 * num_pcpus, void *uefi_rsdp)
 
 	_printf("ACPI MADT at 0x%08lx\n", madt);
 	_printf("  len=0x%08x, record-length=%u bytes\n", madt->length,
-		   madt->length - sizeof(ACPI_MADT));
+			madt->length - sizeof(ACPI_MADT));
 
 	//scan through MADT APIC records to find processors
 	*num_pcpus = 0;
