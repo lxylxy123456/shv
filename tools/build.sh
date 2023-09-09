@@ -32,6 +32,7 @@ usage () {
 	echo '	-O <level>          Set GCC optimization level.'
 	echo '	-s, --shv-opt <OPT> Set SHV_OPT.'
 	echo '	-N, --nmi-opt <OPT> Set NMI_OPT.'
+	echo '	-e, --nmi-exp <EXP> Set NMI_EXP.'
 	echo '	-v, --vga           Also output to VGA, consider SHV_NO_VGA_ART.'
 	echo '	-- <--OPTIONS> ...  Pass extra arguments to configure.'
 	exit 1
@@ -50,8 +51,8 @@ DRY_RUN='n'
 AC='n'
 
 # Parse arguments.
-shortopts='hnAipam:O:s:N:v'
-longopts='help,dry-run,ac,i386,pae,amd64,mem:,shv-opt:,nmi-opt:,vga'
+shortopts='hnAipam:O:s:N:e:v'
+longopts='help,dry-run,ac,i386,pae,amd64,mem:,shv-opt:,nmi-opt:,nmi-exp:,vga'
 opt=$(getopt -o "$shortopts" --long "$longopts" -- "$@")
 [ "$?" == "0" ] || usage 'getopt failed'
 eval set -- "$opt"
@@ -93,6 +94,10 @@ while true; do
 		;;
 	-N|--nmi-opt)
 		conf+=("--with-nmi-opt=$2")
+		shift
+		;;
+	-e|--nmi-exp)
+		conf+=("--with-nmi-exp=$2")
 		shift
 		;;
 	-v|--vga)

@@ -54,16 +54,23 @@ AM_CONDITIONAL([I386], [test x"$host_alias" = x"i686-linux-gnu"])
 # SHV_OPT
 AC_ARG_WITH([shv_opt],
             [AS_HELP_STRING([--with-shv-opt=SHV_OPT],
-                            [specify SHV options, see shv.h])],
+                            [specify SHV options, see shv-opts.h])],
             [shv_opt="$withval"], [shv_opt=0])
 AC_DEFINE_UNQUOTED([SHV_OPT],[${shv_opt}],[SHV options])
 
 # NMI_OPT
 AC_ARG_WITH([nmi_opt],
             [AS_HELP_STRING([--with-nmi-opt=NMI_OPT],
-                            [specify NMI testing options, see shv.h])],
+                            [specify NMI testing options, see shv-opts.h])],
             [nmi_opt="$withval"], [nmi_opt=0])
 AC_DEFINE_UNQUOTED([NMI_OPT],[${nmi_opt}],[NMI testing options])
+
+# NMI_EXP
+AC_ARG_WITH([nmi_exp],
+            [AS_HELP_STRING([--with-nmi-exp=NMI_EXP],
+                            [specify NMI experiments to test, see shv-opts.h])],
+            [nmi_exp="$withval"], [nmi_exp=0])
+AC_DEFINE_UNQUOTED([NMI_EXP],[${nmi_exp}],[NMI experiments to test])
 
 # I386_PAE
 AC_ARG_ENABLE([i386_pae],
