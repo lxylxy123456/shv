@@ -68,14 +68,15 @@ static volatile bool disable_cpuid = false;
 
 /* Similar to ASSERT, but set master_fail to indicate something failed. */
 #define TEST_ASSERT(_p) \
-    do { \
-        if ( !(_p) ) { \
-            master_fail = __LINE__; \
-            l2_ready = 0; \
-            printf("\nTEST_ASSERT '%s' failed, line %d, file %s\n", #_p , __LINE__, __FILE__); \
-            HALT(); \
-        } \
-    } while (0)
+	do { \
+		if ( !(_p) ) { \
+			master_fail = __LINE__; \
+			l2_ready = 0; \
+			printf("\nTEST_ASSERT '%s' failed, line %d, file %s\n", #_p , \
+				   __LINE__, __FILE__); \
+			HALT(); \
+		} \
+	} while (0)
 
 extern void idt_stub_guest_11(void);
 extern void idt_stub_guest_hh1(void);
