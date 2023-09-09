@@ -1600,43 +1600,38 @@ static void experiment_30_vmcall(void)
 static struct {
 	void (*f)(void);
 	void (*vmcall)(void);
-	bool supported;
-	bool support_xmhf;
-	bool support_qemu;
-	bool support_bochs;
-} experiments[] = {				/*       a  x  q  b */
-	{NULL, NULL, 1, 0, 0, 0},
-	{experiment_1, experiment_1_vmcall, 0x1, 1, 1, 1},
-	{experiment_2, experiment_2_vmcall, 0x1, 1, 0, 1},
-	{experiment_3, experiment_3_vmcall, 0x1, 1, 0, 1},
-	{experiment_4, experiment_4_vmcall, 0x1, 1, 0, 1},
-	{experiment_5, experiment_5_vmcall, 0x1, 1, 1, 0},
-	{experiment_6, experiment_6_vmcall, 0x1, 1, 0, 1},
-	{experiment_7, experiment_7_vmcall, 0x1, 1, 1, 0},
-	{experiment_8, experiment_8_vmcall, 0x1, 1, 1, 1},
-	{experiment_9, experiment_9_vmcall, 0x1, 1, 1, 1},
-	{experiment_10, experiment_10_vmcall, 1, 1, 1, 1},
-	{experiment_11, experiment_11_vmcall, 1, 1, 1, 0},
-	{experiment_12, experiment_12_vmcall, 1, 1, 1, 1},
-	{experiment_13, experiment_13_vmcall, 1, 1, 0, 1},
-	{experiment_14, experiment_14_vmcall, 1, 1, 0, 0},
-	{experiment_15, experiment_15_vmcall, 1, 1, 1, 1},
-	{experiment_16, experiment_16_vmcall, 1, 1, 1, 0},
-	{experiment_17, experiment_17_vmcall, 1, 1, 1, 0},
-	{experiment_18, experiment_18_vmcall, 1, 0, 0, 0},
-	{experiment_19, experiment_19_vmcall, 1, 1, 0, 0},
-	{experiment_20, experiment_20_vmcall, 1, 1, 1, 1},
-	{experiment_21, experiment_21_vmcall, 1, 1, 1, 0},
-	{experiment_22, experiment_22_vmcall, 1, 1, 1, 1},
-	{experiment_23, experiment_23_vmcall, 1, 1, 1, 1},
-	{experiment_24, experiment_24_vmcall, 1, 1, 0, 1},
-	{experiment_25, experiment_25_vmcall, 1, 1, 1, 1},
-	{experiment_26, experiment_26_vmcall, 1, 0, 1, 1},
-	{experiment_27, experiment_27_vmcall, 1, 1, 1, 0},
-	{experiment_28, experiment_28_vmcall, 1, 1, 1, 0},
-	{experiment_29, experiment_29_vmcall, 1, 1, 1, 1},
-	{experiment_30, experiment_30_vmcall, 1, 1, 1, 0},
-	/*                                    a  x  q  b */
+} experiments[] = {
+	{NULL, NULL},
+	{experiment_1, experiment_1_vmcall},
+	{experiment_2, experiment_2_vmcall},
+	{experiment_3, experiment_3_vmcall},
+	{experiment_4, experiment_4_vmcall},
+	{experiment_5, experiment_5_vmcall},
+	{experiment_6, experiment_6_vmcall},
+	{experiment_7, experiment_7_vmcall},
+	{experiment_8, experiment_8_vmcall},
+	{experiment_9, experiment_9_vmcall},
+	{experiment_10, experiment_10_vmcall},
+	{experiment_11, experiment_11_vmcall},
+	{experiment_12, experiment_12_vmcall},
+	{experiment_13, experiment_13_vmcall},
+	{experiment_14, experiment_14_vmcall},
+	{experiment_15, experiment_15_vmcall},
+	{experiment_16, experiment_16_vmcall},
+	{experiment_17, experiment_17_vmcall},
+	{experiment_18, experiment_18_vmcall},
+	{experiment_19, experiment_19_vmcall},
+	{experiment_20, experiment_20_vmcall},
+	{experiment_21, experiment_21_vmcall},
+	{experiment_22, experiment_22_vmcall},
+	{experiment_23, experiment_23_vmcall},
+	{experiment_24, experiment_24_vmcall},
+	{experiment_25, experiment_25_vmcall},
+	{experiment_26, experiment_26_vmcall},
+	{experiment_27, experiment_27_vmcall},
+	{experiment_28, experiment_28_vmcall},
+	{experiment_29, experiment_29_vmcall},
+	{experiment_30, experiment_30_vmcall},
 };
 
 static u32 nexperiments = sizeof(experiments) / sizeof(experiments[0]);
@@ -1653,12 +1648,11 @@ static u64 exp_mask = ~1ULL;
 void run_experiment(u32 i)
 {
 	if (!(exp_mask & (1ULL << i))) {
-		printf("Skipping experiments[%d]", i);
+		printf("Skipping experiments[%d]\n", i);
 		return;
 	}
-	if (experiments[i].f) {
-		experiments[i].f();
-	}
+	ASSERT(experiments[i].f);
+	experiments[i].f();
 	TEST_ASSERT(!master_fail);
 }
 
