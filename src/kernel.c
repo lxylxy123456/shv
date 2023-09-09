@@ -45,7 +45,7 @@ void kernel_main(multiboot_info_t * mbi)
 
 	/* Parse command line. */
 	if (mbi->flags & MBI_CMDLINE) {
-		char *cmdline = (char *)(uintptr_t)mbi->cmdline;
+		char *cmdline = (char *)(uintptr_t) mbi->cmdline;
 		printf("Multiboot command line: %s\n", cmdline);
 		parse_cmdline(cmdline);
 	} else {

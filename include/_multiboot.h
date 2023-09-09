@@ -82,44 +82,44 @@
 
 #ifndef __ASSEMBLY__
 // section header table for ELF
-typedef struct{
-  u32 num;
-  u32 size;
-  u32 addr;
-  u32 shndx;
-}__attribute__((packed)) elf_section_header_table_t;
+typedef struct {
+	u32 num;
+	u32 size;
+	u32 addr;
+	u32 shndx;
+} __attribute__((packed)) elf_section_header_table_t;
 
 // multiboot information struct
-typedef struct{
-  u32 flags;
-  u32 mem_lower;
-  u32 mem_upper;
-  u32 boot_device;
-  u32 cmdline;
-  u32 mods_count;
-  u32 mods_addr;
-  elf_section_header_table_t elf_sec;
-  u32 mmap_length;
-  u32 mmap_addr;
-}__attribute__((packed)) multiboot_info_t;
+typedef struct {
+	u32 flags;
+	u32 mem_lower;
+	u32 mem_upper;
+	u32 boot_device;
+	u32 cmdline;
+	u32 mods_count;
+	u32 mods_addr;
+	elf_section_header_table_t elf_sec;
+	u32 mmap_length;
+	u32 mmap_addr;
+} __attribute__((packed)) multiboot_info_t;
 
 // The module structure.
 typedef struct {
-  u32 mod_start;
-  u32 mod_end;
-  u32 string;
-  u32 reserved;
-}__attribute__((packed)) module_t;
+	u32 mod_start;
+	u32 mod_end;
+	u32 string;
+	u32 reserved;
+} __attribute__((packed)) module_t;
 
 // The memory map structure
 typedef struct {
-  u32 size;
-  u32 base_addr_low;
-  u32 base_addr_high;
-  u32 length_low;
-  u32 length_high;
-  u32 type;
-}__attribute__((packed)) memory_map_t;
+	u32 size;
+	u32 base_addr_low;
+	u32 base_addr_high;
+	u32 length_low;
+	u32 length_high;
+	u32 type;
+} __attribute__((packed)) memory_map_t;
 #endif /*__ASSEMBLY*/
 
-#endif /* __MULTIBOOT_H */
+#endif							/* __MULTIBOOT_H */
