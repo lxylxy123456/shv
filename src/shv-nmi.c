@@ -440,16 +440,16 @@ void hlt_wait(u32 source)
 	}
 	prepare_measure();
 	exit_source = EXIT_MEASURE;
-	l2_ready = 1;
  loop:
-	asm volatile ("pushf; sti; hlt; 1: lea 1b, %0; popf":"=g" (rip));
+	l2_ready = 1;
+	asm volatile ("pushf; sti; hlt; 1: popf; lea 1b, %0":"=g" (rip));
+	l2_ready = 0;
 	if ("qemu workaround" && exit_source == EXIT_MEASURE) {
 		if (!quiet) {
 			printf("      Strange wakeup from HLT\n");
 		}
 		goto loop;
 	}
-	l2_ready = 0;
 	assert_measure(source, rip);
 	if (!quiet) {
 		printf("    hlt_wait() end\n");

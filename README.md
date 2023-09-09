@@ -387,6 +387,7 @@ TODO
 * Complete README
 * Port lhv-nmi (add new configuration option, use bit map)
 * Make configuration options override-able from command line
+* Combine Jenkins files
 * VirtualBox cannot boot SMP, `vcpu->id = vcpu->idx = 0`
 	* Check reading other APIC fields
 	* Check whether VirtualBox forces APIC virtualization
