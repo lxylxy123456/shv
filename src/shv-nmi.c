@@ -1644,23 +1644,16 @@ static u32 nexperiments = sizeof(experiments) / sizeof(experiments[0]);
 static bool in_qemu = false;
 static bool in_bochs = false;
 static bool in_xmhf = false;
+static u64 exp_mask = ~1ULL;
+
+#define EXP_QEMU_MASK	0x7ef39fa2
+#define EXP_BOCHS_MASK	0x27d0b75e
+#define EXP_XMHF_MASK	0x7bfbfffe
 
 void run_experiment(u32 i)
 {
-	if (!experiments[i].supported) {
-		printf("Skipping experiments[%d] due to global settings\n", i);
-		return;
-	}
-	if (in_xmhf && !experiments[i].support_xmhf) {
-		printf("Skipping experiments[%d] due to XMHF\n", i);
-		return;
-	}
-	if (in_qemu && !in_xmhf && !experiments[i].support_qemu) {
-		printf("Skipping experiments[%d] due to QEMU\n", i);
-		return;
-	}
-	if (in_bochs && !in_xmhf && !experiments[i].support_bochs) {
-		printf("Skipping experiments[%d] due to Bochs\n", i);
+	if (!(exp_mask & (1ULL << i))) {
+		printf("Skipping experiments[%d]", i);
 		return;
 	}
 	if (experiments[i].f) {
@@ -1693,9 +1686,7 @@ void shv_nmi_guest_main(VCPU * vcpu)
 		interrupt_period = 10;
 	}
 
-	/*
-	 * Detect environment and automatically disable tests.
-	 */
+	/* Detect environment. */
 	if (NMI_OPT & SHV_NMI_DETECT_ENV) {
 		u32 eax, ebx, ecx, edx;
 		printf("Detecting environment\n");
@@ -1722,18 +1713,37 @@ void shv_nmi_guest_main(VCPU * vcpu)
 			printf("    XMHF detected\n");
 		}
 		printf("End detecting environment\n");
-		/* Wait for some time to make the results visible */
-		if ("Sleep") {
-			quiet = true;
-			for (u32 i = 0; i < 10; i += interrupt_period) {
-				hlt_wait(EXIT_NMI_G);
-				iret_wait(EXIT_MEASURE);
-				hlt_wait(EXIT_TIMER_G);
-			}
-			quiet = false;
-		}
 	}
 	disable_cpuid = true;
+
+	/* Disable tests based on environment and/or settings. */
+	{
+		if (in_xmhf) {
+			exp_mask &= EXP_XMHF_MASK;
+		}
+		if (in_qemu && !in_xmhf) {
+			exp_mask &= EXP_QEMU_MASK;
+		}
+		if (in_bochs && !in_xmhf) {
+			exp_mask &= EXP_BOCHS_MASK;
+		}
+		if (NMI_EXP & SHV_NMI_EXP_MASK_ENABLE) {
+			exp_mask &= NMI_EXP;
+		}
+		printf("exp_mask: 0x%llx\n", exp_mask);
+	}
+
+	/* Wait for some time to make the results visible */
+	if ("Sleep") {
+		quiet = true;
+		for (u32 i = 0; i < 10; i += interrupt_period) {
+			hlt_wait(EXIT_NMI_G);
+			iret_wait(EXIT_MEASURE);
+			hlt_wait(EXIT_TIMER_G);
+		}
+		quiet = false;
+	}
+
 	asm volatile ("sti");
 	if (1 && "hardcode") {
 		//experiment_17();
@@ -1745,18 +1755,6 @@ void shv_nmi_guest_main(VCPU * vcpu)
 		TEST_ASSERT(!master_fail);
 		for (u32 i = 0; i < 3; i++) {
 			printf("Sequential experiments pass\n");
-		}
-	}
-	if (0 && "enable all experiments") {
-		for (u32 i = 0; i < nexperiments; i++) {
-			experiments[i].support_qemu = true;
-			experiments[i].support_bochs = true;
-			experiments[i].support_xmhf = true;
-			run_experiment(i);
-		}
-		TEST_ASSERT(!master_fail);
-		for (u32 i = 0; i < 3; i++) {
-			printf("All experiments pass\n");
 		}
 	}
 	if (NMI_OPT & SHV_NMI_RUN_RANDOM) {
