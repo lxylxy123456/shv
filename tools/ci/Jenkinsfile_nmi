@@ -1,0 +1,106 @@
+/*
+ * SHV - Small HyperVisor for testing nested virtualization in hypervisors
+ * Copyright (C) 2023  Eric Li
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+/*
+ * CI for testing SHV NMI
+ */
+
+properties([
+    parameters([
+        string(name: 'SHV_BRANCH', defaultValue: 'master'),
+        string(name: 'BUILD_OPTS', defaultValue: '--nmi-opt=0x1f')
+    ])
+])
+
+void qemu_test(String subarch) {
+    PWD = sh(returnStdout: true, script: 'pwd').trim()
+    sh "rm -rf tmp"
+    sh "mkdir tmp"
+    sh """
+        python3 -u ./tools/ci/test5.py \
+            --shv-img ${PWD}/shv.bin \
+            --work-dir ${PWD}/tmp/ \
+            --no-display \
+            --verbose \
+            --watch-serial \
+            --nmi
+    """
+}
+
+def helper
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Logistics') {
+            steps {
+                sh "git fetch origin ${params.SHV_BRANCH}"
+                sh "git checkout ${params.SHV_BRANCH}"
+                sh "git pull origin ${params.SHV_BRANCH}"
+                script {
+                    cmt = sh(
+                        returnStdout: true,
+                        script: 'git rev-parse HEAD | head -c 9').trim()
+                    currentBuild.displayName += " ${params.SHV_BRANCH}"
+                    currentBuild.displayName += " ${cmt}"
+                    helper = load "tools/ci/jenkins.groovy"
+                }
+            }
+        }
+        stage('Build i386') {
+            steps {
+                script {
+                    helper.build_shv("i386", "${params.BUILD_OPTS}")
+                }
+            }
+        }
+        stage('Test i386') {
+            steps {
+                qemu_test "i386"
+            }
+        }
+/*
+        stage('Build pae') {
+            steps {
+                script {
+                    helper.build_shv("pae", "${params.BUILD_OPTS}")
+                }
+            }
+        }
+        stage('Test pae') {
+            steps {
+                qemu_test "pae"
+            }
+        }
+*/
+        stage('Build amd64') {
+            steps {
+                script {
+                    helper.build_shv("amd64", "${params.BUILD_OPTS}")
+                }
+            }
+        }
+        stage('Test amd64') {
+            steps {
+                qemu_test "amd64"
+            }
+        }
+    }
+}
+
