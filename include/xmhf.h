@@ -282,9 +282,12 @@ extern u8 g_tss[MAX_VCPU_ENTRIES][PAGE_SIZE_4K] ALIGNED_PAGE;
 extern void init_gdt(VCPU * vcpu);
 
 /* strtoul.c */
-unsigned long tb_strtoul(const char *nptr, char **endptr, int base);
+unsigned long tb_strtoull(const char *nptr, const char **endptr, int base);
 
 /* cmdline.c */
+extern u64 g_shv_opt;
+extern u64 g_nmi_opt;
+extern u64 g_nmi_exp;
 void parse_cmdline(const char *cmdline);
 
 #endif							/* !__ASSEMBLY__ */

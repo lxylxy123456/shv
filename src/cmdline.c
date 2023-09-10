@@ -20,6 +20,34 @@
 
 #define _isspace(c)		((c) == ' ' || ((c) >= '\t' && (c) <= '\r'))
 
+u64 g_shv_opt = SHV_OPT;
+u64 g_nmi_opt = NMI_OPT;
+u64 g_nmi_exp = NMI_EXP;
+
+static const struct {
+	u64 *ptr;
+	const char *prefix;
+} cmdline_vars[] = {
+	{.ptr=&g_shv_opt, .prefix="shv_opt="},
+	{.ptr=&g_nmi_opt, .prefix="nmi_opt="},
+	{.ptr=&g_nmi_exp, .prefix="nmi_exp="},
+	{.ptr=NULL, .prefix=NULL},
+};
+
+static void match_var(const char *begin_word,const char *end_word)
+{
+	//printf("Word: %.*s\n", (end_word - begin_word), begin_word);
+	for (u32 i = 0; cmdline_vars[i].ptr; i++) {
+		const char *prefix = cmdline_vars[i].prefix;
+		size_t len = strlen(prefix);
+		if (strlen(begin_word) >= len && memcmp(begin_word, prefix, len) == 0) {
+			const char *begin_val = begin_word + len;
+			const char *end_val;
+			*(cmdline_vars[i].ptr) = tb_strtoull(begin_val, &end_val, 0);
+		}
+	}
+}
+
 void parse_cmdline(const char *cmdline)
 {
 	const char *begin_word = cmdline;
@@ -29,7 +57,7 @@ void parse_cmdline(const char *cmdline)
 		while (*end_word != '\0' && !_isspace(*end_word)) {
 			end_word++;
 		}
-		printf("Word: %.*s\n", (end_word - begin_word), begin_word);
+		match_var(begin_word, end_word);
 		begin_word = end_word;
 		while (_isspace(*begin_word)) {
 			begin_word++;

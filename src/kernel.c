@@ -55,6 +55,9 @@ void kernel_main(multiboot_info_t * mbi)
 	/* Print options. */
 	{
 		printf("SHV Options: 0x%x\n", SHV_OPT);
+		printf("g_shv_opt: 0x%llx\n", g_shv_opt);
+		printf("g_nmi_opt: 0x%llx\n", g_nmi_opt);
+		printf("g_nmi_exp: 0x%llx\n", g_nmi_exp);
 	}
 
 	/* Set up page table. */

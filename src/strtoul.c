@@ -52,8 +52,7 @@
 
 /* $FreeBSD: src/sys/libkern/strtoul.c,v 1.6.32.1 2010/02/10 00:26:20 kensmith Exp $ */
 
-#include <ctype.h>
-#include <string.h>
+#include <xmhf.h>
 
 #define _isspace(c)		((c) == ' ' || ((c) >= '\t' && (c) <= '\r'))
 #define _isupper(c)		((c) >= 'A' && (c) <= 'Z')
@@ -61,7 +60,7 @@
 #define _isalpha(c)		(_isupper(c) || _islower(c))
 #define _isdigit(c)		((c) >= '0' && (c) <= '9')
 
-#define ULONG_MAX		0xFFFFFFFFUL
+#define ULONGLONG_MAX	0xFFFFFFFFFFFFFFFFULL
 
 /*
  * Convert a string to an unsigned long integer.
@@ -69,16 +68,15 @@
  * Ignores `locale' stuff.  Assumes that the upper and lower case
  * alphabets and digits are each contiguous.
  */
-unsigned long tb_strtoul(const char *nptr, char **endptr, int base)
+unsigned long tb_strtoull(const char *nptr, const char **endptr, int base)
 {
 	const char *s = nptr;
-	unsigned long acc;
+	unsigned long long acc;
 	unsigned char c;
-	unsigned long cutoff;
+	unsigned long long cutoff;
 	int neg = 0, any, cutlim;
 
-	if (nptr == NULL)
-		return ULONG_MAX;
+	ASSERT(nptr != NULL);
 	/*
 	 * See strtol for comments as to the logic used.
 	 */
@@ -97,8 +95,8 @@ unsigned long tb_strtoul(const char *nptr, char **endptr, int base)
 	}
 	if (base == 0)
 		base = c == '0' ? 8 : 10;
-	cutoff = (unsigned long)ULONG_MAX / (unsigned long)base;
-	cutlim = (unsigned long)ULONG_MAX % (unsigned long)base;
+	cutoff = (unsigned long long)ULONGLONG_MAX / (unsigned long long)base;
+	cutlim = (unsigned long long)ULONGLONG_MAX % (unsigned long long)base;
 	for (acc = 0, any = 0;; c = *s++) {
 		if (_isdigit(c))
 			c -= '0';
@@ -117,10 +115,11 @@ unsigned long tb_strtoul(const char *nptr, char **endptr, int base)
 		}
 	}
 	if (any < 0) {
-		acc = ULONG_MAX;
+		printf("Error: invalid input to tb_strtoull: %s\n", nptr);
+		HALT();
 	} else if (neg)
 		acc = -acc;
 	if (endptr != 0)
-		*((const char **)endptr) = any ? s - 1 : nptr;
+		*endptr = any ? s - 1 : nptr;
 	return (acc);
 }
