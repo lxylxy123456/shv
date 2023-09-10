@@ -23,6 +23,9 @@
  * g_shv_opt is used to configure miscellaneous behavior of SHV. Most
  * configuration options control which test to enable. We use this to avoid
  * adding too many configurations in configure.ac.
+ *
+ * This can be configured on multiboot command line using "shv_opt=". The
+ * default value is SHV_OPT, configured using "./configure --with-shv-opt=".
  */
 
 /* Begin of bit definitions for g_shv_opt */
@@ -43,8 +46,11 @@
 /* End of bit definitions for g_shv_opt */
 
 /*
- * g_nmi_opt is used to configure NMI testing SHV. Bit 0 of g_nmi_opt enables NMI
- * testing. Once NMI testing is enabled, most bits in g_shv_opt are ignored.
+ * g_nmi_opt is used to configure NMI testing SHV. Bit 0 of g_nmi_opt enables
+ * NMI testing. Once NMI testing is enabled, most bits in g_shv_opt are ignored.
+ *
+ * This can be configured on multiboot command line using "nmi_opt=". The
+ * default value is NMI_OPT, configured using "./configure --with-nmi-opt=".
  */
 
 /* Begin of bit definitions for g_nmi_opt */
@@ -62,6 +68,9 @@
  * g_nmi_exp is used to select a list of NMI experiments to perform. It is
  * ignored when (g_nmi_opt & SHV_NMI_ENABLE) == 0. Bit 0 of g_nmi_exp enables
  * g_nmi_exp masking. For i > 0, Bit i enables NMI test i (see shv-nmi.c).
+ *
+ * This can be configured on multiboot command line using "nmi_exp=". The
+ * default value is NMI_EXP, configured using "./configure --with-nmi-exp=".
  */
 
 /* Begin of bit definitions for g_nmi_exp */
