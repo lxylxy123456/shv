@@ -114,7 +114,9 @@ To view other configuration options:
 
 There are two ways to load SHV to QEMU / KVM.
 * To load SHV image directly, use `-kernel shv.bin`.
+	* To add arguments to multiboot commandline, use `-append "arg1 arg2 ..."`.
 * To boot SHV using GRUB, use `-cdrom grub.iso`.
+	* To add arguments to multiboot commandline, edit `grub.cfg`.
 
 Note that SHV requires hardware virtualization (VMX), so QEMU must enable KVM.
 Sample command line is `-cpu Haswell,vmx=yes -enable-kvm`.
@@ -124,8 +126,9 @@ print the serial port message to stdout.
 
 [tools/qemu.sh](tools/qemu.sh) is intended to make running SHV easy. For
 example, the following command tests SHV with 4 Haswell CPUs and 1G RAM.
+`g_shv_opt` is set to 0xdfd and `g_nmi_opt` is set to 0.
 ```sh
-../tools/qemu.sh -kernel shv.bin
+../tools/qemu.sh -kernel shv.bin -append 'shv_opt=0xdfd nmi_opt=0'
 ```
 
 To view arguments to `qemu.sh`:

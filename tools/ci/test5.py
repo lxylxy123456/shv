@@ -37,6 +37,7 @@ def parse_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--xmhf-img')
 	parser.add_argument('--shv-img', required=True)
+	parser.add_argument('--mb-cmdline', type=str)
 	parser.add_argument('--qcow2-suffix')
 	parser.add_argument('--smp', type=int, default=4)
 	parser.add_argument('--work-dir', required=True)
@@ -60,7 +61,10 @@ def println(*args):
 def spawn_qemu(args, serial_file):
 	if args.xmhf_img is None:
 		img = ['-kernel', args.shv_img]
+		if args.mb_cmdline is not None:
+			img += ['-append', args.mb_cmdline]
 	else:
+		assert args.mb_cmdline is None
 		img = ['-d', args.xmhf_img, args.qcow2_suffix,
 			   '-d', args.shv_img, args.qcow2_suffix]
 	qemu_args = [

@@ -41,7 +41,7 @@ jobs:
       - run:
           name: "Build"
           command: |
-            tools/build.sh --<< parameters.subarch >> -O0 --shv-opt 0xdfd
+            tools/build.sh --<< parameters.subarch >> -O0
       - run:
           name: "Versions"
           command: |
@@ -60,6 +60,7 @@ jobs:
             mkdir tmp
             python3 -u ./tools/ci/test5.py \
                 --shv-img ${PWD}/shv.bin \
+                --mb-cmdline 'shv_opt=0xdfd' \
                 --work-dir ${PWD}/tmp/ \
                 --no-display \
                 --verbose \
@@ -107,6 +108,7 @@ jobs:
             mkdir tmp
             python3 -u ./tools/ci/test5.py \
                 --shv-img ${PWD}/shv.bin \
+                --mb-cmdline 'nmi_opt=0x4f' \
                 --work-dir ${PWD}/tmp/ \
                 --no-display \
                 --verbose \
