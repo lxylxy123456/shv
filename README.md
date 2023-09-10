@@ -268,10 +268,10 @@ VBoxManage modifyvm <VirtualMachineName> --nested-hw-virt on
 
 Due to problems of VirtualBox or SHV, currently these workarounds are required:
 * Only configure one CPU in VirtualBox (i.e. SMP not supported).
-* Do not let SHV access VGA mmio. That is, make sure `SHV_OPT` sets bit
+* Do not let SHV access VGA mmio. That is, make sure `g_shv_opt` sets bit
   `0x2000` (e.g. `./tools/build.sh -s 0x2000`) and make sure not to enable VGA
   (i.e. do not use `./tools/build.sh --vga`).
-* Do not set any bits in `0x421` of `SHV_OPT`
+* Do not set any bits in `0x421` of `g_shv_opt`
   (e.g. `./tools/build.sh -s 0x29dc`).
 
 The problems are:
@@ -388,8 +388,5 @@ TODO
 * Port lhv-nmi (add new configuration option, use bit map)
 * Make configuration options override-able from command line
 * Combine Jenkins files
-* VirtualBox cannot boot SMP, `vcpu->id = vcpu->idx = 0`
-	* Check reading other APIC fields
-	* Check whether VirtualBox forces APIC virtualization
-	* Check whether this problem happens if EPT is enabled
+* Report "#### VirtualBox Problems"
 
