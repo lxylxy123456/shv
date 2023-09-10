@@ -75,7 +75,7 @@ pipeline {
         }
         stage('Test i386') {
             steps {
-                qemu_test "i386", "${TEST_SHV_OPT}"
+                qemu_test "i386", "${TEST_SHV_OPT}", ""
             }
         }
         stage('Test i386 NMI') {
@@ -92,7 +92,7 @@ pipeline {
         }
         stage('Test pae') {
             steps {
-                qemu_test "pae", "${TEST_SHV_OPT}" ""
+                qemu_test "pae", "${TEST_SHV_OPT}", ""
             }
         }
         stage('Build amd64') {
@@ -104,7 +104,7 @@ pipeline {
         }
         stage('Test amd64') {
             steps {
-                qemu_test "amd64", "${TEST_SHV_OPT}" ""
+                qemu_test "amd64", "${TEST_SHV_OPT}", ""
             }
         }
         stage('Test amd64 NMI') {
