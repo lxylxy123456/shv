@@ -16,7 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <xmhf.h>
+
+#define _isspace(c)		((c) == ' ' || ((c) >= '\t' && (c) <= '\r'))
+
 void parse_cmdline(const char *cmdline)
 {
-	// TODO
+	const char *begin_word = cmdline;
+	while (*begin_word) {
+		const char *end_word;
+		end_word = begin_word;
+		while (*end_word != '\0' && !_isspace(*end_word)) {
+			end_word++;
+		}
+		printf("Word: %.*s\n", (end_word - begin_word), begin_word);
+		begin_word = end_word;
+		while (_isspace(*begin_word)) {
+			begin_word++;
+		}
+	}
 }
