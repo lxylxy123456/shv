@@ -123,15 +123,27 @@ def serial_thread_shv(args, serial_file, serial_result):
 	for i in gen:
 		pass
 
+def is_failed(line):
+	if line.startswith('Error: ASSERT') or line.startswith('TEST_ASSERT'):
+		if 'failed' in line:
+			return True
+	return False
+
 def serial_thread_nmi(args, serial_file, serial_result):
 	gen = gen_lines(args, serial_file)
 	for i in gen:
+		if is_failed(i):
+			with serial_result[0]:
+				serial_result[1] = SERIAL_FAIL
 		if i == 'Sequential experiments pass':
 			println('Found', i)
 			break
 	test_count = 0
 	test_goal = 10
 	for i in gen:
+		if is_failed(i):
+			with serial_result[0]:
+				serial_result[1] = SERIAL_FAIL
 		if re.fullmatch('Experiment: \d+', i):
 			test_count += 1
 			println('Random exp progress: %d / %d' % (test_count, test_goal))
