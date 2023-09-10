@@ -30,14 +30,13 @@
 #define RTC_PORT_OUT 0x70
 #define RTC_PORT_IN  0x71
 
-#define TIMER_PERIOD 50
 #define TIMER_RATE 1193182
 #define TIMER_PERIOD_IO_PORT 0x40
 #define TIMER_MODE_IO_PORT 0x43
 #define TIMER_SQUARE_WAVE 0x36
 #define TIMER_ONE_SHOT 0x30
 
-#define LAPIC_PERIOD (TIMER_PERIOD * 1000000)
+#define LAPIC_PERIOD (g_timer_ms * 1000000)
 
 static int getrtcfield(int field)
 {
@@ -76,7 +75,7 @@ void timer_init(VCPU * vcpu)
 {
 	/* PIT */
 	if (vcpu->isbsp) {
-		u64 ncycles = TIMER_RATE * TIMER_PERIOD / 1000;
+		u64 ncycles = TIMER_RATE * g_timer_ms / 1000;
 		ASSERT(ncycles == (u64) (u16) ncycles);
 		if (g_shv_opt & SHV_NO_INTERRUPT) {
 			outb(TIMER_MODE_IO_PORT, TIMER_ONE_SHOT);

@@ -23,6 +23,7 @@
 u64 g_shv_opt = SHV_OPT;
 u64 g_nmi_opt = NMI_OPT;
 u64 g_nmi_exp = NMI_EXP;
+u64 g_timer_ms = 50;
 
 static const struct {
 	u64 *ptr;
@@ -31,6 +32,7 @@ static const struct {
 	{.ptr = &g_shv_opt,.prefix = "shv_opt="},
 	{.ptr = &g_nmi_opt,.prefix = "nmi_opt="},
 	{.ptr = &g_nmi_exp,.prefix = "nmi_exp="},
+	{.ptr = &g_timer_ms,.prefix = "timer_ms="},
 	{.ptr = NULL,.prefix = NULL},
 };
 

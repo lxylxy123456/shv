@@ -288,6 +288,7 @@ unsigned long tb_strtoull(const char *nptr, const char **endptr, int base);
 extern u64 g_shv_opt;
 extern u64 g_nmi_opt;
 extern u64 g_nmi_exp;
+extern u64 g_timer_ms;
 void parse_cmdline(const char *cmdline);
 
 #endif							/* !__ASSEMBLY__ */
