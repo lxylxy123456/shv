@@ -45,9 +45,11 @@ jobs:
       - run:
           name: "Versions"
           command: |
+            set -xe
             lscpu
             ssh -V
             qemu-system-x86_64 -version
+            uname -r
             gcc -v
       - store_artifacts:
           path: shv.bin
@@ -65,44 +67,8 @@ jobs:
                 --no-display \
                 --verbose \
                 --watch-serial
-  test-nmi:
-    machine:
-      # Need nested virtualization
-      # https://discuss.circleci.com/t/new-android-machine-image-now-/39467
-      image: android:2022.03.1
-    resource_class: medium
-    parameters:
-      subarch:
-        type: string
-    steps:
-      - checkout
       - run:
-          name: "Apt-get"
-          command: |
-            sudo apt-get update
-            sudo apt-get -y -q install \
-                build-essential crossbuild-essential-i386 \
-                autoconf libtool xorriso mtools grub-pc \
-                git qemu-system-x86
-      - run:
-          name: "Build"
-          command: |
-            tools/build.sh --<< parameters.subarch >> -O0 --nmi-opt 0x4f
-      - run:
-          name: "Versions"
-          command: |
-            set -xe
-            lscpu
-            ssh -V
-            qemu-system-x86_64 -version
-            uname -r
-            gcc -v
-      - store_artifacts:
-          path: shv.bin
-      - store_artifacts:
-          path: grub.iso
-      - run:
-          name: "Test"
+          name: "Test NMI"
           command: |
             rm -rf tmp
             mkdir tmp
@@ -123,7 +89,3 @@ workflows:
           matrix:
             parameters:
               subarch: ["i386", "pae", "amd64"]
-      - test-nmi:
-          matrix:
-            parameters:
-              subarch: ["i386", "amd64"]
