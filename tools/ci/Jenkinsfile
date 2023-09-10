@@ -37,7 +37,7 @@ void qemu_test(String work_dir, String append, String args) {
         python3 -u ./tools/ci/test5.py \
             --shv-img ${PWD}/shv.bin \
             --mb-cmdline "${append}" \
-            --work-dir ${PWD}/tmp/ \
+            --work-dir ${PWD}/${work_dir}/ \
             --no-display \
             --verbose \
             --watch-serial \
