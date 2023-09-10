@@ -23,21 +23,25 @@
 properties([
     parameters([
         string(name: 'SHV_BRANCH', defaultValue: 'master'),
-        string(name: 'BUILD_OPTS', defaultValue: '--shv-opt=0xdfd')
+        string(name: 'BUILD_OPTS', defaultValue: ''),
+        string(name: 'TEST_SHV_OPT', defaultValue: 'shv_opt=0xdfd'),
+        string(name: 'TEST_NMI_OPT', defaultValue: 'nmi_opt=0x1f nmi_exp=0')
     ])
 ])
 
-void qemu_test(String subarch) {
+void qemu_test(String subarch, String append, String args) {
     PWD = sh(returnStdout: true, script: 'pwd').trim()
     sh "rm -rf tmp"
     sh "mkdir tmp"
     sh """
         python3 -u ./tools/ci/test5.py \
             --shv-img ${PWD}/shv.bin \
+            --append "${append}" \
             --work-dir ${PWD}/tmp/ \
             --no-display \
             --verbose \
-            --watch-serial
+            --watch-serial \
+            ${args}
     """
 }
 
@@ -71,7 +75,12 @@ pipeline {
         }
         stage('Test i386') {
             steps {
-                qemu_test "i386"
+                qemu_test "i386", "${TEST_SHV_OPT}"
+            }
+        }
+        stage('Test i386 NMI') {
+            steps {
+                qemu_test "i386", "${TEST_NMI_OPT}", "--nmi"
             }
         }
         stage('Build pae') {
@@ -83,7 +92,7 @@ pipeline {
         }
         stage('Test pae') {
             steps {
-                qemu_test "pae"
+                qemu_test "pae", "${TEST_SHV_OPT}" ""
             }
         }
         stage('Build amd64') {
@@ -95,7 +104,12 @@ pipeline {
         }
         stage('Test amd64') {
             steps {
-                qemu_test "amd64"
+                qemu_test "amd64", "${TEST_SHV_OPT}" ""
+            }
+        }
+        stage('Test amd64 NMI') {
+            steps {
+                qemu_test "amd64", "${TEST_NMI_OPT}", "--nmi"
             }
         }
     }

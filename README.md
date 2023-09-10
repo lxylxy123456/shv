@@ -391,5 +391,6 @@ TODO
 * Port lhv-nmi (add new configuration option, use bit map)
 * Make configuration options override-able from command line
 * Combine Jenkins files
+* Jenkins can run in parallel
 * Report "#### VirtualBox Problems"
 
