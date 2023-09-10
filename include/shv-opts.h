@@ -20,12 +20,12 @@
 #define _SHV_OPTS_H_
 
 /*
- * SHV_OPT is used to configure miscellaneous behavior of SHV. Most
+ * g_shv_opt is used to configure miscellaneous behavior of SHV. Most
  * configuration options control which test to enable. We use this to avoid
  * adding too many configurations in configure.ac.
  */
 
-/* Begin of bit definitions for SHV_OPT */
+/* Begin of bit definitions for g_shv_opt */
 #define SHV_USE_MSR_LOAD			0x0000000000000001ULL
 #define SHV_NO_EFLAGS_IF			0x0000000000000002ULL
 #define SHV_USE_EPT					0x0000000000000004ULL
@@ -40,14 +40,14 @@
 #define SHV_NESTED_USER_MODE		0x0000000000000800ULL	/* Need !0x2 */
 #define SHV_USE_PS2_MOUSE			0x0000000000001000ULL
 #define SHV_NO_VGA_ART				0x0000000000002000ULL	/* Need !0x20 */
-/* End of bit definitions for SHV_OPT */
+/* End of bit definitions for g_shv_opt */
 
 /*
- * NMI_OPT is used to configure NMI testing SHV. Bit 0 of NMI_OPT enables NMI
- * testing. Once NMI testing is enabled, most bits in SHV_OPT are ignored.
+ * g_nmi_opt is used to configure NMI testing SHV. Bit 0 of g_nmi_opt enables NMI
+ * testing. Once NMI testing is enabled, most bits in g_shv_opt are ignored.
  */
 
-/* Begin of bit definitions for NMI_OPT */
+/* Begin of bit definitions for g_nmi_opt */
 #define SHV_NMI_ENABLE				0x0000000000000001ULL
 #define SHV_NMI_DETECT_ENV			0x0000000000000002ULL
 #define SHV_NMI_RUN_SEQUENTIAL		0x0000000000000004ULL
@@ -56,15 +56,15 @@
 #define SHV_NMI_INTR_PERIOD_5		0x0000000000000020ULL
 #define SHV_NMI_INTR_PERIOD_15		0x0000000000000040ULL
 #define SHV_NMI_INTR_PERIOD_20		0x0000000000000080ULL
-/* End of bit definitions for NMI_OPT */
+/* End of bit definitions for g_nmi_opt */
 
 /*
- * NMI_EXP is used to select a list of NMI experiments to perform. It is
- * ignored when (NMI_OPT & SHV_NMI_ENABLE) == 0. Bit 0 of NMI_EXP enables
- * NMI_EXP masking. For i > 0, Bit i enables NMI test i (see shv-nmi.c).
+ * g_nmi_exp is used to select a list of NMI experiments to perform. It is
+ * ignored when (g_nmi_opt & SHV_NMI_ENABLE) == 0. Bit 0 of g_nmi_exp enables
+ * g_nmi_exp masking. For i > 0, Bit i enables NMI test i (see shv-nmi.c).
  */
 
-/* Begin of bit definitions for NMI_EXP */
+/* Begin of bit definitions for g_nmi_exp */
 #define SHV_NMI_EXP_MASK_ENABLE		0x0000000000000001ULL
 #define SHV_NMI_EXPERIMENT_01		0x0000000000000002ULL
 #define SHV_NMI_EXPERIMENT_02		0x0000000000000004ULL
@@ -129,6 +129,6 @@
 #define SHV_NMI_EXPERIMENT_61		0x2000000000000000ULL
 #define SHV_NMI_EXPERIMENT_62		0x4000000000000000ULL
 #define SHV_NMI_EXPERIMENT_63		0x8000000000000000ULL
-/* End of bit definitions for NMI_EXP */
+/* End of bit definitions for g_nmi_exp */
 
 #endif							/* _SHV_OPTS_H_ */

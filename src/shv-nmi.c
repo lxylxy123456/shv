@@ -1664,8 +1664,8 @@ void run_experiment(u32 i)
 void shv_nmi_guest_main(VCPU * vcpu)
 {
 	vcpu->vmexit_handler_override = shv_nmi_vmexit_handler;
-	printf("NMI_OPT: 0x%llx\n", (u64) (NMI_OPT));
-	printf("NMI_EXP: 0x%llx\n", (u64) (NMI_EXP));
+	printf("g_nmi_opt: 0x%llx\n", (u64) (g_nmi_opt));
+	printf("g_nmi_exp: 0x%llx\n", (u64) (g_nmi_exp));
 
 	TEST_ASSERT(vcpu->idx == 1);
 
@@ -1673,20 +1673,20 @@ void shv_nmi_guest_main(VCPU * vcpu)
 	l2_init_apic_id = cpuid_ebx(1, 0) & 0xff000000;
 
 	/* Configure interrupt_period. */
-	if (NMI_OPT & SHV_NMI_INTR_PERIOD_1) {
+	if (g_nmi_opt & SHV_NMI_INTR_PERIOD_1) {
 		interrupt_period = 1;
-	} else if (NMI_OPT & SHV_NMI_INTR_PERIOD_5) {
+	} else if (g_nmi_opt & SHV_NMI_INTR_PERIOD_5) {
 		interrupt_period = 5;
-	} else if (NMI_OPT & SHV_NMI_INTR_PERIOD_15) {
+	} else if (g_nmi_opt & SHV_NMI_INTR_PERIOD_15) {
 		interrupt_period = 15;
-	} else if (NMI_OPT & SHV_NMI_INTR_PERIOD_20) {
+	} else if (g_nmi_opt & SHV_NMI_INTR_PERIOD_20) {
 		interrupt_period = 20;
 	} else {
 		interrupt_period = 10;
 	}
 
 	/* Detect environment. */
-	if (NMI_OPT & SHV_NMI_DETECT_ENV) {
+	if (g_nmi_opt & SHV_NMI_DETECT_ENV) {
 		u32 eax, ebx, ecx, edx;
 		printf("Detecting environment\n");
 		/*
@@ -1726,8 +1726,8 @@ void shv_nmi_guest_main(VCPU * vcpu)
 		if (in_bochs && !in_xmhf) {
 			exp_mask &= EXP_BOCHS_MASK;
 		}
-		if (NMI_EXP & SHV_NMI_EXP_MASK_ENABLE) {
-			exp_mask &= NMI_EXP;
+		if (g_nmi_exp & SHV_NMI_EXP_MASK_ENABLE) {
+			exp_mask &= g_nmi_exp;
 		}
 		printf("exp_mask: 0x%llx\n", exp_mask);
 	}
@@ -1747,7 +1747,7 @@ void shv_nmi_guest_main(VCPU * vcpu)
 	if (1 && "hardcode") {
 		//experiment_17();
 	}
-	if (NMI_OPT & SHV_NMI_RUN_SEQUENTIAL) {
+	if (g_nmi_opt & SHV_NMI_RUN_SEQUENTIAL) {
 		for (u32 i = 0; i < nexperiments; i++) {
 			run_experiment(i);
 		}
@@ -1756,7 +1756,7 @@ void shv_nmi_guest_main(VCPU * vcpu)
 			printf("Sequential experiments pass\n");
 		}
 	}
-	if (NMI_OPT & SHV_NMI_RUN_RANDOM) {
+	if (g_nmi_opt & SHV_NMI_RUN_RANDOM) {
 		for (u32 i = 0; i < 100000; i++) {
 			run_experiment(rand() % nexperiments);
 		}

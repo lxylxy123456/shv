@@ -100,7 +100,7 @@ VCPU *get_vcpu(void)
 	u64 msr_val;
 	u32 lapic_id;
 
-	if ((NMI_OPT & SHV_NMI_ENABLE)) {
+	if ((g_nmi_opt & SHV_NMI_ENABLE)) {
 		/* Hardcode LAPIC address to avoid VMEXIT due to RDMSR. */
 		msr_val = 0xfee00000ULL;
 	} else {
@@ -168,7 +168,7 @@ u32 handle_idt(uintptr_t _ip, iret_info_t * info)
 	ASSERT(_ip == info->ip);
 
 	/* When testing NMI, we want to avoid VMEXITs as much as possible. */
-	if (!(NMI_OPT & SHV_NMI_ENABLE)) {
+	if (!(g_nmi_opt & SHV_NMI_ENABLE)) {
 		ASSERT(guest == !(cpuid_ecx(1, 0) & (1U << 5)));
 	}
 
@@ -253,7 +253,7 @@ u32 handle_idt(uintptr_t _ip, iret_info_t * info)
 		break;
 	}
 
-	if (NMI_OPT & SHV_NMI_ENABLE) {
+	if (g_nmi_opt & SHV_NMI_ENABLE) {
 		if (vcpu->idx == 1 &&
 			(vector == 0x02 || vector == 0x21 || vector == 0x54)) {
 			return 1;

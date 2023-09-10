@@ -26,7 +26,7 @@ volatile u32 drop_keyboard_interrupts = 0;
 
 void handle_keyboard_interrupt(VCPU * vcpu, u8 vector, bool guest)
 {
-	if (!(NMI_OPT & SHV_NMI_ENABLE)) {
+	if (!(g_nmi_opt & SHV_NMI_ENABLE)) {
 		ASSERT(vcpu->isbsp);
 	}
 

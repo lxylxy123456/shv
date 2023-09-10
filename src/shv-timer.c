@@ -78,7 +78,7 @@ void timer_init(VCPU * vcpu)
 	if (vcpu->isbsp) {
 		u64 ncycles = TIMER_RATE * TIMER_PERIOD / 1000;
 		ASSERT(ncycles == (u64) (u16) ncycles);
-		if (SHV_OPT & SHV_NO_INTERRUPT) {
+		if (g_shv_opt & SHV_NO_INTERRUPT) {
 			outb(TIMER_MODE_IO_PORT, TIMER_ONE_SHOT);
 			outb(TIMER_PERIOD_IO_PORT, (u8) (1));
 			outb(TIMER_PERIOD_IO_PORT, (u8) (0));
@@ -96,7 +96,7 @@ void timer_init(VCPU * vcpu)
 	}
 
 	/* LAPIC Timer */
-	if (!(SHV_OPT & SHV_NO_INTERRUPT) && !(NMI_OPT & SHV_NMI_ENABLE)) {
+	if (!(g_shv_opt & SHV_NO_INTERRUPT) && !(g_nmi_opt & SHV_NMI_ENABLE)) {
 		write_lapic(LAPIC_TIMER_DIV, 0x0000000b);
 		write_lapic(LAPIC_TIMER_INIT, LAPIC_PERIOD);
 		write_lapic(LAPIC_LVT_TIMER, 0x00020022);
@@ -145,7 +145,7 @@ static void calibrate_timer(VCPU * vcpu)
 
 void handle_timer_interrupt(VCPU * vcpu, u8 vector, bool guest)
 {
-	if (SHV_OPT & SHV_NO_INTERRUPT) {
+	if (g_shv_opt & SHV_NO_INTERRUPT) {
 		/* Only one interrupt should arrive, ever */
 		static bool shot_arrived = false;
 		ASSERT(vcpu->isbsp);
@@ -153,13 +153,13 @@ void handle_timer_interrupt(VCPU * vcpu, u8 vector, bool guest)
 		shot_arrived = true;
 		return;
 	}
-	if (NMI_OPT & SHV_NMI_ENABLE) {
+	if (g_nmi_opt & SHV_NMI_ENABLE) {
 		shv_nmi_handle_timer_interrupt(vcpu, vector, guest);
 		return;
 	}
 	if (vector == 0x20) {
 		vcpu->pit_time++;
-		if (!(SHV_OPT & SHV_NO_VGA_ART)) {
+		if (!(g_shv_opt & SHV_NO_VGA_ART)) {
 			update_screen(vcpu, &vcpu->shv_pit_x[!!guest], 0, guest);
 		}
 		outb(INT_CTL_PORT, INT_ACK_CURRENT);
@@ -168,7 +168,7 @@ void handle_timer_interrupt(VCPU * vcpu, u8 vector, bool guest)
 		}
 	} else if (vector == 0x22) {
 		vcpu->lapic_time++;
-		if (!(SHV_OPT & SHV_NO_VGA_ART)) {
+		if (!(g_shv_opt & SHV_NO_VGA_ART)) {
 			update_screen(vcpu, &vcpu->shv_lapic_x[!!guest], 1, guest);
 		}
 		write_lapic(LAPIC_EOI, 0);

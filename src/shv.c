@@ -41,7 +41,7 @@ void shv_main(VCPU * vcpu)
 	}
 
 	/* When testing NMI, we need exactly 2 CPUs. */
-	if (NMI_OPT & SHV_NMI_ENABLE) {
+	if (g_nmi_opt & SHV_NMI_ENABLE) {
 		if (vcpu->idx < 2) {
 			ASSERT(g_midtable_numentries >= 2);
 		} else {
@@ -51,7 +51,7 @@ void shv_main(VCPU * vcpu)
 
 	timer_init(vcpu);
 
-	if (!(SHV_OPT & SHV_NO_VGA_ART)) {
+	if (!(g_shv_opt & SHV_NO_VGA_ART)) {
 		console_vc_t vc;
 		console_get_vc(&vc, vcpu->idx, 0);
 		console_clear(&vc);
@@ -67,7 +67,7 @@ void shv_main(VCPU * vcpu)
 	}
 
 	/* Demonstrate disabling paging in hypervisor */
-	if (SHV_OPT & SHV_USE_UNRESTRICTED_GUEST) {
+	if (g_shv_opt & SHV_USE_UNRESTRICTED_GUEST) {
 #ifdef __amd64__
 		extern void shv_disable_enable_paging(char *);
 		shv_disable_enable_paging("SHV hypervisor can disable paging\n");
@@ -81,19 +81,19 @@ void shv_main(VCPU * vcpu)
 #endif							/* !defined(__i386__) && !defined(__amd64__) */
 	}
 
-	if (!(SHV_OPT & SHV_NO_EFLAGS_IF)) {
+	if (!(g_shv_opt & SHV_NO_EFLAGS_IF)) {
 		/* Set EFLAGS.IF */
 		asm volatile ("sti");
 	}
 
-	if (SHV_OPT & SHV_USE_PS2_MOUSE) {
+	if (g_shv_opt & SHV_USE_PS2_MOUSE) {
 		if (vcpu->isbsp) {
 			mouse_init(vcpu);
 		}
 	}
 
 	/* When testing NMI, CPU 0 only forwards interrupts (does not enter VMX). */
-	if (NMI_OPT & SHV_NMI_ENABLE) {
+	if (g_nmi_opt & SHV_NMI_ENABLE) {
 		if (vcpu->isbsp) {
 			HALT();
 		}

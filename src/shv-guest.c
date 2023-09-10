@@ -221,7 +221,7 @@ static void shv_guest_test_msr_ls_vmexit_handler(VCPU * vcpu, struct regs *r,
 
 static void shv_guest_test_msr_ls(VCPU * vcpu)
 {
-	if (SHV_OPT & SHV_USE_MSR_LOAD) {
+	if (g_shv_opt & SHV_USE_MSR_LOAD) {
 		shv_guest_test_msr_ls_data_t data;
 		vcpu->vmexit_handler_override = shv_guest_test_msr_ls_vmexit_handler;
 		asm volatile ("vmcall"::"a" (12), "b"(&data));
@@ -258,7 +258,7 @@ static void shv_guest_test_ept_vmexit_handler(VCPU * vcpu, struct regs *r,
 
 static void shv_guest_test_ept(VCPU * vcpu)
 {
-	if (SHV_OPT & SHV_USE_EPT) {
+	if (g_shv_opt & SHV_USE_EPT) {
 		u32 expected_ept_count;
 		ASSERT(vcpu->ept_exit_count == 0);
 		vcpu->vmexit_handler_override = shv_guest_test_ept_vmexit_handler;
@@ -298,7 +298,7 @@ static void shv_guest_switch_ept_vmexit_handler(VCPU * vcpu, struct regs *r,
 	{
 		u64 eptp;
 		/* Check prerequisite */
-		ASSERT(SHV_OPT & SHV_USE_EPT);
+		ASSERT(g_shv_opt & SHV_USE_EPT);
 		/* Swap EPT */
 		vcpu->ept_num++;
 		vcpu->ept_num %= (SHV_EPT_COUNT << 4);
@@ -311,8 +311,8 @@ static void shv_guest_switch_ept_vmexit_handler(VCPU * vcpu, struct regs *r,
 
 static void shv_guest_switch_ept(VCPU * vcpu)
 {
-	if (SHV_OPT & SHV_USE_SWITCH_EPT) {
-		ASSERT(SHV_OPT & SHV_USE_EPT);
+	if (g_shv_opt & SHV_USE_SWITCH_EPT) {
+		ASSERT(g_shv_opt & SHV_USE_EPT);
 		vcpu->vmexit_handler_override = shv_guest_switch_ept_vmexit_handler;
 		asm volatile ("vmcall"::"a" (17));
 		vcpu->vmexit_handler_override = NULL;
@@ -419,7 +419,7 @@ static void shv_guest_test_vmxoff_vmexit_handler(VCPU * vcpu, struct regs *r,
 
 static void shv_guest_test_vmxoff(VCPU * vcpu, bool test_vmxoff)
 {
-	if (SHV_OPT & SHV_USE_VMXOFF) {
+	if (g_shv_opt & SHV_USE_VMXOFF) {
 		vcpu->vmexit_handler_override = shv_guest_test_vmxoff_vmexit_handler;
 		asm volatile ("vmcall"::"a" (22), "b"((u32) test_vmxoff));
 		vcpu->vmexit_handler_override = NULL;
@@ -465,7 +465,7 @@ static void shv_guest_test_vpid_vmexit_handler(VCPU * vcpu, struct regs *r,
 
 static void shv_guest_test_vpid(VCPU * vcpu)
 {
-	if (SHV_OPT & SHV_USE_VPID) {
+	if (g_shv_opt & SHV_USE_VPID) {
 		vcpu->vmexit_handler_override = shv_guest_test_vpid_vmexit_handler;
 		asm volatile ("vmcall"::"a" (19));
 		vcpu->vmexit_handler_override = NULL;
@@ -483,7 +483,7 @@ static void shv_guest_wait_int_vmexit_handler(VCPU * vcpu, struct regs *r,
 		return;
 	}
 	ASSERT(r->eax == 25);
-	if (!(SHV_OPT & (SHV_NO_EFLAGS_IF | SHV_NO_INTERRUPT))) {
+	if (!(g_shv_opt & (SHV_NO_EFLAGS_IF | SHV_NO_INTERRUPT))) {
 		asm volatile ("sti; hlt; cli;");
 	}
 	__vmx_vmwriteNW(VMCS_guest_RIP, info->guest_rip + info->inst_len);
@@ -501,7 +501,7 @@ static void shv_guest_wait_int(VCPU * vcpu)
 static void shv_guest_test_unrestricted_guest(VCPU * vcpu)
 {
 	(void)vcpu;
-	if (SHV_OPT & SHV_USE_UNRESTRICTED_GUEST) {
+	if (g_shv_opt & SHV_USE_UNRESTRICTED_GUEST) {
 #ifdef __amd64__
 		extern void shv_disable_enable_paging(char *);
 		if ("quiet") {
@@ -517,7 +517,7 @@ static void shv_guest_test_unrestricted_guest(VCPU * vcpu)
 			printf("CPU(0x%02x): SHV guest can disable paging\n", vcpu->id);
 		}
 		write_cr0(cr0);
-		if (!(SHV_OPT & SHV_NO_EFLAGS_IF)) {
+		if (!(g_shv_opt & SHV_NO_EFLAGS_IF)) {
 			asm volatile ("sti");
 		}
 #else							/* !defined(__i386__) && !defined(__amd64__) */
@@ -530,8 +530,8 @@ static void shv_guest_test_unrestricted_guest(VCPU * vcpu)
 static void shv_guest_test_large_page(VCPU * vcpu)
 {
 	(void)vcpu;
-	if (SHV_OPT & SHV_USE_LARGE_PAGE) {
-		ASSERT(SHV_OPT & SHV_USE_EPT);
+	if (g_shv_opt & SHV_USE_LARGE_PAGE) {
+		ASSERT(g_shv_opt & SHV_USE_EPT);
 		ASSERT(large_pages[0][0] == 'B');
 		ASSERT(large_pages[1][0] == 'A');
 	}
@@ -552,8 +552,8 @@ static void shv_guest_test_user_vmexit_handler(VCPU * vcpu, struct regs *r,
 
 static void shv_guest_test_user(VCPU * vcpu)
 {
-	if (SHV_OPT & SHV_USER_MODE) {
-		ASSERT(!(SHV_OPT & SHV_NO_EFLAGS_IF));
+	if (g_shv_opt & SHV_USER_MODE) {
+		ASSERT(!(g_shv_opt & SHV_NO_EFLAGS_IF));
 		vcpu->vmexit_handler_override = shv_guest_test_user_vmexit_handler;
 		asm volatile ("vmcall"::"a" (33));
 		vcpu->vmexit_handler_override = NULL;
@@ -575,8 +575,8 @@ static void shv_guest_test_nested_user_vmexit_handler(VCPU * vcpu,
 
 static void shv_guest_test_nested_user(VCPU * vcpu)
 {
-	if (SHV_OPT & SHV_NESTED_USER_MODE) {
-		ASSERT(!(SHV_OPT & SHV_NO_EFLAGS_IF));
+	if (g_shv_opt & SHV_NESTED_USER_MODE) {
+		ASSERT(!(g_shv_opt & SHV_NO_EFLAGS_IF));
 		vcpu->vmexit_handler_override =
 			shv_guest_test_nested_user_vmexit_handler;
 		// asm volatile ("vmcall" : : "a"(0x4c4150ffU));
@@ -723,7 +723,7 @@ static void _test_wrmsr(u32 ecx, u32 expected_ebx, u64 val)
 
 static void shv_guest_msr_bitmap(VCPU * vcpu)
 {
-	if (SHV_OPT & SHV_USE_MSRBITMAP) {
+	if (g_shv_opt & SHV_USE_MSRBITMAP) {
 		vcpu->vmexit_handler_override = shv_guest_msr_bitmap_vmexit_handler;
 		/* Enable MSR bitmap */
 		asm volatile ("vmcall"::"a" (34));
@@ -793,7 +793,7 @@ static void shv_guest_msr_bitmap(VCPU * vcpu)
 		_test_wrmsr(IA32_MSR_FS_BASE, MSR_TEST_NORMAL, 0xffff680eULL);
 		_test_wrmsr(IA32_MSR_GS_BASE, MSR_TEST_NORMAL, 0xffff6810ULL);
 		asm volatile ("vmcall"::"a" (42));
-		if (!(SHV_OPT & SHV_NO_EFLAGS_IF)) {
+		if (!(g_shv_opt & SHV_NO_EFLAGS_IF)) {
 			asm volatile ("sti");
 		}
 		/* Disable MSR bitmap */
@@ -816,7 +816,7 @@ void shv_guest_main(VCPU * vcpu)
 	u64 iter = 0;
 	bool in_xmhf = false;
 	ASSERT(vcpu == get_vcpu());
-	if (NMI_OPT & SHV_NMI_ENABLE) {
+	if (g_nmi_opt & SHV_NMI_ENABLE) {
 		shv_nmi_guest_main(vcpu);
 	}
 	{
@@ -824,7 +824,7 @@ void shv_guest_main(VCPU * vcpu)
 		cpuid(0x46484d58U, &eax, &ebx, &ecx, &edx);
 		in_xmhf = (eax == 0x46484d58U);
 	}
-	if (!(SHV_OPT & SHV_NO_VGA_ART)) {
+	if (!(g_shv_opt & SHV_NO_VGA_ART)) {
 		console_vc_t vc;
 		console_get_vc(&vc, vcpu->idx, 1);
 		console_clear(&vc);
@@ -837,7 +837,7 @@ void shv_guest_main(VCPU * vcpu)
 			}
 		}
 	}
-	if (!(SHV_OPT & SHV_NO_EFLAGS_IF)) {
+	if (!(g_shv_opt & SHV_NO_EFLAGS_IF)) {
 		asm volatile ("sti");
 	}
 	while (1) {
@@ -848,11 +848,11 @@ void shv_guest_main(VCPU * vcpu)
 		} else {
 			printf("CPU(0x%02x): SHV test iter %lld\n", vcpu->id, iter);
 		}
-		if (!(SHV_OPT & (SHV_NO_EFLAGS_IF | SHV_NO_INTERRUPT))) {
+		if (!(g_shv_opt & (SHV_NO_EFLAGS_IF | SHV_NO_INTERRUPT))) {
 			asm volatile ("hlt");
 		}
-		if (in_xmhf && (SHV_OPT & SHV_USE_MSR_LOAD) &&
-			(SHV_OPT & SHV_USER_MODE)) {
+		if (in_xmhf && (g_shv_opt & SHV_USE_MSR_LOAD) &&
+			(g_shv_opt & SHV_USER_MODE)) {
 			/*
 			 * Due to the way TrustVisor is implemented, cannot change MTRR
 			 * after running pal_demo. So we need to disable some tests.

@@ -282,7 +282,7 @@ u64 shv_build_ept(VCPU * vcpu, u8 ept_num)
 	}
 
 	/* Swap large_pages using 2M pages */
-	if (SHV_OPT & SHV_USE_LARGE_PAGE) {
+	if (g_shv_opt & SHV_USE_LARGE_PAGE) {
 		spa_t addr0 = hva2spa(large_pages[0]);
 		spa_t addr1 = hva2spa(large_pages[1]);
 		ASSERT(PA_PAGE_ALIGNED_2M(addr0));
