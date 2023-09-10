@@ -29,10 +29,10 @@ properties([
     ])
 ])
 
-void qemu_test(String subarch, String append, String args) {
+void qemu_test(String work_dir, String append, String args) {
     PWD = sh(returnStdout: true, script: 'pwd').trim()
-    sh "rm -rf tmp"
-    sh "mkdir tmp"
+    sh "rm -rf ${work_dir}"
+    sh "mkdir ${work_dir}"
     sh """
         python3 -u ./tools/ci/test5.py \
             --shv-img ${PWD}/shv.bin \
@@ -77,12 +77,12 @@ pipeline {
             parallel {
                 stage('Test i386 SHV') {
                     steps {
-                        qemu_test "i386", "${TEST_SHV_OPT}", ""
+                        qemu_test "tmp_i386_shv", "${TEST_SHV_OPT}", ""
                     }
                 }
                 stage('Test i386 NMI') {
                     steps {
-                        qemu_test "i386", "${TEST_NMI_OPT}", "--nmi"
+                        qemu_test "tmp_i386_nmi", "${TEST_NMI_OPT}", "--nmi"
                     }
                 }
             }
@@ -98,12 +98,12 @@ pipeline {
             parallel {
                 stage('Test pae SHV') {
                     steps {
-                        qemu_test "pae", "${TEST_SHV_OPT}", ""
+                        qemu_test "tmp_pae_shv", "${TEST_SHV_OPT}", ""
                     }
                 }
                 stage('Test pae NMI') {
                     steps {
-                        qemu_test "pae", "${TEST_NMI_OPT}", "--nmi"
+                        qemu_test "tmp_pae_nmi", "${TEST_NMI_OPT}", "--nmi"
                     }
                 }
             }
@@ -119,12 +119,12 @@ pipeline {
             parallel {
                 stage('Test amd64 SHV') {
                     steps {
-                        qemu_test "amd64", "${TEST_SHV_OPT}", ""
+                        qemu_test "tmp_amd64_shv", "${TEST_SHV_OPT}", ""
                     }
                 }
                 stage('Test amd64 NMI') {
                     steps {
-                        qemu_test "amd64", "${TEST_NMI_OPT}", "--nmi"
+                        qemu_test "tmp_amd64_nmi", "${TEST_NMI_OPT}", "--nmi"
                     }
                 }
             }
