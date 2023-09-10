@@ -74,6 +74,12 @@ doesn't make sense to return from this function as the bootloader is gone.
 .type _start, @function
 _start:
 
+	/*
+	 * Move multiboot info pointer to EDI. Cannot use EBX because it will be
+	 * overwritten by CPUID.
+	 */
+	movl	%ebx, %edi
+
 	/* Load GDT. */
 	lgdt	boot_gdt
 
@@ -171,9 +177,8 @@ _boot_start_lret:
 	/* Set up stack pointer. */
 	movl	$stack_top, %esp
 
-	/* Clear upper 32 bits of RBX, then load multiboot info pointer from EBX. */
-	movl	%ebx, %ebx
-	SET_ARG1(_BX)
+	/* First argument of kernel_main() is the multiboot info pointer. */
+	SET_ARG1(_DI)
 
 	/* Transfer control to C code. */
 	call	kernel_main
