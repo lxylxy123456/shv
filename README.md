@@ -116,7 +116,8 @@ There are two ways to load SHV to QEMU / KVM.
 * To load SHV image directly, use `-kernel shv.bin`.
 	* To add arguments to multiboot commandline, use `-append "arg1 arg2 ..."`.
 * To boot SHV using GRUB, use `-cdrom grub.iso`.
-	* To add arguments to multiboot commandline, edit `grub.cfg`.
+	* To add arguments to multiboot commandline, edit `grub.cfg` in the build
+	  directory and then rebuild using `make`.
 
 Note that SHV requires hardware virtualization (VMX), so QEMU must enable KVM.
 Sample command line is `-cpu Haswell,vmx=yes -enable-kvm`.

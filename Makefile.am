@@ -85,15 +85,19 @@ endif
 
 all: grub.iso
 
+grub.cfg: grub.cfg.default
+	cp $(top_srcdir)/grub.cfg.default grub.cfg
+
 grub.iso: shv.bin grub.cfg
 	mkdir -p isodir/boot/grub
 	cp shv.bin isodir/boot/shv.bin
-	cp $(top_srcdir)/grub.cfg isodir/boot/grub/grub.cfg
+	cp grub.cfg isodir/boot/grub/grub.cfg
 	$(GRUB_MKRESCUE) -o grub.iso isodir
 
 clean-local: clean-local-grub
 
 clean-local-grub:
+	rm -f grub.cfg
 	rm -f grub.iso
 	rm -rf isodir/
 
