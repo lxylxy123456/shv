@@ -28,13 +28,13 @@ static const struct {
 	u64 *ptr;
 	const char *prefix;
 } cmdline_vars[] = {
-	{.ptr=&g_shv_opt, .prefix="shv_opt="},
-	{.ptr=&g_nmi_opt, .prefix="nmi_opt="},
-	{.ptr=&g_nmi_exp, .prefix="nmi_exp="},
-	{.ptr=NULL, .prefix=NULL},
+	{.ptr = &g_shv_opt,.prefix = "shv_opt="},
+	{.ptr = &g_nmi_opt,.prefix = "nmi_opt="},
+	{.ptr = &g_nmi_exp,.prefix = "nmi_exp="},
+	{.ptr = NULL,.prefix = NULL},
 };
 
-static void match_var(const char *begin_word,const char *end_word)
+static void match_var(const char *begin_word, const char *end_word)
 {
 	//printf("Word: %.*s\n", (end_word - begin_word), begin_word);
 	for (u32 i = 0; cmdline_vars[i].ptr; i++) {
