@@ -316,9 +316,10 @@ cd Bochs/bochs
             \
             --prefix="$PWD"
 make -j `nproc`
+make install
 ```
 
-Then create `bochsrc` that can boot SHV:
+Then go back to SHV build directory, create `bochsrc` that can boot SHV:
 ```
 cpu: model=corei7_sandy_bridge_2600k, count=2, ips=50000000, reset_on_triple_fault=1, ignore_bad_msrs=1, msrs="msrs.def"
 memory: guest=512, host=256
