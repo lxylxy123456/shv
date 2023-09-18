@@ -1653,7 +1653,9 @@ static u64 exp_mask = ~1ULL;
 void run_experiment(u32 i)
 {
 	if (!(exp_mask & (1ULL << i))) {
-		printf("Skipping experiments[%d]\n", i);
+		if (!(g_nmi_opt & SHV_NMI_QUIET_SKIP)) {
+			printf("Skipping experiments[%d]\n", i);
+		}
 		return;
 	}
 	ASSERT(experiments[i].f);
