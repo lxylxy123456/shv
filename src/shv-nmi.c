@@ -1754,22 +1754,18 @@ void shv_nmi_guest_main(VCPU * vcpu)
 			run_experiment(i);
 		}
 		TEST_ASSERT(!master_fail);
-		for (u32 i = 0; i < 3; i++) {
-			printf("Sequential experiments pass\n");
-		}
+		printf("Sequential experiments pass\n");
 	}
 	if (g_nmi_opt & SHV_NMI_RUN_RANDOM) {
 		for (u32 i = 0; i < 100000; i++) {
 			run_experiment(rand() % nexperiments);
 		}
 		TEST_ASSERT(!master_fail);
-		for (u32 i = 0; i < 3; i++) {
-			printf("Random experiments pass\n");
-		}
+		printf("Random experiments pass\n");
 	}
 	{
 		TEST_ASSERT(!master_fail);
-		printf("ALL TEST PASS\nALL TEST PASS\nALL TEST PASS\n");
+		printf("ALL TEST PASS\n");
 		l2_ready = 0;
 		HALT();
 	}
