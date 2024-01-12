@@ -396,4 +396,5 @@ TODO
 
 * Complete README
 * Report "#### VirtualBox Problems"
+* Report Bochs bug on experiment 18, 19
 
