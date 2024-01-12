@@ -1647,7 +1647,7 @@ static bool in_xmhf = false;
 static u64 exp_mask = ~1ULL;
 
 #define EXP_QEMU_MASK	0x7ef39fa2
-#define EXP_BOCHS_MASK	0x27d0b75e
+#define EXP_BOCHS_MASK	0x7ff3fffe
 #define EXP_XMHF_MASK	0x7bfbfffe
 
 void run_experiment(u32 i)

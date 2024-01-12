@@ -385,6 +385,11 @@ Configuration directory is [tools/ci/](tools/ci/).
 
 ## Bugs Found
 
+* <https://sourceforge.net/p/bochs/bugs/1460/>
+	* Fixed by Stanislav Shwartsman in Bochs commit `6b48d6e3` (Jan 2023)
+	* Before, around `EXP_BOCHS_MASK = 0x27d0b75f` is stable
+	* After, around `EXP_BOCHS_MASK = 0x7ff3fffe` is stable
+	* At least fixes experiments 7, 16, 28 (consistently fails before fix)
 TODO
 
 ## TODO
