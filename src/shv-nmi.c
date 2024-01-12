@@ -550,7 +550,6 @@ static void experiment_2_vmcall(void)
  * Experiment 3: NMI Exiting = 0, virtual NMIs = 0
  * L1 (guest) blocks NMI, L2 (SHV) does not. L1 receives NMI, then VMENTRY to
  * L2. Result: L2 receives NMI after VMENTRY.
- * This test does not work on Bochs.
  * This test does not work on QEMU ("experiment_3(); experiment_3();" fails).
  */
 static void experiment_3(void)
@@ -618,7 +617,6 @@ static void experiment_4_vmcall(void)
  * Experiment 5: NMI Exiting = 1, virtual NMIs = 0
  * L2 (guest) does not block NMI. When NMI hits L2, VMEXIT should happen.
  * Result: VMEXIT happens.
- * This test may not work on Bochs ("experiment_5(); experiment_1();" fails).
  */
 static void experiment_5(void)
 {
@@ -686,7 +684,6 @@ static void experiment_6_vmcall(void)
  * Experiment 7: NMI Exiting = 1, virtual NMIs = 0
  * L1 (host) blocks NMI, NMI hits L1. L2 (guest) does not block NMI in VMCS.
  * L1 VMENTRY to L2 (guest), Result: L2 receives NMI VMEXIT.
- * This test does not work on Bochs.
  */
 static void experiment_7(void)
 {
@@ -786,7 +783,6 @@ static void experiment_9_vmcall(void)
  * Experiment 10: NMI Exiting = 1, virtual NMIs = 1
  * L1 (host) blocks NMI, NMI hits L1. L2 (guest) does not block NMI in VMCS.
  * L1 VMENTRY to L2 (guest), Result: L2 receives NMI VMEXIT.
- * This test does not work on Bochs.
  */
 static void experiment_10(void)
 {
@@ -823,7 +819,6 @@ static void experiment_10_vmcall(void)
  * Experiment 11: NMI Exiting = 1, virtual NMIs = 1
  * L1 (host) blocks NMI, NMI hits L1. L2 (guest) blocks virtual NMI in VMCS.
  * L1 VMENTRY to L2 (guest), Result: L2 receives NMI VMEXIT.
- * This test does not work on Bochs.
  */
 static void experiment_11(void)
 {
@@ -893,7 +888,6 @@ static void experiment_12_vmcall(void)
  * Experiment 13: NMI Exiting = 1, virtual NMIs = 1
  * L1 (host) blocks NMI. L2 (guest) does not block NMI. L1 VMENTRY to L2, then
  * L2 VMEXIT to L1. Then L1 expects an interrupt. Result: L1 gets NMI.
- * This test does not work on Bochs.
  * This test does not work on QEMU.
  */
 static void experiment_13(void)
@@ -929,7 +923,6 @@ static void experiment_13_vmcall(void)
  * Experiment 14: NMI Exiting = 1, virtual NMIs = 1
  * L1 (host) blocks NMI. L2 (guest) blocks virtual NMI. L1 VMENTRY to L2, then
  * L2 VMEXIT to L1. Then L1 expects an interrupt. Result: L1 gets NMI.
- * This test does not work on Bochs.
  * This test does not work on QEMU.
  */
 static void experiment_14(void)
@@ -966,7 +959,6 @@ static void experiment_14_vmcall(void)
  * L1 (host) blocks NMI. L2 (guest) does not block NMI. L1 VMENTRY to L2, and
  * inject a keyboard interrupt at the same time. Result: L2 executes the first
  * instruction of the keyboard interrupt before NMI.
- * This test does not work on Bochs.
  */
 static void experiment_15(void)
 {
@@ -1006,7 +998,6 @@ static void experiment_15_vmcall(void)
  * L1 (host) blocks NMI. L2 (guest) does not block NMI. L1 VMENTRY to L2, and
  * inject a keyboard interrupt at the same time. Result: L2 executes the first
  * instruction of the keyboard interrupt before NMI VMEXIT.
- * This test does not work on Bochs.
  */
 static void experiment_16(void)
 {
@@ -1046,7 +1037,6 @@ static void experiment_16_vmcall(void)
  * L1 (host) blocks NMI. L2 (guest) blocks NMI. L1 VMENTRY to L2, and
  * inject a keyboard interrupt at the same time. Result: L2 executes the first
  * instruction of the keyboard interrupt before NMI VMEXIT.
- * This test does not work on Bochs.
  */
 static void experiment_17(void)
 {
@@ -1317,7 +1307,6 @@ static void experiment_23_vmcall(void)
  * L1 (SHV) blocks NMI. L2 (guest) does not block virtual NMI. L1 receives an
  * NMI, then sets NMI windowing bit in VMCS and VMENTRY. See which event
  * happens first. Result: NMI windowing happens first, then NMI hits the host.
- * This test does not work on Bochs.
  * This test does not work on QEMU.
  */
 static void experiment_24(void)
@@ -1404,7 +1393,6 @@ static void experiment_25_vmcall(void)
  * L1 (SHV) blocks NMI. L2 (guest) does not block virtual NMI. L1 receives NMI,
  * and injects an NMI during VMENTRY. See which event happens first.
  * Result: the NMI injection happens first, then VMEXIT.
- * This test does not work on Bochs.
  */
 static void experiment_26(void)
 {
