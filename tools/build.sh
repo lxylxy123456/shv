@@ -39,7 +39,7 @@ usage () {
 }
 
 # Compute directory.
-SCRIPT_DIR="$(dirname $BASH_SOURCE)"
+SCRIPT_DIR="$(dirname "$BASH_SOURCE")"
 SRCDIR="$SCRIPT_DIR/.."
 if [ ! -f "$SRCDIR/configure.ac" ]; then
 	usage 'please check project structure and configure.ac.'
