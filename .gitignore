@@ -39,3 +39,4 @@ src/.dirstamp
 
 build/
 tmp/
+grub.cfg

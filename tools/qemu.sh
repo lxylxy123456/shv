@@ -38,6 +38,7 @@ usage () {
 	--uefi: use /usr/share/OVMF/OVMF_CODE.fd for BIOS
 	--q35: Use Q35
 	--iommu: Enable Intel IOMMU (will enable --q35 and --win-bios)
+	--tpm SOCKET_FILE: connect to swtpm
 	-d name.qcow2 '': use drive name.qcow2
 	-d name.img -a: use drive name-a.img (other exts: iso, qcow2, vdi, vmdk)
 	-d name.img +a: use drive name+a.qcow2; if not exist, create from name.img
@@ -86,6 +87,7 @@ WIN_BIOS="n"
 UEFI="n"
 Q35="n"
 IOMMU="n"
+TPM=""
 DRIVE_ARGS=()
 DRIVE_INDEX=0
 EXTRA_ARGS=()
@@ -111,6 +113,7 @@ while [ "$#" -gt 0 ]; do
 		--uefi) UEFI="y"; ;;
 		--q35) Q35="y"; ;;
 		--iommu) Q35="y"; IOMMU="y"; WIN_BIOS="y"; ;;
+		--tpm) TPM="$2"; shift; ;;
 		-d|--drive)
 			process_drive "$2" "$3"
 			# $DRIVE_FILE is set by process_drive
@@ -162,6 +165,11 @@ if [ "$UEFI" == "y" ]; then
 fi
 if [ "$Q35" == "y" ]; then ARGS+=("-machine" "q35"); fi
 if [ "$IOMMU" == "y" ]; then ARGS+=("-device" "intel-iommu"); fi
+if [ -n "$TPM" ]; then
+	ARGS+=("-chardev" "socket,id=chrtpm,path=$TPM")
+	ARGS+=("-tpmdev" "emulator,id=tpm0,chardev=chrtpm")
+	ARGS+=("-device" "tpm-tis,tpmdev=tpm0")
+fi
 if [ "${#SERIAL_ARGS[@]}" = "0" ]; then
 	ARGS+=("-serial" "stdio")
 else
